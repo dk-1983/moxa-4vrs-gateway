@@ -7,7 +7,7 @@ panel implementation. Public installation packaging and remaining hardware
 qualification are still in progress. This guide describes the 4VRS Gateway project. For the device's technical,
 electrical and other specifications, consult the manufacturer's instructions.
 
-## First start
+## Home screen
 
 <img src="../assets/images/menu/home.png" alt="Home screen and physical keys" width="360">
 
