@@ -33,7 +33,8 @@ We are completing final testing and preparing the installation package and user 
 Your software connects to Gateway over the network using TCP or UDP. Gateway
 passes requests to the connected instrument over RS-232, RS-485 or RS-422 and
 returns its replies to the software. Select the same transport in Gateway and
-your software: Modbus UDP, RTU over UDP and RAW UDP use different message formats.
+your software: **Modbus TCP, Modbus UDP, RTU over UDP, RAW TCP or RAW UDP**.
+Their connection and data-framing rules are described in the table above.
 
 Web management and a user-facing automatic update module are planned for the
 second feature release. They are not first-release features.
