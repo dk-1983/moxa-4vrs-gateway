@@ -11,7 +11,7 @@ electrical and other specifications, consult the manufacturer's instructions.
 
 <img src="../assets/images/menu/home.png" alt="Home screen and physical keys" width="360">
 
-*Illustration rendered from an operator photograph; values match the supplied Home screen.*
+*Home screen.*
 
 Use the device's existing network address. A migration must retain its own
 configuration; do not copy another Moxa's saved network profile.
@@ -29,7 +29,7 @@ prove that an instrument answered. Check a real client transaction as well.
 
 <img src="../assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
 
-*Illustration rendered from the operator's photograph.*
+*Main menu.*
 
 F2/F4 move the selection, F3 opens it and F1 returns to Home. Use Status for
 application state, Ports for per-port counters, Configuration for settings,
@@ -83,7 +83,7 @@ a valid read response is needed to prove the complete instrument path.
 
 <img src="../assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
 
-*Illustration from the operator's photograph.*
+*Port list.*
 
 F2/F4 move through all eight ports, scrolling the five-row list as needed.
 Press F3 Detail to inspect the selected port; F2/F4 then switch detail pages.
@@ -91,7 +91,7 @@ F1 returns to the list. This view reports status; it does not edit configuration
 
 <img src="../assets/images/menu/port-details.png" alt="First port detail page" width="360">
 
-*Rendered from a photograph with the device settings preserved. These are not factory defaults.*
+*Port connection settings.*
 
 In this example, `115200 8NONE1` means 115200 baud, 8 data bits, no parity,
 1 stop bit. `TCP 1502` is the listener port, not the Modbus unit address.
@@ -119,8 +119,7 @@ the details before deciding what caused it.
 
 <img src="../assets/images/menu/network-lan2.png" alt="Confirmed LAN2 settings" width="360">
 
-*Photo-based illustrations; displayed addresses are example-device settings,
-not defaults to copy.*
+*Configuration menu and LAN2 network settings.*
 
 From the main menu open **Configuration**, then **F5 Network** on the port list.
 F2/F4 cycle through LAN2, LAN1, Default route, Global DNS, Observed LAN1 and

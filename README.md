@@ -6,8 +6,6 @@ English · [Русский](README.ru.md) · [User guide](docs/user-guide.md)
 
 ![4VRS Gateway for Moxa UC-7420-LX Plus](assets/images/banner.png)
 
-*Project artwork adapted from the original banner; the illustrated display is not a screenshot.*
-
 Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
@@ -45,7 +43,7 @@ Their connection and data-framing rules are described in the table above.
 
 <img src="assets/images/menu/home.png" alt="Home screen and F1–F5 keys" width="360">
 
-*Photo-based illustration of the running Home screen.*
+*Home screen.*
 
 Home shows application readiness, ready ports, errors and clients. In this
 example all eight enabled ports are ready, with zero errors and zero clients.
@@ -56,7 +54,7 @@ network Apply/Keep/Revert and NTP.
 
 <img src="assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
 
-*Main menu, illustrated from the operator's photograph.*
+*Main menu.*
 
 Use **F2/F4** to move, **F3** to open a section and **F1** to return.
 
@@ -74,7 +72,7 @@ Use **F2/F4** to move, **F3** to open a section and **F1** to return.
 
 <img src="assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
 
-*Photo-based illustration; the visible list shows P1–P5.*
+*Port list.*
 
 Use F2/F4 to select among P1–P8; the list scrolls to reveal the remaining
 ports. **F3 Detail** opens the selected port's status pages. `READY` describes
@@ -82,7 +80,7 @@ the port runtime, not a confirmed response from a connected instrument.
 
 <img src="assets/images/menu/port-details.png" alt="Port connection details" width="360">
 
-*Photo-based illustration with the settings shown on the device.*
+*Port connection settings.*
 
 The first detail page shows UART, serial mode/framing, transport and listener.
 Here P1 uses `ttyM0`, RS485-2W, 115200 baud and Modbus TCP on port 1502.
@@ -98,8 +96,7 @@ opens the LAN, default-route and DNS pages.
 
 <img src="assets/images/menu/network-lan2.png" alt="Confirmed LAN2 policy" width="360">
 
-*Photo-based illustrations. The network values shown belong to the example
-device and are not installation defaults.*
+*LAN2 network settings.*
 
 **Confirmed policy** shows accepted settings. F2/F4 switch pages, F5 opens
 the editor and F1 returns. Changes use Review → Apply → Keep, with Revert
@@ -114,7 +111,7 @@ Open **System → F5 Network Time** to view synchronization status and settings.
 the default is 1 hour. **F4 Test** starts three attempts at one-minute intervals,
 then automatically returns to the configured schedule.
 
-*Photo-based illustration; the server address and counters show example settings.*
+*Network time settings.*
 
 ## Compatibility and installation
 
