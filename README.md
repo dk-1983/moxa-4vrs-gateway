@@ -1,2 +1,161 @@
-# moxa-4vrs-gateway
-Multi-protocol serial gateway for Moxa UC-7420-LX Plus: Modbus TCP/UDP, RTU over UDP, RAW TCP/UDP, RS-232/422/485 and local LCD configuration.
+# 4VRS Gateway
+
+**Modbus and transparent serial gateway for Moxa UC-7420-LX Plus.**
+
+English · [Русский](README.ru.md) · [User guide](docs/user-guide.md)
+
+![4VRS Gateway for Moxa UC-7420-LX Plus](assets/images/banner.png)
+
+*Project artwork adapted from the original banner; the illustrated display is not a screenshot.*
+
+Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
+the device's own display and keys. Runs on the existing Moxa Linux system;
+the kernel and drivers remain in place. No mbusd service is required.
+
+**Status:** preparing the first public release, `v2026.00.00`. Candidate r15
+runs on two UC-7420-LX Plus units. Remaining network and power-interruption
+qualification is not complete; release acceptance has not been declared.
+
+## Features
+
+| Capability | Implementation |
+| --- | --- |
+| Serial | Independent P1–P8 settings; RS-232, RS-485 2/4-wire, RS-422 |
+| Modbus TCP | MBAP-framed TCP requests bridged to serial Modbus RTU |
+| Modbus UDP | MBAP-framed UDP requests bridged to serial Modbus RTU |
+| RTU over UDP | RTU frames, including CRC, in UDP datagrams |
+| RAW TCP / RAW UDP | Transparent serial data transport without Modbus interpretation |
+| Local management | LCD/keypad settings, port states, counters and diagnostics |
+| Network | LAN1/LAN2 static IPv4 or DHCP client, mask, default route, DNS |
+| Network changes | Review, temporary Apply, explicit Keep, manual/timed Revert |
+| Clock | RTC, NTP, 1/6/24-hour intervals, three-attempt diagnostic mode |
+| Persistence | Saved product settings and confirmed network policy restored at startup |
+
+Choose the transport expected by your client. Modbus UDP, RTU over UDP and RAW
+UDP are not interchangeable. A serial instrument does not need native UDP or
+Ethernet support to work behind the gateway.
+
+Web management and a user-facing automatic update module are planned for the
+second feature release. They are not first-release features.
+
+## Display and local menu
+
+![Home screen and F1–F5 keys](assets/images/menu/home.png)
+
+*Photo-based illustration of the running Home screen.*
+
+Home shows application readiness, ready ports, errors and clients. In this
+example all eight enabled ports are ready, with zero errors and zero clients.
+Port readiness is not proof of an instrument response. **F1 Help** opens help;
+**F3 Menu** opens the main menu. Follow the bottom-line key prompts as you move
+between settings. See the [user guide](docs/user-guide.md) for port configuration,
+network Apply/Keep/Revert and NTP.
+
+![Main menu with Status selected](assets/images/menu/main-menu.png)
+
+*Main menu, illustrated from the operator's photograph.*
+
+Use **F2/F4** to move, **F3** to open a section and **F1** to return.
+
+| Section | Purpose |
+| --- | --- |
+| Status | Application status |
+| Ports | Individual port states and counters |
+| Configuration | Serial/transport settings and access to network settings |
+| Diagnostics | Diagnostics and startup events |
+| System | Date/time, platform information and NTP |
+| Shutdown | Stop Gateway; does not power off the Moxa OS |
+| About | Product and version information |
+
+### Port status
+
+![Ports list with P1 selected](assets/images/menu/ports.png)
+
+*Photo-based illustration; the visible list shows P1–P5.*
+
+Use F2/F4 to select among P1–P8; the list scrolls to reveal the remaining
+ports. **F3 Detail** opens the selected port's status pages. `READY` describes
+the port runtime, not a confirmed response from a connected instrument.
+
+![Port connection details](assets/images/menu/port-details.png)
+
+*Photo-based illustration; the device IP is replaced with the documentation
+example `192.0.2.10`.*
+
+The first detail page shows UART, serial mode/framing, transport and listener.
+Here P1 uses `ttyM0`, RS485-2W, 115200 baud and Modbus TCP on port 1502.
+`8NONE1` means 8 data bits, no parity and 1 stop bit (8N1). These are example
+settings, not the factory defaults. F2/F4 cycle through the four detail pages.
+
+### Configuration and network
+
+![Configuration menu](assets/images/menu/configuration.png)
+
+F2/F4 select a port; **F3 Select** opens its configuration. **F5 Network**
+opens the LAN, default-route and DNS pages.
+
+![Confirmed LAN2 policy](assets/images/menu/network-lan2.png)
+
+*Photo-based illustrations. The network values shown belong to the example
+device and are not installation defaults.*
+
+**Confirmed policy** shows accepted settings. F2/F4 switch pages, F5 opens
+the editor and F1 returns. Changes use Review → Apply → Keep, with Revert
+available during the confirmation window. See the [network instructions](docs/user-guide.md#network-settings).
+
+## Compatibility and installation
+
+Hardware-tested: **Moxa UC-7420-LX Plus**, legacy XScale big-endian Linux.
+**UC-7410-LX Plus** and other UC-74xx variants are related models, but have not
+been hardware-qualified. The family name is not a tested-device list.
+
+Product files and configuration use CompactFlash under `/var/hda/4vrs/`.
+Minimal startup integration remains on internal storage.
+
+The public installation package is still being prepared. An isolated development
+binary does not include the required network and clock startup integration.
+Installation instructions and assets will be published in
+[Releases](https://github.com/dk-1983/moxa-4vrs-gateway/releases).
+
+Read the [user guide](docs/user-guide.md) for operating an installed system.
+Initial migration retains supported existing device settings and network addresses.
+
+## New-configuration defaults
+
+These are defaults for a new product configuration, not a device-reset instruction.
+
+| Setting | Default |
+| --- | --- |
+| P1–P8 | Enabled, RS-232, 9600 baud, 8N1 |
+| Transport | Modbus TCP |
+| Listener | `0.0.0.0`, ports 502–509 respectively |
+| NTP | Disabled; normal interval 1 hour |
+| Network preference | Static IPv4; optional DHCP client, no DHCP server |
+
+Network enrollment imports supported existing settings. It does not assign a
+universal factory IP or silently convert existing DHCP settings to static.
+
+## Development and verification
+
+C source targets ARMv5TE/XScale big-endian using the separate legacy Moxa
+toolchain. See the [build environment](docs/architecture/build-environment.md).
+Vendor firmware, toolchains and manuals are not redistributed with this project.
+
+Verification combines host regressions, selected UBSan tests, target ABI audits
+and device experiments. See the [validation status](docs/validation.md)
+for passed cases and remaining qualification. Component tests, TCP connections
+and instrument transactions prove different scopes.
+
+Versions follow [`vYEAR.RELEASE.PATCH`](docs/versioning.md), starting at zero:
+first public release `v2026.00.00`, next 2026 feature release `v2026.01.00`.
+Development candidate names are not published releases.
+
+## Contributing and license
+
+[Issues](https://github.com/dk-1983/moxa-4vrs-gateway/issues) welcome reproducible
+problems and suggestions. Include model, version, transport, serial settings
+and sanitized logs. See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
+
+Original code and documentation use the [MIT License](LICENSE). See
+[THIRD_PARTY.md](THIRD_PARTY.md) for vendor boundaries. This independent project
+is not an official Moxa firmware release.
