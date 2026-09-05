@@ -4,8 +4,8 @@
 
 Draft for the first public release, v2026.00.00. Describes the current physical
 panel implementation. Public installation packaging and remaining hardware
-qualification are still in progress. This is the project's own guide, not a
-replacement for the manufacturer's electrical and connector documentation.
+qualification are still in progress. This guide describes the 4VRS Gateway project. For the device's technical,
+electrical and other specifications, consult the manufacturer's instructions.
 
 ## First start
 
