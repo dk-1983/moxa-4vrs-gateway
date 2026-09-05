@@ -30,9 +30,10 @@ We are completing final testing and preparing the installation package and user 
 | Clock | RTC, NTP, 1/6/24-hour intervals, three-attempt diagnostic mode |
 | Persistence | Saved product settings and confirmed network policy restored at startup |
 
-Choose the transport expected by your client. Modbus UDP, RTU over UDP and RAW
-UDP are not interchangeable. A serial instrument does not need native UDP or
-Ethernet support to work behind the gateway.
+Your software connects to Gateway over the network using TCP or UDP. Gateway
+passes requests to the connected instrument over RS-232, RS-485 or RS-422 and
+returns its replies to the software. Select the same transport in Gateway and
+your software: Modbus UDP, RTU over UDP and RAW UDP use different message formats.
 
 Web management and a user-facing automatic update module are planned for the
 second feature release. They are not first-release features.
