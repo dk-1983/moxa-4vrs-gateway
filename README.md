@@ -12,9 +12,8 @@ Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
 
-**Status:** preparing the first public release, `v2026.00.00`. Candidate r15
-runs on two UC-7420-LX Plus units. Remaining network and power-interruption
-qualification is not complete; release acceptance has not been declared.
+**Status:** the first public release, `v2026.00.00`, is in preparation.
+We are completing final testing and preparing the installation package and user documentation.
 
 ## Features
 
