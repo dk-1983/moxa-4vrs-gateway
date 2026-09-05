@@ -78,8 +78,7 @@ the port runtime, not a confirmed response from a connected instrument.
 
 <img src="assets/images/menu/port-details.png" alt="Port connection details" width="360">
 
-*Photo-based illustration; the device IP is replaced with the documentation
-example `192.0.2.10`.*
+*Photo-based illustration with the settings shown on the device.*
 
 The first detail page shows UART, serial mode/framing, transport and listener.
 Here P1 uses `ttyM0`, RS485-2W, 115200 baud and Modbus TCP on port 1502.

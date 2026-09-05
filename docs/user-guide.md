@@ -91,8 +91,7 @@ F1 returns to the list. This view reports status; it does not edit configuration
 
 ![First port detail page](../assets/images/menu/port-details.png)
 
-*Rendered from a photograph; the private device address is replaced with
-`192.0.2.10` for documentation. This is not a preset to copy into your network.*
+*Rendered from a photograph with the device settings preserved. These are not factory defaults.*
 
 In this example, `115200 8NONE1` means 115200 baud, 8 data bits, no parity,
 1 stop bit. `TCP 1502` is the listener port, not the Modbus unit address.
