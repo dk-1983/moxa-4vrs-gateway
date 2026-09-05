@@ -164,6 +164,8 @@ interface waiting for a new lease.
 
 ## Clock and NTP
 
+<img src="../assets/images/menu/network-time.png" alt="Network Time settings and synchronization status" width="360">
+
 Open **System**, go to its Platform page and open **Network Time** using the
 on-screen prompts. Edit the NTP server, enable flag and interval, then confirm.
 Supported normal intervals are **1, 6 and 24 hours**, with **1 hour** the default.

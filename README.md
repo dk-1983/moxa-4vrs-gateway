@@ -102,6 +102,17 @@ device and are not installation defaults.*
 the editor and F1 returns. Changes use Review → Apply → Keep, with Revert
 available during the confirmation window. See the [network instructions](docs/user-guide.md#network-settings).
 
+### Clock and NTP
+
+<img src="assets/images/menu/network-time.png" alt="Network Time settings with NTP synchronized" width="360">
+
+Open **System → F5 Network Time** to view synchronization status and settings.
+**F5 Edit** changes the NTP settings. Choose a normal interval of 1, 6 or 24 hours;
+the default is 1 hour. **F4 Test** starts three attempts at one-minute intervals,
+then automatically returns to the configured schedule.
+
+*Photo-based illustration; the server address and counters show example settings.*
+
 ## Compatibility and installation
 
 Hardware-tested: **Moxa UC-7420-LX Plus**, legacy XScale big-endian Linux.
