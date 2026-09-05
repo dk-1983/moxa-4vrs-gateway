@@ -40,7 +40,7 @@ Modbus UDP, RTU over UDP и RAW UDP используют разные прави
 
 ## Дисплей и локальное меню
 
-![Главный экран и кнопки F1–F5](assets/images/menu/home.png)
+<img src="assets/images/menu/home.png" alt="Главный экран и кнопки F1–F5" width="360">
 
 *Иллюстрация главного экрана по фотографии работающего устройства.*
 
@@ -51,7 +51,7 @@ Modbus UDP, RTU over UDP и RAW UDP используют разные прави
 на подсказки кнопок внизу дисплея. Настройка портов, Apply/Keep/Revert сети и NTP
 описаны в [инструкции пользователя](docs/user-guide.ru.md).
 
-![Главное меню, выбран Status](assets/images/menu/main-menu.png)
+<img src="assets/images/menu/main-menu.png" alt="Главное меню, выбран Status" width="360">
 
 *Иллюстрация главного меню по фотографии оператора.*
 
@@ -69,7 +69,7 @@ Modbus UDP, RTU over UDP и RAW UDP используют разные прави
 
 ### Состояния портов
 
-![Список портов, выбран P1](assets/images/menu/ports.png)
+<img src="assets/images/menu/ports.png" alt="Список портов, выбран P1" width="360">
 
 *Иллюстрация по фотографии; в видимой части списка находятся P1–P5.*
 
@@ -77,7 +77,7 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 **F3 Detail** открывает страницы состояния выбранного порта. `READY` означает
 готовность порта, а не подтверждённый ответ подключённого прибора.
 
-![Параметры подключения порта](assets/images/menu/port-details.png)
+<img src="assets/images/menu/port-details.png" alt="Параметры подключения порта" width="360">
 
 *Иллюстрация по фотографии; IP устройства заменён примером для документации
 `192.0.2.10`.*
@@ -89,12 +89,12 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 
 ### Конфигурация и сеть
 
-![Меню конфигурации](assets/images/menu/configuration.png)
+<img src="assets/images/menu/configuration.png" alt="Меню конфигурации" width="360">
 
 F2/F4 выбирают порт, **F3 Select** открывает его настройки. **F5 Network**
 открывает страницы LAN, основного маршрута и DNS.
 
-![Подтверждённая политика LAN2](assets/images/menu/network-lan2.png)
+<img src="assets/images/menu/network-lan2.png" alt="Подтверждённая политика LAN2" width="360">
 
 *Иллюстрации по фотографиям. Сетевые значения относятся к устройству в примере,
 а не к настройкам установки по умолчанию.*

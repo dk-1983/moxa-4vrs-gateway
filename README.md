@@ -40,7 +40,7 @@ second feature release. They are not first-release features.
 
 ## Display and local menu
 
-![Home screen and F1–F5 keys](assets/images/menu/home.png)
+<img src="assets/images/menu/home.png" alt="Home screen and F1–F5 keys" width="360">
 
 *Photo-based illustration of the running Home screen.*
 
@@ -51,7 +51,7 @@ Port readiness is not proof of an instrument response. **F1 Help** opens help;
 between settings. See the [user guide](docs/user-guide.md) for port configuration,
 network Apply/Keep/Revert and NTP.
 
-![Main menu with Status selected](assets/images/menu/main-menu.png)
+<img src="assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
 
 *Main menu, illustrated from the operator's photograph.*
 
@@ -69,7 +69,7 @@ Use **F2/F4** to move, **F3** to open a section and **F1** to return.
 
 ### Port status
 
-![Ports list with P1 selected](assets/images/menu/ports.png)
+<img src="assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
 
 *Photo-based illustration; the visible list shows P1–P5.*
 
@@ -77,7 +77,7 @@ Use F2/F4 to select among P1–P8; the list scrolls to reveal the remaining
 ports. **F3 Detail** opens the selected port's status pages. `READY` describes
 the port runtime, not a confirmed response from a connected instrument.
 
-![Port connection details](assets/images/menu/port-details.png)
+<img src="assets/images/menu/port-details.png" alt="Port connection details" width="360">
 
 *Photo-based illustration; the device IP is replaced with the documentation
 example `192.0.2.10`.*
@@ -89,12 +89,12 @@ settings, not the factory defaults. F2/F4 cycle through the four detail pages.
 
 ### Configuration and network
 
-![Configuration menu](assets/images/menu/configuration.png)
+<img src="assets/images/menu/configuration.png" alt="Configuration menu" width="360">
 
 F2/F4 select a port; **F3 Select** opens its configuration. **F5 Network**
 opens the LAN, default-route and DNS pages.
 
-![Confirmed LAN2 policy](assets/images/menu/network-lan2.png)
+<img src="assets/images/menu/network-lan2.png" alt="Confirmed LAN2 policy" width="360">
 
 *Photo-based illustrations. The network values shown belong to the example
 device and are not installation defaults.*
