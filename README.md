@@ -10,7 +10,7 @@ English · [Русский](README.ru.md) · [User guide](docs/user-guide.md)
 
 Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
-the kernel and drivers remain in place. No mbusd service is required.
+the kernel and drivers remain in place.
 
 **Status:** preparing the first public release, `v2026.00.00`. Candidate r15
 runs on two UC-7420-LX Plus units. Remaining network and power-interruption
