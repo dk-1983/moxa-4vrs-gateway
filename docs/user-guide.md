@@ -9,7 +9,7 @@ replacement for the manufacturer's electrical and connector documentation.
 
 ## First start
 
-![Home screen and physical keys](../assets/images/menu/home.png)
+<img src="../assets/images/menu/home.png" alt="Home screen and physical keys" width="360">
 
 *Illustration rendered from an operator photograph; values match the supplied Home screen.*
 
@@ -27,7 +27,7 @@ prove that an instrument answered. Check a real client transaction as well.
 
 ### Main menu
 
-![Main menu with Status selected](../assets/images/menu/main-menu.png)
+<img src="../assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
 
 *Illustration rendered from the operator's photograph.*
 
@@ -81,7 +81,7 @@ a valid read response is needed to prove the complete instrument path.
 
 ### Inspecting ports
 
-![Ports list with P1 selected](../assets/images/menu/ports.png)
+<img src="../assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
 
 *Illustration from the operator's photograph.*
 
@@ -89,7 +89,7 @@ F2/F4 move through all eight ports, scrolling the five-row list as needed.
 Press F3 Detail to inspect the selected port; F2/F4 then switch detail pages.
 F1 returns to the list. This view reports status; it does not edit configuration.
 
-![First port detail page](../assets/images/menu/port-details.png)
+<img src="../assets/images/menu/port-details.png" alt="First port detail page" width="360">
 
 *Rendered from a photograph with the device settings preserved. These are not factory defaults.*
 
@@ -115,9 +115,9 @@ the details before deciding what caused it.
 
 ## Network settings
 
-![Configuration entry point](../assets/images/menu/configuration.png)
+<img src="../assets/images/menu/configuration.png" alt="Configuration entry point" width="360">
 
-![Confirmed LAN2 settings](../assets/images/menu/network-lan2.png)
+<img src="../assets/images/menu/network-lan2.png" alt="Confirmed LAN2 settings" width="360">
 
 *Photo-based illustrations; displayed addresses are example-device settings,
 not defaults to copy.*
