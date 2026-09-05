@@ -36,8 +36,10 @@ returns its replies to the software. Select the same transport in Gateway and
 your software: **Modbus TCP, Modbus UDP, RTU over UDP, RAW TCP or RAW UDP**.
 Their connection and data-framing rules are described in the table above.
 
-Web management and a user-facing automatic update module are planned for the
-second feature release. They are not first-release features.
+**Planned for the second release:**
+
+- A web interface for configuring and managing Gateway.
+- An automatic Gateway firmware update module.
 
 ## Display and local menu
 
