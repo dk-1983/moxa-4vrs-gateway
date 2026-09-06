@@ -2,7 +2,7 @@
 
 [README](../README.ru.md) · [English](user-guide.md)
 
-Инструкция для релиза **v2026.01.00**. Эта инструкция описывает проект 4VRS Gateway.
+Инструкция для релиза **v2026.01.01**. Эта инструкция описывает проект 4VRS Gateway.
 Технические, электрические и прочие характеристики прибора уточняйте
 в инструкциях завода-изготовителя.
 
@@ -25,16 +25,16 @@
 
 **Компьютер — PowerShell**, в каталоге загрузок:
 ```powershell
-Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/4vrs-gateway-v2026.01.00.tar.gz' -OutFile './4vrs-gateway-v2026.01.00.tar.gz'
-Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/SHA256SUMS' -OutFile './SHA256SUMS'
-Get-FileHash -Algorithm SHA256 './4vrs-gateway-v2026.01.00.tar.gz'
+Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.01/4vrs-gateway-v2026.01.01.tar.gz' -OutFile './4vrs-gateway-v2026.01.01.tar.gz'
+Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.01/SHA256SUMS' -OutFile './SHA256SUMS'
+Get-FileHash -Algorithm SHA256 './4vrs-gateway-v2026.01.01.tar.gz'
 $moxaAddress = Read-Host 'Moxa IP'
 $moxaSshPort = [int](Read-Host 'SSH port')
 ssh -p $moxaSshPort "root@$moxaAddress"
 ```
 
-Ожидаются SHA256 `852ba0816c467bb828fa9f15c07ee0e7e4a62cfb8b3e7446ef0a69bae9d4cc3f`
-и размер225462 байта. SHA256SUMS относится к архиву этого выпуска.
+Ожидаются SHA256 `2009f886c8efae678548f609642ed8e5158f1c29add3fcc4a94f19a18d736faf`
+и размер 225757 байта. SHA256SUMS относится к архиву этого выпуска.
 
 **Moxa — SSH:** подтвердите root, свою Moxa, смонтированную CF `/var/hda` и место.
 Родитель `/var/hda/4vrs/tests` должен существовать; при первом развёртывании
@@ -44,32 +44,32 @@ ssh -p $moxaSshPort "root@$moxaAddress"
 id
 mount
 df -k /etc /var/hda
-test ! -e /var/hda/4vrs/tests/install-v2026.01.00
-mkdir -m 700 /var/hda/4vrs/tests/install-v2026.01.00
+test ! -e /var/hda/4vrs/tests/install-v2026.01.01
+mkdir -m 700 /var/hda/4vrs/tests/install-v2026.01.01
 ```
 
 **Компьютер — PowerShell**, в том же сеансе с переменными адреса/порта:
 ```powershell
-scp -P $moxaSshPort ./4vrs-gateway-v2026.01.00.tar.gz ./SHA256SUMS "root@${moxaAddress}:/var/hda/4vrs/tests/install-v2026.01.00/"
+scp -P $moxaSshPort ./4vrs-gateway-v2026.01.01.tar.gz ./SHA256SUMS "root@${moxaAddress}:/var/hda/4vrs/tests/install-v2026.01.01/"
 ```
 
 ## Установить и прочитать результат
 
 **Moxa — SSH:** после передачи до распаковки ожидается MD5
-`924d60987086c31534ce046282b4c7c2`. Распакуйте tar на Moxa для сохранения прав;
+`cabf4fbce1b8b8e8b91b0e19e810959f`. Распакуйте tar на Moxa для сохранения прав;
 не переносите отдельно распакованные Windows-файлы без executable modes:
 ```sh
-cd /var/hda/4vrs/tests/install-v2026.01.00
-md5sum 4vrs-gateway-v2026.01.00.tar.gz
-tar -xzf 4vrs-gateway-v2026.01.00.tar.gz
-cd 4vrs-gateway-v2026.01.00
+cd /var/hda/4vrs/tests/install-v2026.01.01
+md5sum 4vrs-gateway-v2026.01.01.tar.gz
+tar -xzf 4vrs-gateway-v2026.01.01.tar.gz
+cd 4vrs-gateway-v2026.01.01
 ./4vrs-install
 ```
 
 `operation started` означает запуск отделённого worker, а не завершение установки.
 После восстановления связи с той же Moxa прочитайте сохранённый результат:
 ```sh
-cd /var/hda/4vrs/tests/install-v2026.01.00/4vrs-gateway-v2026.01.00
+cd /var/hda/4vrs/tests/install-v2026.01.01/4vrs-gateway-v2026.01.01
 ./4vrs-install --status
 ```
 

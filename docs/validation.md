@@ -1,11 +1,28 @@
-# Validation scope — v2026.01.00
+# Validation scope — v2026.01.01
 
-[Русский](validation.ru.md) · [Release notes](releases/v2026.01.00.md)
+[Русский](validation.ru.md) · [Release notes](releases/v2026.01.01.md)
 
 This release uses the unchanged tested installer/Gateway package. The owner
 authorized publication with the untested boundaries below explicitly retained.
 This is not complete hardware qualification or universal vendor-layout support.
 v2026.00.01 remains unchanged. No device update is implied by publication.
+
+## Patch v2026.01.01 hardware result
+
+The first device was updated from its previous managed version without manual
+clock-script edits or re-enroll: result0/verify-installed. Own config/backups,
+network/store and clock scripts/marker retained bytes/type/mode/link. Healthy
+repeat returned3/already-installed with unchanged guardian/owner/application
+PID/starttime and captured non-installer file/link mtimes. Actual unit8/function4
+Modbus reads passed3/3 before,3/3 after,3/3 after repeat; this does not certify all
+instrument channels. No reboot or fresh NTP/backlight physical test of this
+patch was performed; the second device remains on v2026.01.00.
+
+The following table describes prior v2026.01.00/earlier evidence, except where
+explicitly stated. Those tests were not rerun for this documentation export.
+Local patch validation previously passed22 host suites, installer UBSan,9 package
+tests and both XScale ABI audits. [Patch evidence](releases/v2026.01.01-evidence.json)
+and [patch notes](releases/v2026.01.01.md).
 
 | Area | Evidence and scope |
 | --- | --- |

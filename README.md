@@ -10,8 +10,10 @@ Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
 
-**Release: [v2026.01.00](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.00).**
-[Download the installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/4vrs-gateway-v2026.01.00.tar.gz) · [Installation](docs/installation.md) · [Validation scope](docs/validation.md).
+**Release: [v2026.01.01](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.01).**
+[Download the installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.01/4vrs-gateway-v2026.01.01.tar.gz) · [Installation](docs/installation.md) · [Validation scope](docs/validation.md).
+
+**v2026.01.01:** fixes safe installation refusals caused by comments before existing clock guards and literal Usage messages; accepted scripts are preserved. Installer and backlight control were introduced in v2026.01.00. [Patch notes](docs/releases/v2026.01.01.md).
 
 ## Features
 
@@ -250,7 +252,7 @@ been hardware-qualified. The family name is not a tested-device list.
 Product files and configuration use CompactFlash under `/var/hda/4vrs/`.
 Minimal startup integration remains on internal storage.
 
-The complete [v2026.01.00 installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.00) includes network and clock startup integration. Follow the [automatic installation steps](docs/installation.md), then read the persistent result.
+The complete [v2026.01.01 installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.01) includes network and clock startup integration. Follow the [automatic installation steps](docs/installation.md), then read the persistent result.
 
 Read the [user guide](docs/user-guide.md) for operating an installed system.
 Initial migration retains supported existing device settings and network addresses.
