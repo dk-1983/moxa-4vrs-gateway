@@ -2,14 +2,196 @@
 
 [README](../README.md) · [Русский](user-guide.ru.md)
 
-Draft for the first public release, v2026.00.01. Describes the current physical
-panel implementation. Public installation packaging and remaining hardware
-qualification are still in progress. This guide describes the 4VRS Gateway project. For the device's technical,
-electrical and other specifications, consult the manufacturer's instructions.
+User guide for release **v2026.00.01**. This guide describes the 4VRS Gateway project.
+For the device's technical, electrical and other specifications, consult the
+manufacturer's instructions.
+
+## Installing v2026.00.01
+
+### Release contents
+
+Open the [v2026.00.01 release page](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.00.01).
+Download `4vrs-gateway` and `SHA256SUMS`. The **Source code** archive contains
+project sources and scripts, including `deploy`.
+
+`4vrs-gateway` runs on the existing Moxa UC-7420-LX Plus Linux system. It is
+not an operating-system image and must not be submitted to the vendor firmware
+upgrade function. Installation in this release is manual; there is no automatic
+installer. First installation integrates application startup, network recovery
+and clock management.
+
+### 1. Verify the download
+
+The executable is **201665 bytes**, with SHA256:
+
+```text
+68479273620832902e400e1b42d5566cf7c363c9816c7faab464b26640630731
+```
+
+In PowerShell, from the download directory:
+
+```powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath .vrs-gateway
+```
+
+In Linux, from that directory:
+
+```sh
+sha256sum -c SHA256SUMS
+```
+
+If the checksum differs, download the file again before installation.
+
+### 2. Prepare the device
+
+Connect to the Moxa's current address over SSH with root privileges. Working
+CompactFlash, application storage space and write access to the persistent `/etc`
+area are required. Check the model and preserve the device's network, serial and
+clock settings. For initial integration, prepare console access in case the
+network connection is interrupted.
+
+Capture `/etc/network/interfaces`, `/etc/resolv.conf`, the actual target of
+`/etc/rc.d/rc3.d/S40networking`, `/etc/init.d/ntpdate`, `/etc/init.d/ntpdate.d`,
+`/etc/init.d/halt` and existing clock synchronization jobs. If Gateway is already
+installed, also preserve its configuration, `/etc/4vrs-network` and executables.
+Verify script locations on your system; do not substitute files from another
+unit. Installation retains the existing network address.
+
+### 3. Place the files
+
+Transfer the binary into a separate staging directory on CompactFlash and verify
+its checksum after transfer. Do not overwrite a running executable. Stop other
+applications using the same UARTs before starting Gateway.
+
+| Component | Location |
+| --- | --- |
+| Application | `/var/hda/4vrs/bin/4vrs-gateway` |
+| Application settings | `/var/hda/4vrs/config/gateway.conf` |
+| Runtime files and startup log | `/var/hda/4vrs/run`, `/var/hda/4vrs/log` |
+| Network recovery helper — identical binary | `/etc/4vrs-network/gateway-network-recovery` |
+| Confirmed network configuration | `/etc/4vrs-network` |
+| Application startup script | `deploy/4vrs-gateway.init` from the release sources |
+| Network startup wrapper | `deploy/4vrs-networking-wrapper` from the release sources |
+
+Executables require execute permission. Keep the recovery helper under `/etc`
+because network recovery must work before CompactFlash becomes available.
+Preserve an existing `gateway.conf`; do not replace it with example settings.
+Without a saved configuration, the application uses the defaults described below.
+
+### 4. Initial network and clock integration
+
+An administrator performs this stage against the particular device's boot
+scripts. This is a manual integration sequence, not a universal paste-and-run
+installation script.
+
+1. Preserve the device's original network script as
+   `/etc/4vrs-network/vendor-networking`. On the computer, prepare a derivative
+   using `tools/prepare-network-boot-migration.py` with the captured original's
+   SHA256. The tool checks four supported ifup/ifdown call sites. A refusal
+   requires review of that script; do not bypass the check.
+2. Install the result as `/etc/4vrs-network/vendor-networking-managed`, retaining
+   the other vendor hooks. Do not remove disconnected interfaces merely to make
+   import succeed.
+3. Only when no enrolled network store exists, import the current settings with
+   `gateway-network-recovery --network-enroll /var/hda/4vrs/config`. Invoke the
+   helper by its full path from the table. Expect `network-enroll ok stage=ok`.
+   Existing stores must be preserved and checked for compatibility; repeating
+   enroll is not an upgrade procedure. On failure, stop at the reported stage
+   and retain the store for diagnosis.
+4. Run the helper's `--network-boot` operation and expect
+   `network-boot ok stage=ok`. Before editing policy, materialized addresses,
+   masks, routes and DNS must match the device's original configuration.
+5. Prepare clock changes from this device's captured vendor scripts with
+   `tools/prepare-clock-writer-migration.py`. Review the diff and install the
+   matching guards: while `/etc/4vrs-clock-managed` exists, vendor services must
+   not compete with Gateway for NTP or RTC writes. Review cron and any other
+   previously configured time writers separately.
+6. Integrate `4vrs-networking-wrapper` in place of the verified early
+   S40networking entry, preserving the original. Activate the
+   `/etc/4vrs-network/enabled` marker only after the helper, store and vendor
+   derivative are ready. The wrapper restores policy, runs the vendor phase
+   and starts the network owner.
+7. Integrate `4vrs-gateway.init` into normal startup **after** network recovery
+   and `/var/hda` mounting. Start the application through that script. An already
+   addressed loopback without a receipt requires a controlled network restart
+   during initial integration; SSH may disconnect. Do not fabricate a receipt
+   or ifstate, or hide a failure by repeating start.
+
+Verify the exact boot-chain changes for the target system. Preparation tools
+create files for review; they do not install the product. Do not enable managed
+networking when an earlier step has failed.
+
+### 5. Check the installation
+
+Check the Home screen, **About → v2026.00.01**, port readiness and retained
+LAN1/LAN2, route and DNS settings. If NTP is enabled, check **Synced**. Query an
+attached instrument using its actual address and transport. Confirm that only
+one application instance is running.
+
+Perform a planned reboot and repeat checks of connectivity, automatic startup,
+settings and instrument communication. This checks normal startup, not power
+interruption during a configuration write.
+
+### Existing Gateway installations
+
+If both the application and recovery helper already match the SHA256 above,
+they are the current release binary: no reinstall is needed for the version
+number. When migrating from another build, review compatibility and prepare a
+coherent replacement of application and helper. Do not repeat enroll, reset
+settings or copy another unit's network files. A failed migration requires
+restoring a consistent application/helper/configuration/startup set, not a
+single arbitrarily selected older file.
+
+## Menu tree
+
+Names below match the display. In ordinary lists, **F2/F4** move the selection,
+**F3** opens an item and **F1** returns. Follow the bottom-line prompts for editor actions.
+
+```text
+Home screen
+├── F1 Help
+└── F3 Main Menu
+    ├── Status — application state
+    ├── Ports
+    │   └── P1 … P8 → F3 Detail
+    │       └── F2/F4: connection → counters → errors → port state
+    ├── Configuration
+    │   ├── P1 … P8 → F3 Select
+    │   │   ├── Port settings → F5 Edit
+    │   │   ├── Save & Apply → confirmation → result
+    │   │   └── Cancel changes
+    │   └── F5 Network
+    │       ├── F2/F4: LAN2 / LAN1 / route / DNS / Observed LAN1 / Observed LAN2
+    │       └── F5 Edit → F5 Review → F3 Apply
+    │           ├── F3 Keep — save
+    │           └── F1 Revert / timer expiry — roll back
+    ├── Diagnostics
+    │   └── F3 Events → Startup Events → F2/F4: entries
+    ├── System
+    │   ├── Date & Time → F5 Set Time
+    │   └── F4 Platform
+    │       └── F5 Network Time
+    │           ├── F5 Edit: enable, server, interval
+    │           └── F4 Test / Stop: NTP diagnostics
+    ├── Shutdown → confirm stopping Gateway
+    └── About — product and version
+```
+
+## Operation and navigation
 
 ## Home screen
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/home.png" alt="Home screen and physical keys" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre><b>▶ Home screen</b></pre>
+</td>
+</tr>
+</table>
 
 *Home screen.*
 
@@ -27,7 +209,18 @@ prove that an instrument answered. Check a real client transaction as well.
 
 ### Main menu
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── <b>▶ F3 → Main Menu</b></pre>
+</td>
+</tr>
+</table>
 
 *Main menu.*
 
@@ -81,7 +274,19 @@ a valid read response is needed to prove the complete instrument path.
 
 ### Inspecting ports
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Ports</b></pre>
+</td>
+</tr>
+</table>
 
 *Port list.*
 
@@ -89,7 +294,20 @@ F2/F4 move through all eight ports, scrolling the five-row list as needed.
 Press F3 Detail to inspect the selected port; F2/F4 then switch detail pages.
 F1 returns to the list. This view reports status; it does not edit configuration.
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/port-details.png" alt="First port detail page" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Ports
+      └── <b>▶ F3 → P1 → Detail</b></pre>
+</td>
+</tr>
+</table>
 
 *Port connection settings.*
 
@@ -115,9 +333,35 @@ the details before deciding what caused it.
 
 ## Network settings
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/configuration.png" alt="Configuration entry point" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Configuration</b></pre>
+</td>
+</tr>
+</table>
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/network-lan2.png" alt="Confirmed LAN2 settings" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Configuration
+      └── F5 → Network
+         └── <b>▶ LAN2</b></pre>
+</td>
+</tr>
+</table>
 
 *Configuration menu and LAN2 network settings.*
 
@@ -162,7 +406,21 @@ interface waiting for a new lease.
 
 ## Clock and NTP
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/network-time.png" alt="Network Time settings and synchronization status" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 → Platform
+         └── <b>▶ F5 → Network Time</b></pre>
+</td>
+</tr>
+</table>
 
 Open **System**, go to its Platform page and open **Network Time** using the
 on-screen prompts. Edit the NTP server, enable flag and interval, then confirm.
@@ -185,7 +443,19 @@ verify automatic synchronization after installation or a planned restart.
 
 ## Diagnostics and stopping
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/diagnostics.png" alt="Diagnostics counters" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Diagnostics</b></pre>
+</td>
+</tr>
+</table>
 
 *Diagnostics counters.*
 
@@ -193,7 +463,20 @@ Open **Main Menu → Diagnostics** to view accepted and completed requests,
 timeouts, recoveries, stale responses and the queue high-water mark.
 **F3 Events** opens startup events.
 
+<table>
+<tr>
+<td valign="top">
 <img src="../assets/images/menu/startup-events.png" alt="Startup events" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Diagnostics
+      └── <b>▶ F3 → Startup Events</b></pre>
+</td>
+</tr>
+</table>
 
 *Startup events.*
 
