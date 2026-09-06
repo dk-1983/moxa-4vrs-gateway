@@ -44,7 +44,17 @@ RS-422 и возвращает его ответы программе. В Gatewa
 
 ## Дисплей и локальное меню
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/home.png" alt="Главный экран и кнопки F1–F5" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre><b>▶ Главный экран</b></pre>
+</td>
+</tr>
+</table>
 
 *Изображение главного экрана.*
 
@@ -55,7 +65,18 @@ RS-422 и возвращает его ответы программе. В Gatewa
 на подсказки кнопок внизу дисплея. Настройка портов, Apply/Keep/Revert сети и NTP
 описаны в [инструкции пользователя](docs/user-guide.ru.md).
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/main-menu.png" alt="Главное меню, выбран Status" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── <b>▶ F3 → Main Menu</b></pre>
+</td>
+</tr>
+</table>
 
 *Главное меню.*
 
@@ -73,7 +94,19 @@ RS-422 и возвращает его ответы программе. В Gatewa
 
 ### Состояния портов
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/ports.png" alt="Список портов, выбран P1" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── <b>▶ F3 → Ports</b></pre>
+</td>
+</tr>
+</table>
 
 *Список портов.*
 
@@ -81,7 +114,20 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 **F3 Detail** открывает страницы состояния выбранного порта. `READY` означает
 готовность порта, а не подтверждённый ответ подключённого прибора.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/port-details.png" alt="Параметры подключения порта" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → Ports
+      └── <b>▶ F3 → P1 → Detail</b></pre>
+</td>
+</tr>
+</table>
 
 *Параметры подключения порта.*
 
@@ -92,12 +138,38 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 
 ### Конфигурация и сеть
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/configuration.png" alt="Меню конфигурации" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── <b>▶ F3 → Configuration</b></pre>
+</td>
+</tr>
+</table>
 
 F2/F4 выбирают порт, **F3 Select** открывает его настройки. **F5 Network**
 открывает страницы LAN, основного маршрута и DNS.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/network-lan2.png" alt="Подтверждённая политика LAN2" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → Configuration
+      └── F5 → Network
+         └── <b>▶ LAN2</b></pre>
+</td>
+</tr>
+</table>
 
 *Сетевые настройки LAN2.*
 
@@ -107,7 +179,21 @@ F5 открывает редактор, F1 возвращает назад. Из
 
 ### Часы и NTP
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/network-time.png" alt="Настройки Network Time: NTP синхронизирован" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 → Platform
+         └── <b>▶ F5 → Network Time</b></pre>
+</td>
+</tr>
+</table>
 
 Откройте **System → F4 Platform → F5 Network Time**, чтобы посмотреть состояние синхронизации
 и настройки. **F5 Edit** открывает редактирование NTP. Штатный интервал — 1, 6
@@ -118,7 +204,19 @@ F5 открывает редактор, F1 возвращает назад. Из
 
 ### Диагностика
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/diagnostics.png" alt="Счётчики диагностики" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── <b>▶ F3 → Diagnostics</b></pre>
+</td>
+</tr>
+</table>
 
 *Счётчики диагностики.*
 
@@ -126,7 +224,20 @@ F5 открывает редактор, F1 возвращает назад. Из
 завершённых запросов, тайм-аутов, восстановлений, устаревших ответов и
 максимальную глубину очереди. **F3 Events** открывает события запуска.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/startup-events.png" alt="События запуска" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → Diagnostics
+      └── <b>▶ F3 → Startup Events</b></pre>
+</td>
+</tr>
+</table>
 
 *События запуска.*
 

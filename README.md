@@ -45,7 +45,17 @@ to a later release.
 
 ## Display and local menu
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/home.png" alt="Home screen and F1–F5 keys" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre><b>▶ Home screen</b></pre>
+</td>
+</tr>
+</table>
 
 *Home screen.*
 
@@ -56,7 +66,18 @@ Port readiness is not proof of an instrument response. **F1 Help** opens help;
 between settings. See the [user guide](docs/user-guide.md) for port configuration,
 network Apply/Keep/Revert and NTP.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── <b>▶ F3 → Main Menu</b></pre>
+</td>
+</tr>
+</table>
 
 *Main menu.*
 
@@ -74,7 +95,19 @@ Use **F2/F4** to move, **F3** to open a section and **F1** to return.
 
 ### Port status
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Ports</b></pre>
+</td>
+</tr>
+</table>
 
 *Port list.*
 
@@ -82,7 +115,20 @@ Use F2/F4 to select among P1–P8; the list scrolls to reveal the remaining
 ports. **F3 Detail** opens the selected port's status pages. `READY` describes
 the port runtime, not a confirmed response from a connected instrument.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/port-details.png" alt="Port connection details" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Ports
+      └── <b>▶ F3 → P1 → Detail</b></pre>
+</td>
+</tr>
+</table>
 
 *Port connection settings.*
 
@@ -93,12 +139,38 @@ settings, not the factory defaults. F2/F4 cycle through the four detail pages.
 
 ### Configuration and network
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/configuration.png" alt="Configuration menu" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Configuration</b></pre>
+</td>
+</tr>
+</table>
 
 F2/F4 select a port; **F3 Select** opens its configuration. **F5 Network**
 opens the LAN, default-route and DNS pages.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/network-lan2.png" alt="Confirmed LAN2 policy" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Configuration
+      └── F5 → Network
+         └── <b>▶ LAN2</b></pre>
+</td>
+</tr>
+</table>
 
 *LAN2 network settings.*
 
@@ -108,7 +180,21 @@ available during the confirmation window. See the [network instructions](docs/us
 
 ### Clock and NTP
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/network-time.png" alt="Network Time settings with NTP synchronized" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 → Platform
+         └── <b>▶ F5 → Network Time</b></pre>
+</td>
+</tr>
+</table>
 
 Open **System → F4 Platform → F5 Network Time** to view synchronization status and settings.
 **F5 Edit** changes the NTP settings. Choose a normal interval of 1, 6 or 24 hours;
@@ -119,7 +205,19 @@ then automatically returns to the configured schedule.
 
 ### Diagnostics
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/diagnostics.png" alt="Diagnostics counters" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── <b>▶ F3 → Diagnostics</b></pre>
+</td>
+</tr>
+</table>
 
 *Diagnostics counters.*
 
@@ -127,7 +225,20 @@ Open **Main Menu → Diagnostics** to view accepted and completed requests,
 timeouts, recoveries, stale responses and the queue high-water mark.
 **F3 Events** opens startup events.
 
+<table>
+<tr>
+<td valign="top">
 <img src="assets/images/menu/startup-events.png" alt="Startup events" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → Diagnostics
+      └── <b>▶ F3 → Startup Events</b></pre>
+</td>
+</tr>
+</table>
 
 *Startup events.*
 
