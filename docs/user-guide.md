@@ -6,7 +6,30 @@ User guide for release **v2026.00.01**. This guide describes the 4VRS Gateway pr
 For the device's technical, electrical and other specifications, consult the
 manufacturer's instructions.
 
-## Installing v2026.00.01
+## Automatic installation — next release
+
+The automatic installer is being developed for **v2026.01.00**. It is not
+included in the published **v2026.00.01**; the manual procedure is retained below.
+
+The planned workflow is:
+
+1. Download and unpack the installation package.
+2. Copy its files to the Moxa directory specified in the package instructions.
+3. Connect to the Moxa and start the installer with one command.
+4. Wait for the successful installation message. The installer checks the device
+   and package, installs components and configures startup while preserving the
+   existing network settings.
+5. Open the Gateway menu and configure your connected instruments.
+
+No manual editing of system configuration files will be required. The exact
+path, command and expected messages will be added after the completed package
+is tested. This plan is not yet a procedure for an available installer.
+
+## Manual installation of v2026.00.01
+
+Command blocks identify where they run: **computer — PowerShell**,
+**computer — Linux** or **Moxa — SSH**. Run one command at a time and check its
+result before continuing. Stop on an error instead of proceeding to the next step.
 
 ### Release contents
 
@@ -31,7 +54,7 @@ The executable is **201665 bytes**, with SHA256:
 In PowerShell, from the download directory:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 -LiteralPath .vrs-gateway
+Get-FileHash -Algorithm SHA256 -LiteralPath './4vrs-gateway'
 ```
 
 In Linux, from that directory:
@@ -42,6 +65,15 @@ sha256sum -c SHA256SUMS
 
 If the checksum differs, download the file again before installation.
 
+**Computer — PowerShell.** Also check the file size:
+
+```powershell
+(Get-Item -LiteralPath './4vrs-gateway').Length
+```
+
+Expected result: `201665`. Verify the checksum before transfer and again after
+copying the file to the Moxa.
+
 ### 2. Prepare the device
 
 Connect to the Moxa's current address over SSH with root privileges. Working
@@ -51,11 +83,35 @@ clock settings. For initial integration, prepare console access in case the
 network connection is interrupted.
 
 Capture `/etc/network/interfaces`, `/etc/resolv.conf`, the actual target of
-`/etc/rc.d/rc3.d/S40networking`, `/etc/init.d/ntpdate`, `/etc/init.d/ntpdate.d`,
+`/etc/rc.d/rcS.d/S40networking`, `/etc/init.d/ntpdate`, `/etc/init.d/ntpdate.d`,
 `/etc/init.d/halt` and existing clock synchronization jobs. If Gateway is already
 installed, also preserve its configuration, `/etc/4vrs-network` and executables.
 Verify script locations on your system; do not substitute files from another
 unit. Installation retains the existing network address.
+
+**Computer — PowerShell.** Enter this Moxa's current IP and SSH port:
+
+```powershell
+$moxaAddress = Read-Host 'Moxa IP'
+$moxaSshPort = [int](Read-Host 'SSH port')
+ssh -p $moxaSshPort "root@$moxaAddress"
+```
+
+After login, run these commands **on the Moxa — SSH**:
+
+```sh
+id
+uname -a
+mount
+df -k /etc /var/hda
+ls -l /etc/rc.d/rcS.d/S40networking
+```
+
+Confirm `uid=0`, that CompactFlash is actually mounted at `/var/hda`, and that
+storage is available. `ls` shows the network boot entry and its target if it is
+a symlink. If the entry is missing or CF is unmounted, stop before copying files
+to system directories and inspect that system's boot chain. These commands do
+not change settings.
 
 ### 3. Place the files
 
