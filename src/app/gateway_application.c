@@ -16,6 +16,9 @@
 
 #include "app/gateway_application.h"
 
+
+/* Official UC-7420 /dev/lcm on=5, off=6; command acknowledgment only. */
+static int backlight_set_real(void*x,unsigned int on){int fd,r,e;(void)x;if(on>1U)return EINVAL;fd=open("/dev/lcm",O_RDWR);if(fd<0)return errno?errno:EIO;r=ioctl(fd,on?5:6,0);e=r<0?(errno?errno:EIO):r?EIO:0;if(close(fd)&&!e)e=errno?errno:EIO;return e;}
 static const gateway_product_metadata_t product={FOURVRS_PRODUCT_NAME,FOURVRS_VERSION};
 static void copy_text(char*out,size_t capacity,const char*input)
 {size_t n;if(!out||capacity==0U)return;n=strlen(input);if(n>=capacity)n=capacity-1U;memcpy(out,input,n);out[n]='\0';}
@@ -199,7 +202,7 @@ static int real_attach(void*context,gateway_controller_t*c)
 {gateway_application_t*a=(gateway_application_t*)context;unsigned int i;if(!a||!c)return-1;for(i=0;i<GATEWAY_PORT_COUNT;++i)if(a->prepared_adapters&(1U<<i))gateway_real_adapter_attach(&a->adapters[i],&c->ports[i].runtime);return 0;}
 
 void gateway_application_dependencies_production(gateway_application_dependencies_t*d,gateway_application_t*a,const char*directory)
-{gateway_application_dependencies_default(d);if(directory)d->configuration_directory=directory;d->provide_bindings=real_prepare;d->attach_bindings=real_attach;d->binding_context=a;d->ntp_context=a;d->rtc_probe=rtc_probe_real;d->rtc_save=rtc_save_real;
+{gateway_application_dependencies_default(d);if(directory)d->configuration_directory=directory;d->provide_bindings=real_prepare;d->attach_bindings=real_attach;d->binding_context=a;d->ntp_context=a;d->backlight_set=backlight_set_real;d->rtc_probe=rtc_probe_real;d->rtc_save=rtc_save_real;
 #if defined(__arm__)
 if(!strcmp(d->configuration_directory,GATEWAY_CONFIG_TARGET_DIRECTORY)&&access("/etc/4vrs-network/enabled",F_OK)==0)d->network_environment=gateway_network_environment_production();
 #endif
@@ -219,7 +222,7 @@ static int config_equal(const gateway_port_config_t*a,const gateway_port_config_
 static int config_terminal(const gateway_port_controller_t*p,const gateway_port_config_t*c)
 {return c->enabled?p->lifecycle==GATEWAY_PORT_READY:p->lifecycle==GATEWAY_PORT_DISABLED;}
 static void config_rollback_begin(gateway_application_t*a)
-{a->dependencies.discard_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory);a->configuration_transaction.state=GATEWAY_CONFIG_TX_ROLLING_BACK;a->configuration_transaction.port_index=0;a->configuration_transaction.waiting=0;}
+{a->dependencies.discard_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory);a->configuration_transaction.state=GATEWAY_CONFIG_TX_ROLLING_BACK;a->configuration_transaction.port_index=memcmp(a->configuration_transaction.candidate.ports,a->configuration_transaction.previous.ports,sizeof(a->configuration_transaction.candidate.ports))==0?GATEWAY_PORT_COUNT:0;a->configuration_transaction.waiting=0;}
 static void config_transaction_step(gateway_application_t*a,core_tick_t now)
 {gateway_configuration_transaction_t*t=&a->configuration_transaction;gateway_port_controller_t*p;const gateway_port_config_t*desired;gateway_persistent_config_t loaded;gateway_config_source_t source;gateway_config_result_t r;
  if((a->coordinator.state==GATEWAY_APP_SHUTTING_DOWN||a->coordinator.state==GATEWAY_APP_STOPPED||a->coordinator.state==GATEWAY_APP_FATAL_ERROR)&&(t->state==GATEWAY_CONFIG_TX_ACTIVATING||t->state==GATEWAY_CONFIG_TX_PROMOTING||t->state==GATEWAY_CONFIG_TX_ROLLING_BACK)){a->dependencies.discard_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory);t->state=GATEWAY_CONFIG_TX_FAILED;return;}
@@ -250,7 +253,18 @@ for(i=0;i<8U;++i)if(strcmp(c->ports[i].bind_address,t->previous.ports[i].bind_ad
         }
     }
 }
-canonical=t->candidate;gateway_application_network_map(a,&canonical,1);r=a->dependencies.stage_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory,&canonical);t->persistence_result=r;if(r!=GATEWAY_CONFIG_OK){a->dependencies.discard_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory);t->state=GATEWAY_CONFIG_TX_FAILED;return-1;}t->state=GATEWAY_CONFIG_TX_ACTIVATING;return 0;}
+canonical=t->candidate;gateway_application_network_map(a,&canonical,1);r=a->dependencies.stage_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory,&canonical);t->persistence_result=r;if(r!=GATEWAY_CONFIG_OK){a->dependencies.discard_configuration(a->dependencies.configuration_write_context,a->dependencies.configuration_directory);t->state=GATEWAY_CONFIG_TX_FAILED;return-1;}t->state=memcmp(t->candidate.ports,t->previous.ports,sizeof(t->candidate.ports))==0?GATEWAY_CONFIG_TX_PROMOTING:GATEWAY_CONFIG_TX_ACTIVATING;return 0;}
+int gateway_application_backlight_set(gateway_application_t*a,unsigned int on)
+{gateway_persistent_config_t c;int r;if(!a||on>1U)return -1;c=a->coordinator.selected;c.settings.backlight_on=on;r=gateway_application_request_configuration(a,&c);if(!r&&a->configuration_transaction.state==GATEWAY_CONFIG_TX_UNCHANGED)a->backlight.attempted=0;return r;}
+static void backlight_step(gateway_application_t*a)
+{gateway_backlight_health_t*h=&a->backlight;unsigned int on;
+ if(!a->coordinator.controller_initialized||a->run_control.stop_requested)return;
+ on=a->coordinator.selected.settings.backlight_on;
+ if(h->attempted&&h->desired_on==on)return;
+ h->desired_on=on;h->attempted=1;h->last_error=a->dependencies.backlight_set?a->dependencies.backlight_set(a->dependencies.backlight_context,on):ENOSYS;
+ h->command_known=h->last_error==0;if(h->command_known)h->command_on=on;
+}
+
 gateway_configuration_transaction_state_t gateway_application_configuration_state(const gateway_application_t*a){return a?a->configuration_transaction.state:GATEWAY_CONFIG_TX_FAILED;}
 gateway_config_result_t gateway_application_configuration_result(const gateway_application_t*a){return a?a->configuration_transaction.persistence_result:GATEWAY_CONFIG_INVALID;}
 
@@ -401,7 +415,7 @@ static void time_sync_step(gateway_application_t *a,core_tick_t now)
 }
 
 void gateway_application_step(gateway_application_t*a)
-{core_tick_t now;if(!a||a->process_state==GATEWAY_PROCESS_STOPPED)return;now=a->dependencies.clock(a->dependencies.clock_context);if(a->run_control.stop_requested&&a->cleanup_attempts==0U)++a->cleanup_attempts;gateway_coordinator_step(&a->coordinator,now);if(a->coordinator.state==GATEWAY_APP_SELECTING_CONFIGURATION)gateway_application_network_map(a,&a->coordinator.selected,0);gateway_application_network_step(a,now);config_transaction_step(a,now);time_sync_step(a,now);if(a->coordinator.state==GATEWAY_APP_FATAL_ERROR){a->fatal_seen=1;a->process_state=GATEWAY_PROCESS_STOPPING;if(a->cleanup_attempts==0U)++a->cleanup_attempts;gateway_coordinator_request_shutdown(&a->coordinator,now);}
+{core_tick_t now;if(!a||a->process_state==GATEWAY_PROCESS_STOPPED)return;now=a->dependencies.clock(a->dependencies.clock_context);if(a->run_control.stop_requested&&a->cleanup_attempts==0U)++a->cleanup_attempts;gateway_coordinator_step(&a->coordinator,now);if(a->coordinator.state==GATEWAY_APP_SELECTING_CONFIGURATION)gateway_application_network_map(a,&a->coordinator.selected,0);gateway_application_network_step(a,now);config_transaction_step(a,now);backlight_step(a);time_sync_step(a,now);if(a->coordinator.state==GATEWAY_APP_FATAL_ERROR){a->fatal_seen=1;a->process_state=GATEWAY_PROCESS_STOPPING;if(a->cleanup_attempts==0U)++a->cleanup_attempts;gateway_coordinator_request_shutdown(&a->coordinator,now);}
 else if(a->coordinator.state==GATEWAY_APP_READY||a->coordinator.state==GATEWAY_APP_DEGRADED){a->process_state=GATEWAY_PROCESS_RUNNING;}
 else if(a->coordinator.state==GATEWAY_APP_SAFE_MODE){a->safe_mode_seen=1;a->process_state=GATEWAY_PROCESS_RUNNING;}
 else if(a->coordinator.state==GATEWAY_APP_SHUTTING_DOWN){a->process_state=GATEWAY_PROCESS_STOPPING;}
@@ -410,7 +424,7 @@ else if(a->coordinator.state==GATEWAY_APP_STOPPED){a->process_state=(a->ntp_term
 int gateway_application_finished(const gateway_application_t*a){return a&&a->process_state==GATEWAY_PROCESS_STOPPED;}
 gateway_process_exit_t gateway_application_exit_status(const gateway_application_t*a){return a?a->exit_status:GATEWAY_EXIT_INVALID_INVOCATION;}
 void gateway_application_health(const gateway_application_t*a,gateway_application_health_t*h)
-{size_t n;if(!a||!h)return;memset(h,0,sizeof(*h));h->process_state=a->process_state;h->exit_status=a->exit_status;h->product=product;h->platform=a->platform;h->time=a->time;n=strlen(a->dependencies.configuration_directory);if(n>=sizeof(h->configuration_directory))n=sizeof(h->configuration_directory)-1U;memcpy(h->configuration_directory,a->dependencies.configuration_directory,n);gateway_coordinator_health(&a->coordinator,a->dependencies.clock(a->dependencies.clock_context),&h->coordinator);h->shutdown_requests=a->shutdown_requests;h->cleanup_attempts=a->cleanup_attempts;}
+{size_t n;if(!a||!h)return;memset(h,0,sizeof(*h));h->process_state=a->process_state;h->exit_status=a->exit_status;h->product=product;h->platform=a->platform;h->time=a->time;h->backlight=a->backlight;n=strlen(a->dependencies.configuration_directory);if(n>=sizeof(h->configuration_directory))n=sizeof(h->configuration_directory)-1U;memcpy(h->configuration_directory,a->dependencies.configuration_directory,n);gateway_coordinator_health(&a->coordinator,a->dependencies.clock(a->dependencies.clock_context),&h->coordinator);h->shutdown_requests=a->shutdown_requests;h->cleanup_attempts=a->cleanup_attempts;}
 unsigned int gateway_application_memory_bytes(void){return(unsigned int)sizeof(gateway_application_t);}
 unsigned int gateway_application_adapter_bytes(void){return(unsigned int)sizeof(((gateway_application_t*)0)->adapters);}
 unsigned int gateway_application_max_fds(void){return(GATEWAY_PORT_COUNT*2U)+(GATEWAY_PORT_COUNT*MODBUS_LISTENER_CLIENT_MAX)+9U;}

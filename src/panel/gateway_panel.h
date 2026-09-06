@@ -49,7 +49,9 @@ typedef enum gateway_panel_view {
     GATEWAY_PANEL_NETWORK,
     GATEWAY_PANEL_NETWORK_EDIT,
     GATEWAY_PANEL_NETWORK_CONFIRM,
-    GATEWAY_PANEL_NETWORK_RESULT
+    GATEWAY_PANEL_NETWORK_RESULT,
+    GATEWAY_PANEL_DISPLAY,
+    GATEWAY_PANEL_BACKLIGHT
 } gateway_panel_view_t;
 
 typedef enum gateway_panel_key {
@@ -74,6 +76,7 @@ typedef struct gateway_panel_health {
 } gateway_panel_health_t;
 
 typedef struct gateway_panel {
+    unsigned int backlight_choice;
     gateway_network_settings_t lan2_candidate;
     unsigned int lan2_cursor, network_page;
     const gateway_panel_ops_t *ops;

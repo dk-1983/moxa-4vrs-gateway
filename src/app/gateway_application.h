@@ -149,6 +149,8 @@ typedef void (*gateway_ntp_cancel_fn)(void *context);
 typedef gateway_rtc_state_t (*gateway_rtc_operation_fn)(void *context);
 
 typedef struct gateway_application_dependencies {
+    int (*backlight_set)(void *context, unsigned int on);
+    void *backlight_context;
     const gateway_network_environment_t *network_environment;
     const char *configuration_directory;
     gateway_configuration_select_fn select_configuration;
@@ -191,7 +193,13 @@ typedef struct gateway_configuration_transaction {
     unsigned int rollback_failed;
 } gateway_configuration_transaction_t;
 
+typedef struct gateway_backlight_health {
+    unsigned int desired_on, command_on, command_known, attempted;
+    int last_error;
+} gateway_backlight_health_t;
+
 typedef struct gateway_application_health {
+    gateway_backlight_health_t backlight;
     gateway_process_state_t process_state;
     gateway_process_exit_t exit_status;
     gateway_product_metadata_t product;
@@ -204,6 +212,7 @@ typedef struct gateway_application_health {
 } gateway_application_health_t;
 
 struct gateway_application {
+    gateway_backlight_health_t backlight;
     gateway_network_runtime_t network;
     gateway_coordinator_t coordinator;
     gateway_real_adapter_t adapters[GATEWAY_PORT_COUNT];
@@ -276,6 +285,8 @@ unsigned int gateway_application_memory_bytes(void);
 unsigned int gateway_application_adapter_bytes(void);
 unsigned int gateway_application_max_fds(void);
 int gateway_application_network_apply(gateway_application_t *, const gateway_network_settings_t *);
+/* Saves through the common configuration transaction. No physical readback. */
+int gateway_application_backlight_set(gateway_application_t *, unsigned int on);
 int gateway_application_network_keep(gateway_application_t *);
 int gateway_application_network_revert(gateway_application_t *);
 int gateway_application_network_boot(const gateway_network_environment_t *);

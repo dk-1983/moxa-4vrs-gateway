@@ -15,6 +15,8 @@
 /* Linker wrappers ensure no host clock, RTC, or real ntpdate is touched. */
 static unsigned checks,failed,writes,sets;
 static int open_error,io_error,child_mode,extra_fd;
+static unsigned light_request,light_closes;
+static int light_open_error,light_result,light_close_error;
 static time_t epoch=1788609600;
 static struct rtc_time calendar,saved;
 #define CHECK(x) do {++checks;if(!(x)){++failed;printf("FAIL %d: %s\n",__LINE__,#x);}}while(0)
@@ -22,15 +24,17 @@ int __real_open(const char *,int,...);
 int __real_close(int);
 int __wrap_open(const char *path,int flags,...)
 {
+    if(strcmp(path,"/dev/lcm")==0){CHECK(flags==O_RDWR);if(light_open_error){errno=EACCES;return -1;}return 7778;}
     if(strcmp(path,"/dev/rtc")==0){if(open_error){errno=open_error;return -1;}return 7777;}
     /* Production clock helpers only open existing files. */
     if(flags&O_CREAT){errno=EPERM;return -1;}
     return __real_open(path,flags);
 }
-int __wrap_close(int fd){return fd==7777?0:__real_close(fd);}
+int __wrap_close(int fd){if(fd==7778){++light_closes;if(light_close_error){errno=EIO;return -1;}return 0;}return fd==7777?0:__real_close(fd);}
 int __wrap_ioctl(int fd,unsigned long request,...)
 {
     va_list args;struct rtc_time *value;
+    if(fd==7778){light_request=(unsigned)request;if(light_result<0)errno=EIO;return light_result;}
     if(fd!=7777){errno=EPERM;return -1;}
     va_start(args,request);value=va_arg(args,struct rtc_time *);va_end(args);
     if(io_error){errno=EIO;return -1;}
@@ -61,6 +65,13 @@ int main(void)
     int pid,status;unsigned before;struct tm *utc;
     memset(&a,0,sizeof(a));a.ntp_output_fd=-1;
     gateway_application_dependencies_production(&d,&a,0);
+    CHECK(d.backlight_set(0,1)==0&&light_request==5&&light_closes==1);
+    CHECK(d.backlight_set(0,0)==0&&light_request==6&&light_closes==2);
+    light_result=-1;CHECK(d.backlight_set(0,0)==EIO&&light_closes==3);
+    light_result=1;CHECK(d.backlight_set(0,1)==EIO&&light_closes==4);light_result=0;
+    light_close_error=1;CHECK(d.backlight_set(0,1)==EIO);light_close_error=0;
+    light_open_error=1;before=light_closes;CHECK(d.backlight_set(0,0)==EACCES&&light_closes==before);light_open_error=0;
+    CHECK(d.backlight_set(0,2)==EINVAL);
     calendar.tm_year=126;calendar.tm_mon=8;calendar.tm_mday=5;
     CHECK(d.rtc_probe(0)==GATEWAY_RTC_UNVERIFIED);
     calendar.tm_mon=1;calendar.tm_mday=29;CHECK(d.rtc_probe(0)==GATEWAY_RTC_INVALID);

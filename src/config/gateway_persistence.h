@@ -14,6 +14,7 @@
 #define GATEWAY_NTP_SERVER_MAX 64U
 
 typedef struct gateway_product_settings {
+    unsigned int backlight_on;
     int ntp_enabled;
     unsigned int ntp_interval_hours;
     char ntp_server[GATEWAY_NTP_SERVER_MAX];
