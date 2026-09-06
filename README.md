@@ -37,7 +37,8 @@ Their connection and data-framing rules are described in the table above.
 **Planned for the next release:**
 
 - An automatic Gateway download and installation system to simplify setup.
-- Development and testing of the system, followed by a release.
+- Display backlight control from the menu: on, off and persistence of the selected setting.
+- Testing of the installer and backlight control, followed by one combined release.
 
 Implementation details will be defined separately. The web interface is deferred
 to a later release.
