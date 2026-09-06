@@ -29,8 +29,10 @@ release is required. Subsequent releases follow the normal sequence below.
 | Second feature release in 2026 | `v2026.01.00` |
 | First correction to the second feature release | `v2026.01.01` |
 
-The web interface and automatic firmware update module are planned for the
-second feature release; if published in 2026, its version is `v2026.01.00`.
+The next feature release focuses on an automatic Gateway download and
+installation system: develop it, test it, then publish the release. Implementation
+details will be defined separately. If published in 2026, its version is
+`v2026.01.00`. The web interface is deferred to a later release.
 
 ## Build and publication identity
 

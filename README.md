@@ -34,10 +34,13 @@ returns its replies to the software. Select the same transport in Gateway and
 your software: **Modbus TCP, Modbus UDP, RTU over UDP, RAW TCP or RAW UDP**.
 Their connection and data-framing rules are described in the table above.
 
-**Planned for the second release:**
+**Planned for the next release:**
 
-- A web interface for configuring and managing Gateway.
-- An automatic Gateway firmware update module.
+- An automatic Gateway download and installation system to simplify setup.
+- Development and testing of the system, followed by a release.
+
+Implementation details will be defined separately. The web interface is deferred
+to a later release.
 
 ## Display and local menu
 
