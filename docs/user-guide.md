@@ -2,28 +2,122 @@
 
 [README](../README.md) · [Русский](user-guide.ru.md)
 
-User guide for release **v2026.00.01**. This guide describes the 4VRS Gateway project.
+User guide for release **v2026.01.00**. This guide describes the 4VRS Gateway project.
 For the device's technical, electrical and other specifications, consult the
 manufacturer's instructions.
 
-## Automatic installation — next release
+## Automatic installation
 
-The automatic installer is being developed for **v2026.01.00**. It is not
-included in the published **v2026.00.01**; the manual procedure is retained below.
+The native installer runs on supported Moxa UC-7420-LX Plus Linux systems.
+It preserves the device's own network, serial and NTP configuration, prepares
+the network/clock scripts and manages services/startup. It needs no Python on
+the Moxa, no manual enroll and no hand-written vendor derivative. It does not
+reboot automatically and is not a vendor firmware image.
 
-The planned workflow is:
+Arrange a maintenance window and recovery access; installation can interrupt
+SSH and serial traffic. Preserve an external baseline of this device's settings
+and startup files. Check target identity and actual mounted CF before proceeding.
+Unsupported layouts are refused; do not bypass the refusal. Read the
+[documented scope and deferred tests](validation.md) before first deployment.
+Run each command separately and stop if it fails. Do not disable SSH host-key checks.
 
-1. Download and unpack the installation package.
-2. Copy its files to the Moxa directory specified in the package instructions.
-3. Connect to the Moxa and start the installer with one command.
-4. Wait for the successful installation message. The installer checks the device
-   and package, installs components and configures startup while preserving the
-   existing network settings.
-5. Open the Gateway menu and configure your connected instruments.
+## Download and copy
 
-No manual editing of system configuration files will be required. The exact
-path, command and expected messages will be added after the completed package
-is tested. This plan is not yet a procedure for an available installer.
+**Computer — PowerShell**, in a download directory:
+```powershell
+Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/4vrs-gateway-v2026.01.00.tar.gz' -OutFile './4vrs-gateway-v2026.01.00.tar.gz'
+Invoke-WebRequest -Uri 'https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/SHA256SUMS' -OutFile './SHA256SUMS'
+Get-FileHash -Algorithm SHA256 './4vrs-gateway-v2026.01.00.tar.gz'
+$moxaAddress = Read-Host 'Moxa IP'
+$moxaSshPort = [int](Read-Host 'SSH port')
+ssh -p $moxaSshPort "root@$moxaAddress"
+```
+
+Require package SHA256 `852ba0816c467bb828fa9f15c07ee0e7e4a62cfb8b3e7446ef0a69bae9d4cc3f`
+and size225462 bytes. SHA256SUMS covers the public archive, not the older release's ELF.
+
+**Moxa — SSH:** require root, mounted CF at `/var/hda`, free space and the correct
+device. The parent `/var/hda/4vrs/tests` must exist; for a first deployment create
+it with `mkdir -p /var/hda/4vrs/tests` only after verifying CF is mounted.
+Create a fresh staging directory; if it already exists, inspect it instead of overwriting:
+```sh
+id
+mount
+df -k /etc /var/hda
+test ! -e /var/hda/4vrs/tests/install-v2026.01.00
+mkdir -m 700 /var/hda/4vrs/tests/install-v2026.01.00
+```
+
+**Computer — PowerShell**, in the same shell holding the address/port variables:
+```powershell
+scp -P $moxaSshPort ./4vrs-gateway-v2026.01.00.tar.gz ./SHA256SUMS "root@${moxaAddress}:/var/hda/4vrs/tests/install-v2026.01.00/"
+```
+
+## Install and read the result
+
+**Moxa — SSH:** require archive MD5 `924d60987086c31534ce046282b4c7c2`
+after transfer before unpacking. Tar preserves executable modes; do not unpack
+on Windows and upload mode-less files. Execute only the complete original package:
+```sh
+cd /var/hda/4vrs/tests/install-v2026.01.00
+md5sum 4vrs-gateway-v2026.01.00.tar.gz
+tar -xzf 4vrs-gateway-v2026.01.00.tar.gz
+cd 4vrs-gateway-v2026.01.00
+./4vrs-install
+```
+
+`operation started` means a detached worker was launched, not successful completion.
+After reconnecting to the same device, read the persistent result:
+```sh
+cd /var/hda/4vrs/tests/install-v2026.01.00/4vrs-gateway-v2026.01.00
+./4vrs-install --status
+```
+
+| result | Meaning |
+| --- | --- |
+| 0 | Completed operation; check stage (normally verify-installed; recovery repair may report repair-recovery-executable) |
+| 3 | Healthy already installed/no transaction; no unnecessary service restart |
+| 100 | Last worker record was running; may be stale after interruption/boot |
+| 1 | Previous installation restored; requested update did not complete |
+| 2 | Waiting for CF; do not bypass startup protection |
+| -1 | Refused preparation/input; inspect stage/detail |
+| -2 | Recovery required or incomplete; not a successful install |
+
+`--status` exit0 means the record was read. Inspect result/stage, retained settings
+and application readiness; TCP connection alone is not an instrument read.
+To repeat a healthy installation run `./4vrs-install` from that package directory.
+The installer preserves configuration; it does not copy another device's IPs.
+
+## Interruption and recovery
+
+Retain journals, gates, locks and network store. Do not erase them to force a retry.
+The independent recovery executable works before CF becomes available:
+```sh
+/etc/4vrs-installer/recovery --recover
+/etc/4vrs-installer/recovery --status
+```
+
+Read status after the asynchronous operation. If recovery has not yet been
+published, rerun the same verified package; bootstrap had not changed the old
+startup entries at that point. For WAIT_CF restore availability using an agreed
+safe procedure, then retry recovery; do not manufacture a mount or hot-remove CF.
+Boot entries also recover unfinished transactions. The old worker result100 can
+persist after successful boot recovery; compare actual restored set/services.
+Application startup waits up to120 seconds for CF; later recovery/start may need
+an explicit retry. Corrupt journals require diagnosis via reserve access, not bypass.
+Recovery rolls back an unfinished transaction; it is not a general downgrade command.
+
+## Backlight and retained manual procedure
+
+**System → Display → Backlight → On / Off**, F3 saves. Default On; old configs
+without the field use On. Off retains screen/key handling and returns after boot.
+See [Backlight](backlight.md). Older decoders cannot read an Off configuration or
+backup: a binary downgrade needs separate compatibility review.
+
+The [retained manual procedure](user-guide.md#manual-installation-of-v20260001)
+describes the previous manually integrated release. Do not run it over this
+installer's active journal or substitute old binaries into this package.
+Its command checklist and operating instructions remain below the automatic path.
 
 ## Manual installation of v2026.00.01
 
@@ -560,5 +654,5 @@ separately. Do not start a second Gateway instance against the same UARTs.
 | DHCP interface waits for network | Link and DHCP server; do not assume an expired lease remains valid |
 | NTP remains unsynchronized | Enable flag, server, route, DNS and the clock diagnostic result |
 
-Web UI and automatic updating are planned for a later feature release and are
-not described as available controls in this version.
+The web interface remains planned for a later release. Automatic installation
+and managed updates use the package procedure at the start of this guide.

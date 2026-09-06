@@ -10,8 +10,8 @@ Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
 
-**Status:** the first public release, `v2026.00.01`, is in preparation.
-We are completing final testing and preparing the installation package and user documentation.
+**Release: [v2026.01.00](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.00).**
+[Download the installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.01.00/4vrs-gateway-v2026.01.00.tar.gz) · [Installation](docs/installation.md) · [Validation scope](docs/validation.md).
 
 ## Features
 
@@ -22,7 +22,7 @@ We are completing final testing and preparing the installation package and user 
 | Modbus UDP | MBAP-framed UDP requests bridged to serial Modbus RTU |
 | RTU over UDP | RTU frames, including CRC, in UDP datagrams |
 | RAW TCP / RAW UDP | Transparent serial data transport without Modbus interpretation |
-| Local management | LCD/keypad settings, port states, counters and diagnostics |
+| Local management | LCD/keypad settings, backlight On/Off, port states, counters and diagnostics |
 | Network | LAN1/LAN2 static IPv4 or DHCP client, mask, default route, DNS |
 | Network changes | Review, temporary Apply, explicit Keep, manual/timed Revert |
 | Clock | RTC, NTP, 1/6/24-hour intervals, three-attempt diagnostic mode |
@@ -34,14 +34,9 @@ returns its replies to the software. Select the same transport in Gateway and
 your software: **Modbus TCP, Modbus UDP, RTU over UDP, RAW TCP or RAW UDP**.
 Their connection and data-framing rules are described in the table above.
 
-**Planned for the next release:**
-
-- An automatic Gateway download and installation system to simplify setup.
-- Display backlight control from the menu: on, off and persistence of the selected setting.
-- Testing of the installer and backlight control, followed by one combined release.
-
-Implementation details will be defined separately. The web interface is deferred
-to a later release.
+**New in v2026.01.00:** automatic native installation with settings preservation
+and recovery; **System → Display → Backlight → On / Off**, saved across startup.
+The web interface remains planned for a later release. See [release notes](docs/releases/v2026.01.00.md).
 
 ## Display and local menu
 
@@ -255,10 +250,7 @@ been hardware-qualified. The family name is not a tested-device list.
 Product files and configuration use CompactFlash under `/var/hda/4vrs/`.
 Minimal startup integration remains on internal storage.
 
-The public installation package is still being prepared. An isolated development
-binary does not include the required network and clock startup integration.
-Installation instructions and assets will be published in
-[Releases](https://github.com/dk-1983/moxa-4vrs-gateway/releases).
+The complete [v2026.01.00 installer package](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.01.00) includes network and clock startup integration. Follow the [automatic installation steps](docs/installation.md), then read the persistent result.
 
 Read the [user guide](docs/user-guide.md) for operating an installed system.
 Initial migration retains supported existing device settings and network addresses.

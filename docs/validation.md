@@ -1,58 +1,44 @@
-# Validation status
+# Validation scope — v2026.01.00
 
-English · [Русский](validation.ru.md)
+[Русский](validation.ru.md) · [Release notes](releases/v2026.01.00.md)
 
-This is a public-facing summary of development evidence, not a release
-certificate. The first public `v2026.00.01` package has not yet completed
-qualification. Development candidate **r15** is installed on two
-UC-7420-LX Plus devices; that does not establish compatibility with other models.
+This release uses the unchanged tested installer/Gateway package. The owner
+authorized publication with the untested boundaries below explicitly retained.
+This is not complete hardware qualification or universal vendor-layout support.
+v2026.00.01 remains unchanged. No device update is implied by publication.
 
-## Recorded evidence
-
-| Area | Evidence and limit |
+| Area | Evidence and scope |
 | --- | --- |
-| Integrated r15 build | 20 host suites, four relevant UBSan suites, full XScale build and target ABI audit reported for r15 |
-| Both devices | Installation and a software reboot recorded on each device; saved device-specific configuration retained |
-| Startup recovery | Repeated starts and restart exercised; optional absent vendor interface and loopback startup defects reproduced and corrected |
-| Idle power interruption | One r15 power cycle recorded on the first device; this is not interruption during a configuration write |
-| Static network UI | LAN edits, explicit Keep/Revert and timeout rollback exercised; mask Apply/timeout rollback also observed with management access and sampled serial reads |
-| DHCP | Selected acquisition, renewal, expiry, policy recovery and Revert scenarios exercised on an isolated LAN; this is not complete DHCP interoperability coverage |
-| Clock | Earlier RTC UTC write/readback and real NTP diagnostic attempts recorded; operator observed automatic synchronization after r15 boot on both devices |
-| Serial transports | Earlier per-mode instrument/client and RAW loop tests recorded; r15 first-device checks include sampled Modbus reads after boot |
-| Isolated crash harness | Four cases executed on target OS/CompactFlash: interruption before/after publication, peer loss during Apply, and writer timeout; expected private-store recovery observed |
+| Host/build | 22 host suites; relevant UBSan for application, panel, persistence, clock provider and installer; 9 packaging tests; both complete XScale ELF ABI audits |
+| Managed update | Actual native installation, own network/serial/NTP/store preservation, healthy repeat without service restart or installed-file rewriting |
+| Backlight | Operator observed physical On/Off, menu navigation while Off, persistence, one normal reboot with saved Off, then return to On |
+| Immediate recovery | One instrumented exact publish-application process interruption followed by independent recovery and original recovery-ELF repair, CF available |
+| Boot recovery | One separately authorized reboot after that exact instrumented boundary, without manual recovery beforehand; CF available, valid rollback generation, before-set restored, automatic services, TCP3/3; stale worker result100 is not a new boot result |
+| Native observer | Positive target observation passed; stale/reused/zombie/live/error cases additionally covered locally, not all separately on target |
+| Earlier network/clock/serial | Selected static LAN/mask/Keep/Revert, DHCP acquisition/renewal/expiry/policy recovery, RTC/NTP, instrument reads and RAW loop experiments on earlier product revisions; retain each experiment's scope, not a new full release cycle |
 
-The crash harness uses production components with synthetic LAN providers and
-a separate test store. It did not stop the installed Gateway or cut physical
-power. Its results do not replace complete application/owner-path tests.
-Likewise, a TCP connection on the second device is not an instrument-read pass.
+Instrumented interruption uses original production orchestration/recovery with
+a qualification-only boundary. It is not a physical power cut or proof of all
+crash phases. A TCP connection is not a Modbus/instrument read; the latest second
+device trials used TCP checks. Console reboot capture was not a full early-boot
+trace. Source/artifact and reviewed evidence hashes are in the
+[release evidence manifest](releases/v2026.01.00-evidence.json).
 
-## Remaining release work
+## Explicitly untested / deferred
 
-The internal qualification matrix still has open entries for physical write
-interruption and further deployed crash phases; actual DNS resolution after
-configuration changes; automatic DHCP DNS lifecycle; remaining DHCP ownership
-and cancellation cases; alternate route/mask behavior; and explicit listener
-affinity through address and lease transitions. Each needs its stated evidence
-or an explicit, documented scope decision before release acceptance.
+- Real first installation on a system without Gateway; deliberately absent or
+  late CF; physical power removal during a durable write remain hardware-unverified.
+  The owner deferred scenarios needing recovery media because the only two CF
+  cards are in working devices. A spare card purchase, destructive teardown or
+  factory reset is not required for this release. These tests are not called passed.
+- Further DHCP cancellation/late ACK, NAK/conflict/foreign-client and independent
+  LAN/both-client target cases; actual DNS lookups after changes and automatic
+  DHCP-DNS publication/withdrawal; alternate route/interface reachability;
+  mask Keep/reboot or expanded-subnet behavior; dedicated listener-affinity and
+  ordinary bind-edit transitions; remaining network durable Keep/crash phases
+  retain their unproven hardware coverage. This is not a list of newly found bugs.
+- Multi-day endurance, exact NTP latency/packet capture and additional RTC
+  readbacks are optional extensions, not new mandatory tests for this release.
 
-The public installer, clean source export, final version labeling, release
-artifact build and checksums also remain unfinished. The final package must be
-checked against its own source and contents; the earlier candidate's tests do
-not automatically qualify a different binary or installer.
-
-Extra endurance runs and exact NTP latency measurements are separate from the
-recorded functional results. No multi-day soak, universal server compatibility
-or industrial safety certification is claimed.
-
-## Reproducing checks
-
-Host test runners are under `tools/run-host-*-tests.sh`; target build scripts
-are under `tools/build-*.sh`. Obtain the vendor toolchain independently and
-follow the [build environment](architecture/build-environment.md). Tests that
-need device access or archived local evidence are not ordinary host checks.
-Do not execute target helpers against operating equipment without reviewing
-their action, configuration and recovery requirements.
-
-When reporting additional results, identify the exact artifact, device model,
-fixture, operation and observed outcome. Preserve the distinction between
-simulation, target component tests and complete live-device behavior.
+Later destructive or media-dependent tests require their own recovery preparation
+and operator authorization. The web interface is deferred to a later release.
