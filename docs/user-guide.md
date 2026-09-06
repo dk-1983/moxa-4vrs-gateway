@@ -2,7 +2,7 @@
 
 [README](../README.md) · [Русский](user-guide.ru.md)
 
-Draft for the first public release, v2026.00.00. Describes the current physical
+Draft for the first public release, v2026.00.01. Describes the current physical
 panel implementation. Public installation packaging and remaining hardware
 qualification are still in progress. This guide describes the 4VRS Gateway project. For the device's technical,
 electrical and other specifications, consult the manufacturer's instructions.

@@ -10,7 +10,7 @@ Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
 
-**Status:** the first public release, `v2026.00.00`, is in preparation.
+**Status:** the first public release, `v2026.00.01`, is in preparation.
 We are completing final testing and preparing the installation package and user documentation.
 
 ## Features
@@ -156,8 +156,8 @@ and device experiments. See the [validation status](docs/validation.md)
 for passed cases and remaining qualification. Component tests, TCP connections
 and instrument transactions prove different scopes.
 
-Versions follow [`vYEAR.RELEASE.PATCH`](docs/versioning.md), starting at zero:
-first public release `v2026.00.00`, next 2026 feature release `v2026.01.00`.
+Versions follow [`vYEAR.RELEASE.PATCH`](docs/versioning.md), with a one-time initial-version exception:
+first public release `v2026.00.01`, next 2026 feature release `v2026.01.00`.
 Development candidate names are not published releases.
 
 ## Contributing and license

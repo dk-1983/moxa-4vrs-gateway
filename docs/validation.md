@@ -3,7 +3,7 @@
 English · [Русский](validation.ru.md)
 
 This is a public-facing summary of development evidence, not a release
-certificate. The first public `v2026.00.00` package has not yet completed
+certificate. The first public `v2026.00.01` package has not yet completed
 qualification. Development candidate **r15** is installed on two
 UC-7420-LX Plus devices; that does not establish compatibility with other models.
 
