@@ -12,4 +12,57 @@ F1 возвращает без сохранения выделенного зн�
 статус означает подтверждение команды, а не выдуманный readback. Gateway/UART/
 сеть не перезапускаются. Старые декодеры не понимают Off-поле — перед downgrade
 проверить основной config и backup. [Границы доказательств](validation.ru.md).
-Существующие фото сохранены; нового снимка страницы не придумано.
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.jpg" alt="Меню Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Меню Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.jpg" alt="Настройки подсветки" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Настройки подсветки.*

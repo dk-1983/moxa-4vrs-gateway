@@ -115,6 +115,60 @@ result100 может остаться после успешного boot recover
 Старые декодеры несовместимы с Off в основном config и backup: простой откат
 бинарника недопустим без проверки совместимости.
 
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.jpg" alt="Меню Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Меню Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.jpg" alt="Настройки подсветки" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Настройки подсветки.*
+
 Сохранённая ручная процедура в [руководстве](user-guide.ru.md) относится к
 предыдущему выпуску с ручной интеграцией. Не выполняйте её поверх active journal
 этого установщика и не подменяйте ELF в пакете. Она сохранена после автоматического пути.

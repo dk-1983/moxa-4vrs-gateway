@@ -13,4 +13,57 @@ as successful application. Status is command acknowledgement, not invented
 hardware readback. This operation does not restart UART, network or Gateway.
 Older decoders cannot read the optional Off field; review active and backup
 configuration before any downgrade. See [validation](validation.md) for evidence.
-Existing photographs are retained; no new page photo is fabricated.
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.jpg" alt="Display menu" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Display menu.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.jpg" alt="Backlight settings" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Backlight settings.*

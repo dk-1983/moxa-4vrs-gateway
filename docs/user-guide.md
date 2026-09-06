@@ -114,6 +114,60 @@ without the field use On. Off retains screen/key handling and returns after boot
 See [Backlight](backlight.md). Older decoders cannot read an Off configuration or
 backup: a binary downgrade needs separate compatibility review.
 
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.jpg" alt="Display menu" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Display menu.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.jpg" alt="Backlight settings" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Backlight settings.*
+
 The [retained manual procedure](user-guide.md#manual-installation-of-v20260001)
 describes the previous manually integrated release. Do not run it over this
 installer's active journal or substitute old binaries into this package.
