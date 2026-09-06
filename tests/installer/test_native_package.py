@@ -29,7 +29,7 @@ def elf():
     loader = b'/lib/ld-linux.so.3\0'
     struct.pack_into('>I', b, 100, len(loader))
     b[128:128+len(loader)] = loader
-    b[160:174] = b'v2026.01.00\0\0\0'
+    b[160:174] = b'v2026.01.01\0\0\0'
     return bytes(b)
 
 
@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
         path.write_bytes(elf() if i < 2 else b'#!/bin/sh\nexit 0\n')
         sources.append(path)
     archive = tmp / 'package.tar.gz'
-    package.package('v2026.01.00', *sources, archive)
+    package.package('v2026.01.01', *sources, archive)
     baseline = tmp / 'baseline'
     baseline.mkdir(mode=0o700)
     with tarfile.open(archive) as tar:

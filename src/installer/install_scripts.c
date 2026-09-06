@@ -25,11 +25,48 @@ static int preamble(const char*s,const char*end,unsigned int halt){
   p=e+1;
  }return p==end;
 }
+/* The supported vendor start branch is the first branch of one top-level
+ * case. Only inert full-line comments/whitespace may separate its label and
+ * guard. Parse the prelude too: a nearby start) inside a nested shell is not
+ * evidence of unconditional clock ownership. Never rewrite accepted bytes. */
+static int start_guard(const char*s,const char*guard){
+ const char*p=strchr(s,'\n');unsigned int state=0;if(!p)return 0;p++;
+ while(p<guard){const char*e=strchr(p,'\n'),*q=p,*z;size_t n;
+  if(!e)return 0;
+  while(q<e&&(*q==' '||*q=='\t'))q++;
+  if(q==guard)return state==2;
+  if(e>=guard)return 0;
+  z=e;while(z>q&&(z[-1]==' '||z[-1]=='\t'))z--;n=(size_t)(z-q);
+  if(n&&*q!='#'){
+   if(state==0){
+    if((n==10&&!memcmp(q,"case $1 in",10))||(n==12&&!memcmp(q,"case \"$1\" in",12)))state=1;
+    else if(n==strlen("test -f /usr/sbin/ntpdate || exit 0")&&!memcmp(q,"test -f /usr/sbin/ntpdate || exit 0",n)){}
+    else if(n>5&&!memcmp(q,"PATH=",5)){const char*v=q+5;for(;v<z;v++)if(!((*v>='a'&&*v<='z')||(*v>='A'&&*v<='Z')||(*v>='0'&&*v<='9')||strchr("/_:-.",*v)))return 0;}
+    else return 0;
+   }else if(state==1&&n==6&&!memcmp(q,"start)",6))state=2;
+   else return 0;
+  }
+  p=e+1;
+ }return 0;
+}
+/* A quoted usage message is data, not invocation of the script it names.
+ * No expansion, escapes, concatenation or following shell command is accepted. */
+static int literal_echo(const char*p,const char*e){
+ char quote;if(e-p<7||memcmp(p,"echo ",5))return 0;p+=5;
+ while(p<e&&(*p==' '||*p=='\t'))p++;
+ if(e-p>3&&!memcmp(p,"-n ",3)){p+=3;while(p<e&&(*p==' '||*p=='\t'))p++;}
+ if(p==e||(*p!='\"'&&*p!='\''))return 0;
+ quote=*p++;
+ while(p<e&&*p!=quote){if(*p=='$'||*p=='`'||*p=='\\')return 0;p++;}
+ if(p==e)return 0;
+ p++;while(p<e&&(*p==' '||*p=='\t'))p++;
+ return p==e;
+}
 static int writers(const char*s,const char*guard,size_t length,unsigned int halt,unsigned int top){
  const char*p=s,*limit=top?0:strstr(guard+length,";;");
  while(*p){const char*e=strchr(p,'\n'),*q=p,*w;if(!e)return 0;while(q<e&&(*q==' '||*q=='\t'))q++;
-  if(q<e&&*q!='#'){
-   w=strstr(q,halt?"hwclock":"/ntpdate");
+  if(q<e&&*q!='#'&&!literal_echo(q,e)){
+   w=strstr(q,halt?"hwclock":"ntpdate");
    if(w&&w<e&&!(!halt&&(size_t)(e-q)==strlen("test -f /usr/sbin/ntpdate || exit 0")&&!memcmp(q,"test -f /usr/sbin/ntpdate || exit 0",(size_t)(e-q)))){if(halt){if(w<guard||w>=guard+length)return 0;}
     else if(w<guard+length||(!top&&(!limit||w>=limit)))return 0;}
   }p=e+1;
@@ -50,9 +87,7 @@ int install_clock_script(const install_file_t*in,unsigned int halt,install_file_
   if(!found||strstr(found+strlen(guard),"/etc/4vrs-clock-managed")||strstr((char*)in->data,"/etc/4vrs-clock-managed")!=strstr(found,"/etc/4vrs-clock-managed"))goto fail;
   if(halt&&(strstr(found+strlen(guard),"hwclock --systohc")||strstr((char*)in->data,"hwclock --systohc")!=strstr(found,"hwclock --systohc")))goto fail;
   top=(unsigned int)preamble((char*)in->data,found,halt);
-  if(!top){const char*line=found;while(line>(char*)in->data&&line[-1]!='\n')line--;
-   if(halt||line==found||found-line!=2||memcmp(line,"  ",2)||line-(char*)in->data<7||memcmp(line-7,"start)\n",7)){error=INSTALL_CLOCK_POSITION;goto fail;}
-  }
+  if(!top&&(halt||!start_guard((char*)in->data,found))){error=INSTALL_CLOCK_POSITION;goto fail;}
   if(!writers((char*)in->data,found,strlen(guard),halt,top)){error=INSTALL_CLOCK_WRITER;goto fail;}
   memcpy(out->data,in->data,in->size);out->size=in->size;return 0;
  }

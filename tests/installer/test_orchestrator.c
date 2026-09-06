@@ -47,7 +47,7 @@ static void fixture(const char*out,char root[1024],install_package_t*p){
  gateway_persistent_defaults(&cfg);strcpy(cfg.ports[0].bind_address,"10.20.2.7");cfg.settings.backlight_on=0;cfg.settings.ntp_enabled=1;strcpy(cfg.settings.ntp_server,"10.20.0.1");
  CHECK(gateway_config_encode(&cfg,buf,sizeof(buf),&n)==GATEWAY_CONFIG_OK);buf[n]=0;put(root,"var/hda/4vrs/config/gateway.conf",buf);
  script(root,"etc/rc.d/init.d/networking","#!/bin/sh\ncase $1 in\nstart)\n/sbin/ifup -a\n;;\nstop)\n/sbin/ifdown -a\n;;\nrestart)\n/sbin/ifdown -a\n/sbin/ifup -a\n;;\nesac\n");
- script(root,"etc/rc.d/init.d/ntpdate","#!/bin/sh\ncase $1 in\nstart)\n /sbin/ntpdate own-server\n ;;\nesac\n");
+ script(root,"etc/rc.d/init.d/ntpdate","#!/bin/sh\ncase $1 in\nstart)\n  # Clock policy belongs to Gateway.\n\n  test ! -e /etc/4vrs-clock-managed || exit 0\n /sbin/ntpdate own-server\n ;;\nesac\n");
  script(root,"etc/rc.d/init.d/halt","#!/bin/sh\nhwclock --systohc\n/sbin/halt\n");
  f.kind=2;f.mode=0777;f.data=(unsigned char*)"../init.d/networking";f.size=strlen((char*)f.data);CHECK(!install_file_publish(root,"etc/rc.d/rcS.d/S40networking",&f));
  memset(p,0,sizeof(*p));

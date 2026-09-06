@@ -14,7 +14,7 @@ SPEC = importlib.util.spec_from_file_location(
     "installer_package", Path(__file__).resolve().parents[2] / "tools/build-installer-package.py")
 PACKAGE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(PACKAGE)
-VERSION = "v2026.01.00"
+VERSION = "v2026.01.01"
 
 
 def elf(version=VERSION):
@@ -92,7 +92,7 @@ class PackageTests(unittest.TestCase):
                 self.assertFalse(self.output.exists())
 
     def test_version_path_injection(self):
-        for version in ["../../bad", "v2026.1.0", "v2026.01.00\n", "v2026.01.00/other"]:
+        for version in ["../../bad", "v2026.1.0", "v2026.01.01\n", "v2026.01.01/other"]:
             with self.assertRaises(ValueError):
                 PACKAGE.package(version, *self.inputs, self.output)
         self.assertFalse(self.output.exists())

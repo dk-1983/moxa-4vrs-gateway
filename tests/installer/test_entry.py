@@ -24,7 +24,7 @@ for name in re.findall(r'(/[^\s()]+)', subprocess.check_output(['ldd', str(binar
         dest = root / name.lstrip('/'); dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(name, dest); dest.chmod(0o755)
 record = root / 'etc/4vrs-installer/result'
-expected = b'version=v2026.01.00\nresult=3\nstage=already-installed\n'
+expected = b'version=v2026.01.01\nresult=3\nstage=already-installed\n'
 record.write_bytes(expected); record.chmod(0o600)
 result = subprocess.run(['chroot', str(root), '/install', '--status'], capture_output=True, timeout=5)
 assert result.returncode == 0 and result.stdout == expected
