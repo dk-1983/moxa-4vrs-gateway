@@ -107,68 +107,6 @@ result100 может остаться после успешного boot recover
 может понадобиться повтор recovery/start. Повреждённый журнал требует диагностики
 через резервный доступ. Recovery незавершённой транзакции не является downgrade.
 
-## Подсветка и сохранённый ручной путь
-
-**System → Display → Backlight → On / Off**, F3 сохраняет. По умолчанию On;
-старый config без поля тоже использует On. При Off экран/кнопки работают,
-сохранённое значение возвращается после boot. [Подсветка](backlight.ru.md).
-Старые декодеры несовместимы с Off в основном config и backup: простой откат
-бинарника недопустим без проверки совместимости.
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
-</td>
-<td valign="top">
-<strong>Путь в меню</strong>
-<pre>Главный экран
-└── F3 → Main Menu
-   └── F3 → System
-      └── <b>▶ F4 × 2 → Display</b></pre>
-</td>
-</tr>
-</table>
-
-*System: Display.*
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/display-menu.png" alt="Меню Display" width="360">
-</td>
-<td valign="top">
-<strong>Путь в меню</strong>
-<pre>Главный экран
-└── F3 → Main Menu
-   └── F3 → System
-      └── F4 × 2 → Display
-         └── <b>▶ F3 → Display</b></pre>
-</td>
-</tr>
-</table>
-
-*Меню Display.*
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/backlight-on.png" alt="Настройки подсветки" width="360">
-</td>
-<td valign="top">
-<strong>Путь в меню</strong>
-<pre>Главный экран
-└── F3 → Main Menu
-   └── F3 → System
-      └── F4 × 2 → Display
-         └── F3 → Display
-            └── <b>▶ F3 → Backlight</b></pre>
-</td>
-</tr>
-</table>
-
-*Настройки подсветки.*
-
 Сохранённая ручная процедура в [руководстве](user-guide.ru.md) относится к
 предыдущему выпуску с ручной интеграцией. Не выполняйте её поверх active journal
 этого установщика и не подменяйте ELF в пакете. Она сохранена после автоматического пути.
@@ -375,10 +313,12 @@ UART приложения перед запуском Gateway.
     │   └── F3 Events → Startup Events → F2/F4: записи
     ├── System
     │   ├── Date & Time → F5 Set Time
-    │   └── F4 Platform
-    │       └── F5 Network Time
-    │           ├── F5 Edit: включение, сервер, интервал
-    │           └── F4 Test / Stop: диагностика NTP
+    │   ├── F4 Platform
+    │   │   └── F5 Network Time
+    │   │       ├── F5 Edit: включение, сервер, интервал
+    │   │       └── F4 Test / Stop: диагностика NTP
+    │   └── F4 → Display → F3 Open
+    │       └── Backlight → On / Off → F3 сохранить
     ├── Shutdown → подтверждение остановки Gateway
     └── About — название и версия
 ```
@@ -701,6 +641,68 @@ Keep завершает сетевую транзакцию: отдельног�
 **Shutdown останавливает приложение Gateway. Он не выключает питание и не
 перезагружает ОС Moxa.** Перезапуск ОС и физическое отключение выполняются
 отдельно. Не запускайте второй Gateway на тех же UART.
+
+## Подсветка дисплея
+
+**System → Display → Backlight → On / Off**, F3 сохраняет. По умолчанию On;
+старый config без поля тоже использует On. При Off экран/кнопки работают,
+сохранённое значение возвращается после boot. [Подсветка](backlight.ru.md).
+Старые декодеры несовместимы с Off в основном config и backup: простой откат
+бинарника недопустим без проверки совместимости.
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.png" alt="Меню Display" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Меню Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.png" alt="Настройки подсветки" width="360">
+</td>
+<td valign="top">
+<strong>Путь в меню</strong>
+<pre>Главный экран
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Настройки подсветки.*
 
 ## Быстрая проверка проблем
 

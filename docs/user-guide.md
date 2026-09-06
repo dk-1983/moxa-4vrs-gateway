@@ -107,67 +107,6 @@ Application startup waits up to120 seconds for CF; later recovery/start may need
 an explicit retry. Corrupt journals require diagnosis via reserve access, not bypass.
 Recovery rolls back an unfinished transaction; it is not a general downgrade command.
 
-## Backlight and retained manual procedure
-
-**System → Display → Backlight → On / Off**, F3 saves. Default On; old configs
-without the field use On. Off retains screen/key handling and returns after boot.
-See [Backlight](backlight.md). Older decoders cannot read an Off configuration or
-backup: a binary downgrade needs separate compatibility review.
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
-</td>
-<td valign="top">
-<strong>Menu path</strong>
-<pre>Home screen
-└── F3 → Main Menu
-   └── F3 → System
-      └── <b>▶ F4 × 2 → Display</b></pre>
-</td>
-</tr>
-</table>
-
-*System: Display.*
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/display-menu.png" alt="Display menu" width="360">
-</td>
-<td valign="top">
-<strong>Menu path</strong>
-<pre>Home screen
-└── F3 → Main Menu
-   └── F3 → System
-      └── F4 × 2 → Display
-         └── <b>▶ F3 → Display</b></pre>
-</td>
-</tr>
-</table>
-
-*Display menu.*
-
-<table>
-<tr>
-<td valign="top">
-<img src="../assets/images/menu/backlight-on.png" alt="Backlight settings" width="360">
-</td>
-<td valign="top">
-<strong>Menu path</strong>
-<pre>Home screen
-└── F3 → Main Menu
-   └── F3 → System
-      └── F4 × 2 → Display
-         └── F3 → Display
-            └── <b>▶ F3 → Backlight</b></pre>
-</td>
-</tr>
-</table>
-
-*Backlight settings.*
-
 The [retained manual procedure](user-guide.md#manual-installation-of-v20260001)
 describes the previous manually integrated release. Do not run it over this
 installer's active journal or substitute old binaries into this package.
@@ -373,10 +312,12 @@ Home screen
     │   └── F3 Events → Startup Events → F2/F4: entries
     ├── System
     │   ├── Date & Time → F5 Set Time
-    │   └── F4 Platform
-    │       └── F5 Network Time
-    │           ├── F5 Edit: enable, server, interval
-    │           └── F4 Test / Stop: NTP diagnostics
+    │   ├── F4 Platform
+    │   │   └── F5 Network Time
+    │   │       ├── F5 Edit: enable, server, interval
+    │   │       └── F4 Test / Stop: NTP diagnostics
+    │   └── F4 → Display → F3 Open
+    │       └── Backlight → On / Off → F3 Save
     ├── Shutdown → confirm stopping Gateway
     └── About — product and version
 ```
@@ -696,6 +637,67 @@ and private infrastructure details from shared logs.
 **Shutdown stops the Gateway application. It does not power off or reboot the
 Moxa operating system.** Coordinate OS restart or physical power removal
 separately. Do not start a second Gateway instance against the same UARTs.
+
+## Display backlight
+
+**System → Display → Backlight → On / Off**, F3 saves. Default On; old configs
+without the field use On. Off retains screen/key handling and returns after boot.
+See [Backlight](backlight.md). Older decoders cannot read an Off configuration or
+backup: a binary downgrade needs separate compatibility review.
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── <b>▶ F4 × 2 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*System: Display.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/display-menu.png" alt="Display menu" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── <b>▶ F3 → Display</b></pre>
+</td>
+</tr>
+</table>
+
+*Display menu.*
+
+<table>
+<tr>
+<td valign="top">
+<img src="../assets/images/menu/backlight-on.png" alt="Backlight settings" width="360">
+</td>
+<td valign="top">
+<strong>Menu path</strong>
+<pre>Home screen
+└── F3 → Main Menu
+   └── F3 → System
+      └── F4 × 2 → Display
+         └── F3 → Display
+            └── <b>▶ F3 → Backlight</b></pre>
+</td>
+</tr>
+</table>
+
+*Backlight settings.*
 
 ## Quick troubleshooting
 
