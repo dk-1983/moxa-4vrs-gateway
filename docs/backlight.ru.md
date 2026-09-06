@@ -16,7 +16,7 @@ F1 возвращает без сохранения выделенного зн�
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
 </td>
 <td valign="top">
 <strong>Путь в меню</strong>
@@ -33,7 +33,7 @@ F1 возвращает без сохранения выделенного зн�
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/display-menu.jpg" alt="Меню Display" width="360">
+<img src="../assets/images/menu/display-menu.png" alt="Меню Display" width="360">
 </td>
 <td valign="top">
 <strong>Путь в меню</strong>
@@ -51,7 +51,7 @@ F1 возвращает без сохранения выделенного зн�
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/backlight-on.jpg" alt="Настройки подсветки" width="360">
+<img src="../assets/images/menu/backlight-on.png" alt="Настройки подсветки" width="360">
 </td>
 <td valign="top">
 <strong>Путь в меню</strong>

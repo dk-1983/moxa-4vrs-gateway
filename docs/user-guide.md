@@ -117,7 +117,7 @@ backup: a binary downgrade needs separate compatibility review.
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/system-display.jpg" alt="System: Display" width="360">
+<img src="../assets/images/menu/system-display.png" alt="System: Display" width="360">
 </td>
 <td valign="top">
 <strong>Menu path</strong>
@@ -134,7 +134,7 @@ backup: a binary downgrade needs separate compatibility review.
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/display-menu.jpg" alt="Display menu" width="360">
+<img src="../assets/images/menu/display-menu.png" alt="Display menu" width="360">
 </td>
 <td valign="top">
 <strong>Menu path</strong>
@@ -152,7 +152,7 @@ backup: a binary downgrade needs separate compatibility review.
 <table>
 <tr>
 <td valign="top">
-<img src="../assets/images/menu/backlight-on.jpg" alt="Backlight settings" width="360">
+<img src="../assets/images/menu/backlight-on.png" alt="Backlight settings" width="360">
 </td>
 <td valign="top">
 <strong>Menu path</strong>
