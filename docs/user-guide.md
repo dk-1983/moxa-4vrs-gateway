@@ -185,6 +185,22 @@ verify automatic synchronization after installation or a planned restart.
 
 ## Diagnostics and stopping
 
+<img src="../assets/images/menu/diagnostics.png" alt="Diagnostics counters" width="360">
+
+*Diagnostics counters.*
+
+Open **Main Menu → Diagnostics** to view accepted and completed requests,
+timeouts, recoveries, stale responses and the queue high-water mark.
+**F3 Events** opens startup events.
+
+<img src="../assets/images/menu/startup-events.png" alt="Startup events" width="360">
+
+*Startup events.*
+
+Use **F2/F4** to browse events. Each entry shows its sequence, startup stage,
+progress, result and error. `BOOT / Progress 0%` describes the selected startup
+event, not the application's current readiness.
+
 Use **Diagnostics** for startup events and **About** for the product version.
 For an issue report record the model, version, affected port, transport, serial
 settings, operation performed and exact displayed result. Remove credentials

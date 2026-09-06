@@ -20,6 +20,8 @@ the explicitly substituted example address below.
 | `network-lan2.png` | Confirmed LAN2 / Подтверждённый LAN2 | Operator values retained / Значения снимка сохранены |
 | `port-details.png` | Port 1: 1/4 / Подробности P1 | Operator values retained, including IP `10.0.2.13` / Значения снимка сохранены, включая IP `10.0.2.13` |
 | `network-time.png` | Network Time / Настройки NTP | Synced, 1 h, Attempts 3; operator values retained / Synced, 1 ч, Attempts 3; значения снимка сохранены |
+| `diagnostics.png` | Diagnostics / Диагностика | Accepted 18, Complete 18, Q high 1; other counters 0 |
+| `startup-events.png` | Startup Events / События запуска | Sequence 1, BOOT, Progress 0%, Result 0, Error 0 |
 
 These are explanatory illustrations, not raw screenshots, packet captures or
 additional hardware-test evidence. Example settings are not device defaults
