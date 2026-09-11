@@ -89,27 +89,37 @@ def check_script(data):
     data.decode("ascii")
 
 
-def package(version, installer, gateway, init_script, wrapper, output):
+def package(version, installer, gateway, init_script, wrapper, output, *, web=None, license_file=None, rng=None, kdf=None):
     if not re.fullmatch(r"v[0-9]{4}\.[0-9]{2,}\.[0-9]{2,}", version):
         raise ValueError("invalid package version")
+    if version == 'v2026.02.01' and web is None:
+        raise ValueError('v2026.02.01 requires the format-2 Web payload')
     sources = (installer, gateway, init_script, wrapper)
+    names = PAYLOAD_NAMES
+    if web is not None:
+        if version != 'v2026.02.01' or license_file is None:
+            raise ValueError('format 2 requires the qualified version and Mbed TLS license')
+        if rng is None or kdf is None: raise ValueError('format 3 requires RNG and KDF executables')
+        sources += (web,rng,kdf)
+        names += ('4vrs-web','4vrs-rng','4vrs-kdf')
     contents = {}
-    for index, (name, source) in enumerate(zip(PAYLOAD_NAMES, sources)):
-        data = read_regular(source, MAX_BINARY if index < 2 else MAX_SCRIPT)
-        if index < 2:
+    for index, (name, source) in enumerate(zip(names, sources)):
+        binary = index < 2 or index >= 4
+        data = read_regular(source, MAX_BINARY if binary else MAX_SCRIPT)
+        if binary:
             check_target(data, version)
         else:
             check_script(data)
         contents[name] = data
     metadata = {
-        "format": 1,
+        "format": 3 if web is not None else 1,
         "product": "4VRS Gateway",
         "version": version,
         "entrypoint": "4vrs-install",
         "files": [
             {"name": name, "size": len(contents[name]), "mode": "0755",
              "sha256": hashlib.sha256(contents[name]).hexdigest()}
-            for name in PAYLOAD_NAMES
+            for name in names
         ],
     }
     contents["manifest.json"] = (json.dumps(metadata, sort_keys=True, indent=2)
@@ -118,13 +128,16 @@ def package(version, installer, gateway, init_script, wrapper, output):
         hashlib.sha256(data).hexdigest() + "  " + name + "\n"
         for name, data in sorted(contents.items())
     ).encode("ascii")
+    if web is not None:
+        contents['LICENSE.mbedtls'] = read_regular(license_file, 65536)
+        contents['NOTICE'] = b'4VRS Gateway includes Mbed TLS 3.6.7, used under Apache-2.0. See LICENSE.mbedtls. UI and Help are embedded in 4vrs-web.\n'
     archive = io.BytesIO()
     prefix = "4vrs-gateway-" + version
     with tarfile.open(fileobj=archive, mode="w", format=tarfile.USTAR_FORMAT) as tar:
         for name, data in sorted(contents.items()):
             info = tarfile.TarInfo(prefix + "/" + name)
             info.size = len(data)
-            info.mode = 0o755 if name in PAYLOAD_NAMES else 0o644
+            info.mode = 0o755 if name in names else 0o644
             info.uid = info.gid = info.mtime = 0
             info.uname = info.gname = ""
             tar.addfile(info, io.BytesIO(data))
@@ -153,10 +166,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("version", "installer", "gateway", "init-script", "wrapper", "output"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument('--web')
+    parser.add_argument('--rng')
+    parser.add_argument('--kdf')
+    parser.add_argument('--license-file')
     args = parser.parse_args()
     try:
         result = package(args.version, args.installer, args.gateway,
-                         args.init_script, args.wrapper, args.output)
+                         args.init_script, args.wrapper, args.output,
+                         web=args.web, license_file=args.license_file, rng=args.rng, kdf=args.kdf)
     except (ValueError, OSError) as error:
         parser.exit(1, "package refused: " + str(error) + "\n")
     print(json.dumps(result, sort_keys=True))

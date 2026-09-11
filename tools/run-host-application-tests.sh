@@ -28,7 +28,7 @@ tmp=$(mktemp -d);pid=;trap 'test -z "$pid" || kill "$pid" 2>/dev/null || true;rm
 printf 'corrupt\n' >"$tmp/gateway.conf";printf 'corrupt\n' >"$tmp/gateway.conf.good"
 "$out/4vrs-gateway" "$tmp" >"$tmp/output" 2>&1 & pid=$!
 i=0;while ! grep -q 'startup_result=SAFE_MODE' "$tmp/output"&&test "$i" -lt 100;do i=$((i+1));sleep 0.01;done
-grep -q 'product=4VRS Gateway version=v2026.01.01 state=starting' "$tmp/output"
+grep -q 'product=4VRS Gateway version=v2026.02.01 state=starting' "$tmp/output"
 grep -q 'configuration_source=safe-mode startup_result=SAFE_MODE' "$tmp/output"
 kill -TERM "$pid";set +e;wait "$pid";status=$?;set -e;pid=
 test "$status" -eq 10

@@ -18,7 +18,7 @@ int main(int argc,char**argv){
  memset(&environment,0,sizeof(environment));environment.read_network=archive_observe;environment.read_lan2=archive_lan;
  memset(&f,0,sizeof(f));f.cf=1;f.running=1;context_init(&c,&f,root);
  r=install_orchestrate(&c,&p);stage=c.stage;CHECK(r==INSTALL_COMPLETED);equal_set(&c,0);
- CHECK(install_file_equal(&c.plan.member[1].before,&c.plan.member[1].after));CHECK(install_file_equal(&c.plan.member[2].before,&c.plan.member[2].after));
+ CHECK(install_file_equal(&c.plan.member[1].before,&c.plan.member[1].after));{gateway_persistent_config_t old_cfg,new_cfg;CHECK(gateway_config_decode((char*)c.plan.member[2].before.data,c.plan.member[2].before.size,&old_cfg)==GATEWAY_CONFIG_OK);CHECK(gateway_config_decode((char*)c.plan.member[2].after.data,c.plan.member[2].after.size,&new_cfg)==GATEWAY_CONFIG_OK);CHECK(!memcmp(&old_cfg,&new_cfg,sizeof(old_cfg)));}
  install_context_release(&c);context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_UNCHANGED);CHECK(!install_recover_entry(&c,0,"start"));CHECK(!install_recover_entry(&c,1,"start"));
  install_context_release(&c);install_package_free(&p);
  printf("immutable archive + actual package production orchestration: %u checks passed; hardware providers fake\n",checks);return 0;

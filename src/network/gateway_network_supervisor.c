@@ -64,6 +64,7 @@ int gateway_network_supervisor_run_traced(int fd,gateway_network_manager_t *m,
         if(m->state!=observed){TRACE(GATEWAY_NET_EVENT_STATE,0);observed=m->state;}
         if(channel_alive&&m->state!=announced){
             status.state=m->state;status.deadline=m->deadline.at;
+            status.rollback_reason=m->rollback_reason;status.error_code=m->error_code;
             n=send(fd,&status,sizeof(status),0);
             if(n==(ssize_t)sizeof(status))announced=m->state;
             else if(n<0 && errno!=EAGAIN && errno!=EWOULDBLOCK && errno!=EINTR){int error=errno;LOST(GATEWAY_NET_EVENT_SEND_ERROR,error);}

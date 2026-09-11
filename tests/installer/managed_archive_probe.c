@@ -40,7 +40,7 @@ int INSTALL_ARCHIVE_MAIN(int argc,char**argv){
  if(!strcmp(argv[3],"refuse")){CHECK(r==-1);CHECK(!strcmp(c.stage,"plan-clock-ntpdate")&&c.detail==INSTALL_CLOCK_POSITION);CHECK(f.stops==0);}
  else {
   CHECK(r==(!strcmp(argv[3],"rollback")?INSTALL_ROLLED_BACK:INSTALL_COMPLETED));equal_set(&c,r==INSTALL_ROLLED_BACK);
-  for(i=0;i<c.plan.count;i++){const char*s=c.plan.member[i].path;if(strstr(s,"ntpdate")||strstr(s,"halt")||!strcmp(s,"etc/4vrs-clock-managed")||i<5)CHECK(install_file_equal(&c.plan.member[i].before,&c.plan.member[i].after));}
+  for(i=0;i<c.plan.count;i++){const char*s=c.plan.member[i].path;if(strstr(s,"ntpdate")||strstr(s,"halt")||!strcmp(s,"etc/4vrs-clock-managed")||(i<5&&i!=2))CHECK(install_file_equal(&c.plan.member[i].before,&c.plan.member[i].after));}
   if(r==INSTALL_ROLLED_BACK){install_context_release(&c);context_init(&c,&f,argv[1]);CHECK(install_recover_only(&c)==INSTALL_ROLLED_BACK);f.fail_start=0;install_context_release(&c);context_init(&c,&f,argv[1]);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);}
   stops=f.stops;starts=f.starts;install_context_release(&c);context_init(&c,&f,argv[1]);CHECK(install_orchestrate(&c,&p)==INSTALL_UNCHANGED);CHECK(f.stops==stops&&f.starts==starts);
  }

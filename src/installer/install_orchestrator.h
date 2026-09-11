@@ -17,14 +17,19 @@ typedef struct install_context {
  const char *root;
  const install_platform_t *platform;
  void *platform_context;
+ int (*restore_apache)(unsigned int);
  const gateway_network_environment_t *network;
  char init_directory[64],state_directory[1024],journal_directory[1024];
  char slot[8];
- unsigned int entry_mode;
+ unsigned int entry_mode, restore_running, transaction_services;
  const char *stage;
  int detail;
  const char *failure_stage;
  int failure_detail;
+ /* Public decision diagnostics: no file contents or RNG material. */
+ const char *decision, *decision_health, *verify_reason;
+ char decision_path[128];
+ unsigned int decision_count, decision_mask;
  install_plan_t plan;
  install_transaction_t transaction;
  /* Qualification only: public main never sets this callback. */

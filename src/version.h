@@ -2,6 +2,8 @@
 #define FOURVRS_VERSION_H
 
 #define FOURVRS_PRODUCT_NAME "4VRS Gateway"
-#define FOURVRS_VERSION "v2026.01.01"
+#ifndef FOURVRS_VERSION
+#define FOURVRS_VERSION "v2026.02.01"
+#endif
 
 #endif

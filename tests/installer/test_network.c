@@ -26,13 +26,31 @@ int main(int argc,char**argv){char root[1024],work[1024],config[GATEWAY_CONFIG_M
  CHECK(strstr((char*)plan.member[0].after.data," dns-nameservers 10.20.0.1 10.20.0.3\n")!=0);
  CHECK(plan.member[0].after.size==strlen(document)+4);
  CHECK(!install_file_read(root,"etc/network/interfaces",&original));CHECK(original.size==strlen(document)&&!memcmp(original.data,document,original.size));install_file_free(&original);
- CHECK(install_file_equal(&plan.member[1].before,&plan.member[1].after));CHECK(install_file_equal(&plan.member[2].before,&plan.member[2].after));
+ CHECK(install_file_equal(&plan.member[1].before,&plan.member[1].after));{gateway_persistent_config_t old_cfg,new_cfg;CHECK(gateway_config_decode((char*)plan.member[2].before.data,plan.member[2].before.size,&old_cfg)==GATEWAY_CONFIG_OK);CHECK(gateway_config_decode((char*)plan.member[2].after.data,plan.member[2].after.size,&new_cfg)==GATEWAY_CONFIG_OK);CHECK(old_cfg.schema_version==1&&new_cfg.schema_version==1&&new_cfg.settings.web_enabled==0&&new_cfg.settings.web_interface==0&&new_cfg.settings.web_protocol==1);CHECK(!memcmp(&old_cfg,&new_cfg,sizeof(old_cfg)));}
  /* Simulate publication by the transaction engine's actual file provider,
   * then build an update plan from the resulting own confirmed/good files. */
  for(i=0;i<plan.count;i++)CHECK(!install_file_publish(root,plan.member[i].path,&plan.member[i].after));
  install_plan_free(&plan);
  directory(root,"update");directory(root,"update/store");CHECK(snprintf(work,sizeof(work),"%s/update",root)>0);
  CHECK(!install_network_plan(root,work,&env,&plan,&stage));for(i=0;i<plan.count;i++)CHECK(install_file_equal(&plan.member[i].before,&plan.member[i].after));install_plan_free(&plan);
+ /* Explicit schema-2 choices survive byte-for-byte, including backlight Off. */
+ for(i=0;i<18;i++){
+  char name[32];unsigned int j;
+  cfg.schema_version=i<6?2:3;cfg.settings.web_protocol=i<12?1:0;cfg.settings.web_enabled=(i%6)/3;cfg.settings.web_interface=i%3;cfg.settings.backlight_on=0;
+  CHECK(gateway_config_encode(&cfg,config,sizeof(config),&n)==GATEWAY_CONFIG_OK);config[n]=0;put(root,"var/hda/4vrs/config/gateway.conf",config);
+  snprintf(name,sizeof(name),"choice%u",i);directory(root,name);snprintf(name,sizeof(name),"choice%u/store",i);directory(root,name);
+  CHECK(snprintf(work,sizeof(work),"%s/choice%u",root,i)>0);
+  CHECK(!install_network_plan(root,work,&env,&plan,&stage));
+  for(j=0;j<plan.count;j++)CHECK(install_file_equal(&plan.member[j].before,&plan.member[j].after));
+  install_plan_free(&plan);
+ }
+ /* No saved configuration: HTTP enabled on LAN1, no secret payload. */
+ {char cfgpath[1200];snprintf(cfgpath,sizeof(cfgpath),"%s/var/hda/4vrs/config/gateway.conf",root);CHECK(!unlink(cfgpath));}
+ directory(root,"fresh");directory(root,"fresh/store");CHECK(snprintf(work,sizeof(work),"%s/fresh",root)>0);
+ CHECK(!install_network_plan(root,work,&env,&plan,&stage));CHECK(plan.member[2].before.kind==0);
+ CHECK(gateway_config_decode((char*)plan.member[2].after.data,plan.member[2].after.size,&cfg)==GATEWAY_CONFIG_OK);
+ CHECK(cfg.schema_version==3&&cfg.settings.web_enabled==1&&cfg.settings.web_interface==0&&cfg.settings.web_protocol==0);
+ install_plan_free(&plan);
  /* A conflicting resolver is refused without altering live fixture bytes. */
  directory(root,"conflict");directory(root,"conflict/store");CHECK(snprintf(work,sizeof(work),"%s/conflict",root)>0);put(root,"etc/resolv.conf","nameserver 10.20.0.9\n");
  CHECK(install_network_plan(root,work,&env,&plan,&stage)<0);CHECK(!install_file_read(root,"etc/resolv.conf",&after));CHECK(!strcmp((char*)after.data,"nameserver 10.20.0.9\n"));install_file_free(&after);install_plan_free(&plan);

@@ -22,7 +22,7 @@ static int valid_file(const install_file_t*f){return f->kind<=2&&f->size<=INSTAL
  (f->kind||(!f->size&&!f->mode))&&(f->kind!=1||!(f->mode&0022))&&(f->kind!=2||(f->size&&f->size<=INSTALL_PATH_LIMIT&&!memchr(f->data,0,f->size)));}
 static int encode(const install_plan_t*p,install_file_t*out){
  size_t n=16,at=16,z;unsigned int i,j;char digest[65];
- if(!p->count||p->count>INSTALL_MEMBERS||p->was_running>1)return -1;
+ if(!p->count||p->count>INSTALL_MEMBERS||p->was_running>3)return -1;
  for(i=0;i<p->count;i++){
   const install_member_t*m=&p->member[i];z=strlen(m->path);if(!z||z>INSTALL_PATH_LIMIT||!valid_file(&m->before)||!valid_file(&m->after))return -1;
   n+=8+z+24+m->before.size+m->after.size;if(n>JOURNAL_LIMIT-64)return -1;
@@ -39,7 +39,7 @@ static int decode(install_transaction_t*t,const install_file_t*in,install_plan_t
  size_t at=16,end,z;unsigned int i,j;char digest[65];
  memset(p,0,sizeof(*p));if(in->kind!=1||in->size<80||in->size>JOURNAL_LIMIT||memcmp(in->data,"4VIJ0001",8))return -1;
  end=in->size-64;install_digest_hex(in->data,end,digest);if(memcmp(digest,in->data+end,64))return -1;
- p->count=get(in->data+8);p->was_running=get(in->data+12);if(!p->count||p->count>INSTALL_MEMBERS||p->was_running>1){p->count=0;return -1;}
+ p->count=get(in->data+8);p->was_running=get(in->data+12);if(!p->count||p->count>INSTALL_MEMBERS||p->was_running>3){p->count=0;return -1;}
  for(i=0;i<p->count;i++){
   install_member_t*m=&p->member[i];if(end-at<8)goto fail;z=get(in->data+at);m->compact_flash=get(in->data+at+4);at+=8;
   if(!z||z>INSTALL_PATH_LIMIT||z>end-at||m->compact_flash>3||memchr(in->data+at,0,z))goto fail;

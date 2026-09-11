@@ -36,7 +36,8 @@ int install_network_plan(const char*root,const char*work,const gateway_network_e
  *stage="network-dns-migration";if(normalize(&interfaces,&resolver)<0)goto done;
  *stage="configuration";
  if(config.kind){if(config.kind!=1||gateway_config_decode((char*)config.data,config.size,&cfg)!=GATEWAY_CONFIG_OK)goto done;}
- else{gateway_persistent_defaults(&cfg);if(gateway_config_encode(&cfg,buf,sizeof(buf),&n)!=GATEWAY_CONFIG_OK)goto done;config.kind=1;config.mode=0600;config.size=n;config.data=malloc(n+1);if(!config.data)goto done;memcpy(config.data,buf,n);config.data[n]=0;}
+ else{gateway_persistent_defaults(&cfg);cfg.schema_version=3;cfg.settings.web_enabled=1;cfg.settings.web_interface=0;cfg.settings.web_protocol=0;if(gateway_config_encode(&cfg,buf,sizeof(buf),&n)!=GATEWAY_CONFIG_OK)goto done;config.kind=1;config.mode=0600;config.size=n;config.data=malloc(n+1);if(!config.data)goto done;memcpy(config.data,buf,n);config.data[n]=0;}
+ /* Existing configurations preserve protocol/enabled/LAN byte for byte. */
  *stage="network-shadow";
  if(strlen(work)+20>=sizeof(path)||install_file_publish(work,"interfaces",&interfaces)||install_file_publish(work,"resolver",&resolver))goto done;
  snprintf(ipath,sizeof(ipath),"%s/interfaces",work);snprintf(rpath,sizeof(rpath),"%s/resolver",work);snprintf(store,sizeof(store),"%s/store",work);

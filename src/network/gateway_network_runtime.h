@@ -35,6 +35,7 @@ typedef struct gateway_network_runtime {
     gateway_network_observation_t observed;
     unsigned int observed_valid, observation_error, stopping;
     int observer_pid, observer_fd;
+    unsigned int observer_received, observer_failed; /* Per child, not per poll. */
     core_tick_t observe_at, observer_deadline;
     unsigned int lease_valid[2],dhcp_state[2];
     core_tick_t lease_expiry[2];

@@ -51,7 +51,12 @@ typedef enum gateway_panel_view {
     GATEWAY_PANEL_NETWORK_CONFIRM,
     GATEWAY_PANEL_NETWORK_RESULT,
     GATEWAY_PANEL_DISPLAY,
-    GATEWAY_PANEL_BACKLIGHT
+    GATEWAY_PANEL_BACKLIGHT,
+    GATEWAY_PANEL_WEB,
+    GATEWAY_PANEL_WEB_RECOVER,
+    GATEWAY_PANEL_WEB_CODE,
+    GATEWAY_PANEL_WEB_URL,
+    GATEWAY_PANEL_WEB_CERT
 } gateway_panel_view_t;
 
 typedef enum gateway_panel_key {
@@ -76,6 +81,12 @@ typedef struct gateway_panel_health {
 } gateway_panel_health_t;
 
 typedef struct gateway_panel {
+    char draft_token[64];
+    char web_transaction_token[64];
+    unsigned int web_pending, web_save_failed;
+    unsigned int network_operation;
+    unsigned int web_choice, web_interface, web_remote, web_prompt_ready;
+    gateway_panel_view_t web_return;
     unsigned int backlight_choice;
     gateway_network_settings_t lan2_candidate;
     unsigned int lan2_cursor, network_page;

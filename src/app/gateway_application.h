@@ -183,6 +183,9 @@ typedef struct gateway_application_dependencies {
 } gateway_application_dependencies_t;
 
 typedef struct gateway_configuration_transaction {
+    /* Receipt for the accepted request and its own configuration revision. */
+    char accepted_token[64];
+    char result_token[64];
     gateway_persistent_config_t candidate;
     gateway_persistent_config_t previous;
     gateway_configuration_transaction_state_t state;
@@ -211,7 +214,19 @@ typedef struct gateway_application_health {
     gateway_time_health_t time;
 } gateway_application_health_t;
 
+typedef struct gateway_web_view {
+ unsigned int state, error, enrollment, seconds_left;
+   unsigned int recovery_available, recovery_prompt, show_code;
+ char fingerprint[65], certificate_until[16];
+   char code[13], urls[2][40]; /* code is LOCAL panel-only; never diagnostics */
+ int (*local)(void *,unsigned int); void *context;
+} gateway_web_view_t;
 struct gateway_application {
+ gateway_persistent_config_t revision_configuration;
+    char revision_addresses[2][16];
+    char epoch[33]; unsigned int revision, network_operation, revision_network_state;
+ gateway_web_view_t web;
+
     gateway_backlight_health_t backlight;
     gateway_network_runtime_t network;
     gateway_coordinator_t coordinator;
@@ -242,6 +257,9 @@ struct gateway_application {
 };
 
 const gateway_product_metadata_t *gateway_product_metadata(void);
+void gateway_application_revision(const gateway_application_t *,char token[64]);
+int gateway_application_revision_check(const gateway_application_t *,const char *);
+void gateway_application_revision_advance(gateway_application_t *);
 int gateway_application_ntp_test(gateway_application_t *application, unsigned int enabled);
 const char *gateway_rtc_state_name(gateway_rtc_state_t state);
 int gateway_platform_info_default(void *context, gateway_platform_info_t *info);

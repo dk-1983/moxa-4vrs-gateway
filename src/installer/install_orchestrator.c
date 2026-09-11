@@ -1,6 +1,8 @@
 #define _GNU_SOURCE
 #include "installer/install_orchestrator.h"
 #include "installer/install_scripts.h"
+#include "installer/install_apache.h"
+#include "installer/install_digest.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
@@ -44,13 +46,15 @@ static const char*const common_paths[]={
  "etc/4vrs-clock-managed","var/hda/4vrs/bin/4vrs-gateway",
  "etc/4vrs-installer/networking","etc/4vrs-installer/application",
  "etc/rc.d/rcS.d/S40networking","etc/rc.d/rc3.d/S90fourvrs-gateway",
- "etc/rc.d/rc0.d/K10fourvrs-gateway","etc/rc.d/rc6.d/K10fourvrs-gateway"
+ "etc/rc.d/rc0.d/K10fourvrs-gateway","etc/rc.d/rc6.d/K10fourvrs-gateway",
+ "var/hda/4vrs/bin/4vrs-web","etc/rc.d/rcS.d/S21apache",
+ "var/hda/4vrs/bin/4vrs-rng","var/hda/4vrs/bin/4vrs-kdf"
 };
 int install_allow_path(void*v,const char*path,unsigned int flags){
  install_context_t*c=v;unsigned int i,expected;char p[128];
  for(i=0;i<sizeof(common_paths)/sizeof(common_paths[0]);i++)if(!strcmp(path,common_paths[i])){
   expected=!strncmp(path,"var/hda/",8)?INSTALL_ON_CF:0;
-  if(i>=13)expected=INSTALL_BOOT_GATE;
+  if(i>=13&&i<=16)expected=INSTALL_BOOT_GATE;
   return flags==expected?0:-1;
  }
  {static const char*names[]={"4vrs-gateway","ntpdate","ntpdate.d","halt"};
@@ -70,8 +74,12 @@ static int gate(void*v){install_context_t*c=v;install_file_t active;
  }
  return 0;
 }
-static int stop(void*v){install_context_t*c=v;c->stage="services-stop";return c->platform->stop(c->platform_context);}
-static int start(void*v,unsigned int old){install_context_t*c=v;c->stage=old?"services-restore":"services-start";if(old&&c->entry_mode)return 0;return c->platform->start(c->platform_context,old);}
+static int stop(void*v){install_context_t*c=v;int r;c->stage="services-stop";
+ if(c->plan.count)c->restore_running=c->plan.was_running;
+ else{install_plan_t saved;if(install_transaction_load(&c->transaction,&saved))return -1;c->restore_running=saved.was_running;install_plan_free(&saved);}
+ c->transaction_services=1;r=c->platform->stop(c->platform_context);c->transaction_services=0;return r;
+}
+static int start(void*v,unsigned int old){install_context_t*c=v;c->stage=old?"services-restore":"services-start";if(old&&c->entry_mode)return c->restore_apache?c->restore_apache(c->restore_running&INSTALL_APACHE_RUNNING):0;return c->platform->start(c->platform_context,old);}
 static int verify(void*v,unsigned int old){install_context_t*c=v;c->stage=old?"verify-restored":"verify-installed";if(old&&c->entry_mode)return 0;return c->platform->verify(c->platform_context,old);}
 static int cf(void*v){install_context_t*c=v;return c->platform->cf_available(c->platform_context);}
 static int boundary(void*v,const char*s,unsigned int i){install_context_t*c=v;
@@ -99,6 +107,24 @@ static int named_script(install_context_t*c,const char*name,unsigned int halt){
 }
 static int plan(install_context_t*c,const install_package_t*p){
  char path[128],work[1024];install_file_t source,derived,marker,link;unsigned int i;int r;
+ c->stage="rng-schema";
+ {install_file_t nv;unsigned char digest[32];install_digest_t h;int bad=0;char rngdir[1024];struct stat st;
+  if(install_path(c->root,"var/hda/4vrs-rng",rngdir))return -1;
+  if(lstat(rngdir,&st)){if(errno!=ENOENT)return -1;goto rng_schema_done;}
+  if(!S_ISDIR(st.st_mode)||st.st_uid!=geteuid()||(st.st_mode&0777)!=0700)return -1;
+  if(install_file_read(c->root,"var/hda/4vrs-rng/state",&nv))return -1;
+  if(nv.kind){size_t covered=nv.size==192?160:128;bad=nv.kind!=1||nv.mode!=0600||(nv.size!=160&&nv.size!=192);
+   if(!bad){
+    if(nv.size==160)bad=memcmp(nv.data,"4VRSNV01",8)!=0;
+    else if(!memcmp(nv.data,"4VRSNV02",8))bad=memcmp(nv.data+128,"production-v1",13)!=0||nv.data[12]||nv.data[13]||nv.data[14]||!nv.data[15]||nv.data[15]>8;
+    else if(!memcmp(nv.data,"4VRSNV03",8))bad=memcmp(nv.data+128,"production-autonomous-v1",24)!=0||!(nv.data[12]|nv.data[13]|nv.data[14]|nv.data[15]);
+    else bad=1;
+    install_digest_init(&h);install_digest_update(&h,nv.data,covered);install_digest_final(&h,digest);bad|=memcmp(digest,nv.data+covered,32)!=0;
+   }
+   {volatile unsigned char *q=nv.data;size_t n=nv.size;while(n--)*q++=0;}}
+  install_file_free(&nv);if(bad)return -1;
+ }
+ rng_schema_done:
  c->stage="plan-network";if(join(work,sizeof(work),c->journal_directory,"work"))return -1;
  if(install_network_plan(c->root,work,c->network,&c->plan,&c->stage))return -1;
  c->stage="plan-vendor";snprintf(path,sizeof(path),"%s/networking",c->init_directory);
@@ -121,7 +147,8 @@ static int plan(install_context_t*c,const install_package_t*p){
  install_file_free(&marker);
  if(named_script(c,"ntpdate",0)||named_script(c,"ntpdate.d",0)||named_script(c,"halt",1))return -1;
  c->stage="plan-components";
- if(add(c,"var/hda/4vrs/bin/4vrs-gateway",&p->payload[1])||add(c,"etc/4vrs-network/gateway-network-recovery",&p->payload[1])||add(c,"etc/4vrs-installer/application",&p->payload[2])||add(c,"etc/4vrs-installer/networking",&p->payload[3]))return -1;
+ c->stage="apache-startup-plan";if(install_apache_plan(c->root,c->init_directory,&c->plan))return -1;
+ if(add(c,"var/hda/4vrs/bin/4vrs-gateway",&p->payload[1])||add(c,"etc/4vrs-network/gateway-network-recovery",&p->payload[1])||add(c,"etc/4vrs-installer/application",&p->payload[2])||add(c,"etc/4vrs-installer/networking",&p->payload[3])||add(c,"var/hda/4vrs/bin/4vrs-web",&p->payload[4])||add(c,"var/hda/4vrs/bin/4vrs-rng",&p->payload[5])||add(c,"var/hda/4vrs/bin/4vrs-kdf",&p->payload[6]))return -1;
  marker.kind=1;marker.mode=0600;marker.size=0;marker.data=0;
  if(add(c,"etc/4vrs-network/enabled",&marker))return -1;
  if(install_file_read(c->root,"etc/4vrs-clock-managed",&source))return -1;
@@ -248,13 +275,26 @@ int install_orchestrate(install_context_t*c,const install_package_t*p){
   c->stage="storage-capacity";
   if(c->platform->capacity(c->platform_context,early,compact))return INSTALL_REFUSED;
  }
- for(i=0;i<(int)c->plan.count;i++)if(!install_file_equal(&c->plan.member[i].before,&c->plan.member[i].after))break;
- if(i==(int)c->plan.count&&!c->platform->verify(c->platform_context,0)){
+ c->decision="plan-equal";c->decision_count=c->decision_mask=0;c->decision_path[0]=0;
+ for(i=0;i<(int)c->plan.count;i++){
+  install_member_t*m=&c->plan.member[i];
+  if(install_file_equal(&m->before,&m->after))continue;
+  if(!c->decision_count){
+   snprintf(c->decision_path,sizeof(c->decision_path),"%s",m->path);
+   c->decision_mask=(m->before.kind!=m->after.kind?1U:0U)|(m->before.mode!=m->after.mode?2U:0U)|(m->before.size!=m->after.size?4U:0U);
+   if(m->before.size==m->after.size&&m->before.size&&memcmp(m->before.data,m->after.data,m->before.size))c->decision_mask|=8U;
+  }
+  c->decision_count++;
+ }
+ r=-1;c->decision_health="not-run-plan-differs";
+ if(!c->decision_count){c->verify_reason=0;r=c->platform->verify(c->platform_context,0);c->decision_health=r?(c->verify_reason?c->verify_reason:"unspecified"):"healthy";}
+ c->decision=c->decision_count?"repair-plan-differs":r?"repair-platform-unhealthy":"no-op";
+ if(!c->decision_count&&!r){
   install_file_t recovery;int same;
   if(install_file_read(c->root,INSTALL_RECOVERY_DIRECTORY "/recovery",&recovery))return INSTALL_REFUSED;
   same=install_file_equal(&recovery,&p->payload[0]);install_file_free(&recovery);
   if(same){c->stage="already-installed";return INSTALL_UNCHANGED;}
-  c->stage="repair-recovery-executable";
+  c->decision="repair-recovery-only";c->stage="repair-recovery-executable";
   return install_bootstrap_prepare(c->root,&p->payload[0])?INSTALL_REFUSED:INSTALL_COMPLETED;
  }
  c->stage="bootstrap-executable";if(install_bootstrap_prepare(c->root,&p->payload[0]))return INSTALL_REFUSED;

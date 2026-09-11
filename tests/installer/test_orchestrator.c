@@ -6,6 +6,7 @@
 #include "installer/install_orchestrator.h"
 #include "installer/install_readiness.h"
 #include "installer/install_scripts.h"
+#include "installer/install_digest.h"
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -50,8 +51,10 @@ static void fixture(const char*out,char root[1024],install_package_t*p){
  script(root,"etc/rc.d/init.d/ntpdate","#!/bin/sh\ncase $1 in\nstart)\n  # Clock policy belongs to Gateway.\n\n  test ! -e /etc/4vrs-clock-managed || exit 0\n /sbin/ntpdate own-server\n ;;\nesac\n");
  script(root,"etc/rc.d/init.d/halt","#!/bin/sh\nhwclock --systohc\n/sbin/halt\n");
  f.kind=2;f.mode=0777;f.data=(unsigned char*)"../init.d/networking";f.size=strlen((char*)f.data);CHECK(!install_file_publish(root,"etc/rc.d/rcS.d/S40networking",&f));
+ f.data=(unsigned char*)"../init.d/apache";f.size=strlen((char*)f.data);CHECK(!install_file_publish(root,"etc/rc.d/rcS.d/S21apache",&f));
+ f.data=(unsigned char*)"../../usr/sbin/apachectl";f.size=strlen((char*)f.data);CHECK(!install_file_publish(root,"etc/rc.d/init.d/apache",&f));
  memset(p,0,sizeof(*p));
- for(i=0;i<4;i++){p->payload[i].kind=1;p->payload[i].mode=0755;p->payload[i].data=(unsigned char*)(i==0?"qualification installer":i==1?"qualification gateway":"#!/bin/sh\nexit 0\n");p->payload[i].size=strlen((char*)p->payload[i].data);}
+ for(i=0;i<INSTALL_PAYLOAD_COUNT;i++){p->payload[i].kind=1;p->payload[i].mode=0755;p->payload[i].data=(unsigned char*)(i==0?"qualification installer":i==1?"qualification gateway":"#!/bin/sh\nexit 0\n");p->payload[i].size=strlen((char*)p->payload[i].data);}
 }
 static void equal_set(install_context_t*c,unsigned int old){unsigned int i;install_file_t f;
  for(i=0;i<c->plan.count;i++){CHECK(!install_file_read(c->root,c->plan.member[i].path,&f));CHECK(install_file_equal(&f,old?&c->plan.member[i].before:&c->plan.member[i].after));install_file_free(&f);}
@@ -76,7 +79,7 @@ static void run_crash(const char*out,const char*point,unsigned int index,unsigne
   CHECK(install_transaction_status(&c.transaction)==INSTALL_ROLLED_BACK);
   CHECK(!install_transaction_load(&c.transaction,&c.plan));equal_set(&c,1);
  }
- CHECK(!install_file_read(root,"var/hda/4vrs/config/gateway.conf",&after));CHECK(install_file_equal(&before,&after));install_file_free(&before);install_file_free(&after);install_context_release(&c);
+ CHECK(!install_file_read(root,"var/hda/4vrs/config/gateway.conf",&after));if(!strcmp(point,"bootstrap-executable")||!strcmp(point,"journal")){gateway_persistent_config_t cfg;CHECK(gateway_config_decode((char*)after.data,after.size,&cfg)==GATEWAY_CONFIG_OK);CHECK(cfg.schema_version==1&&cfg.settings.web_enabled==0&&cfg.settings.web_interface==0&&cfg.settings.web_protocol==1&&!cfg.settings.backlight_on);}else CHECK(install_file_equal(&before,&after));install_file_free(&before);install_file_free(&after);install_context_release(&c);
 }
 static void readiness_test(const char*out){
  char root[1024],path[1024],buf[GATEWAY_CONFIG_MAX_BYTES];install_package_t p;gateway_persistent_config_t cfg;size_t n;unsigned int i;int fd,uart,status;pid_t child;struct sockaddr_in address;socklen_t length=sizeof(address);
@@ -122,6 +125,38 @@ static void clock_rejection_test(const char*out){
 #ifndef INSTALL_ORCHESTRATOR_MAIN
 #define INSTALL_ORCHESTRATOR_MAIN main
 #endif
+static void nv_boundary_test(const char*out){char root[1024],path[1024];install_package_t p;install_context_t c;fake_t f;install_file_t nv,after;unsigned char bytes[192];install_digest_t hash;unsigned int i;
+ fixture(out,root,&p);directory(root,"var/hda/4vrs-rng");CHECK(snprintf(path,sizeof(path),"%s/var/hda/4vrs-rng",root)>0);CHECK(!chmod(path,0700));
+ memset(bytes,0,sizeof(bytes));memcpy(bytes,"4VRSNV01",8);bytes[11]=1;install_digest_init(&hash);install_digest_update(&hash,bytes,128);install_digest_final(&hash,bytes+128);
+ nv.kind=1;nv.mode=0600;nv.size=160;nv.data=bytes;CHECK(!install_file_publish(root,"var/hda/4vrs-rng/state",&nv));
+ memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);
+ CHECK(install_allow_path(&c,"var/hda/4vrs-rng/state",INSTALL_ON_CF)<0);for(i=0;i<c.plan.count;i++)CHECK(!strstr(c.plan.member[i].path,"4vrs-rng/"));install_context_release(&c);
+ p.payload[1].data=(unsigned char*)"rng upgrade fixture";p.payload[1].size=strlen((char*)p.payload[1].data);f.fail_start=1;
+ context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_ROLLED_BACK);CHECK(!install_file_read(root,"var/hda/4vrs-rng/state",&after));CHECK(install_file_equal(&nv,&after));install_file_free(&after);install_context_release(&c);
+ bytes[7]='2';install_digest_init(&hash);install_digest_update(&hash,bytes,128);install_digest_final(&hash,bytes+128);CHECK(!install_file_publish(root,"var/hda/4vrs-rng/state",&nv));
+ memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)!=INSTALL_COMPLETED);CHECK(f.stops==0);CHECK(!strcmp(c.stage,"rng-schema"));install_context_release(&c);
+ for(i=2;i<=3;i++){
+  unsigned int member;
+  memset(bytes,0,sizeof(bytes));memcpy(bytes,i==2?"4VRSNV02":"4VRSNV03",8);bytes[11]=20;bytes[15]=i==2?8:20;
+  memcpy(bytes+128,i==2?"production-v1":"production-autonomous-v1",i==2?13:24);
+  install_digest_init(&hash);install_digest_update(&hash,bytes,160);install_digest_final(&hash,bytes+160);nv.size=192;
+  CHECK(!install_file_publish(root,"var/hda/4vrs-rng/state",&nv));
+  /* Public ambiguous transaction evidence is never part of installation. */
+  CHECK(!install_file_publish(root,"var/hda/4vrs-rng/witness",&nv));
+  CHECK(!install_file_publish(root,"var/hda/4vrs-rng/pending",&nv));
+  memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);
+  for(member=0;member<c.plan.count;member++)CHECK(!strstr(c.plan.member[member].path,"4vrs-rng/"));
+  install_context_release(&c);
+  CHECK(!install_file_read(root,"var/hda/4vrs-rng/state",&after));CHECK(install_file_equal(&nv,&after));install_file_free(&after);
+  CHECK(!install_file_read(root,"var/hda/4vrs-rng/pending",&after));CHECK(install_file_equal(&nv,&after));install_file_free(&after);
+  CHECK(!install_file_read(root,"var/hda/4vrs-rng/witness",&after));CHECK(install_file_equal(&nv,&after));install_file_free(&after);
+  p.payload[1].data=(unsigned char*)(i==2?"schema 2 rollback":"schema 3 rollback");p.payload[1].size=strlen((char*)p.payload[1].data);f.fail_start=1;
+  context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_ROLLED_BACK);install_context_release(&c);
+  CHECK(!install_file_read(root,"var/hda/4vrs-rng/state",&after));CHECK(install_file_equal(&nv,&after));install_file_free(&after);
+  bytes[100]^=1;CHECK(!install_file_publish(root,"var/hda/4vrs-rng/state",&nv));
+  memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)!=INSTALL_COMPLETED);CHECK(f.stops==0);CHECK(!strcmp(c.stage,"rng-schema"));install_context_release(&c);
+ }
+}
 int INSTALL_ORCHESTRATOR_MAIN(int argc,char**argv){
  char root[1024];install_context_t c;install_package_t p;fake_t f;unsigned int i;int r;
  memset(&environment,0,sizeof(environment));environment.read_network=observe;environment.read_lan2=lan;
@@ -134,12 +169,26 @@ int INSTALL_ORCHESTRATOR_MAIN(int argc,char**argv){
  readiness_test(argv[1]);
  managed_r15_test(argv[1]);
  clock_rejection_test(argv[1]);
+ /* Native running-mask round trip and Apache startup before-images. */
+ for(i=0;i<4;i++){
+  install_plan_t saved;install_file_t absent={0,0,0,0};
+  fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;f.running=i;f.fail_start=1;
+  if(i==0||i==2)CHECK(!install_file_publish(root,"etc/rc.d/rcS.d/S21apache",&absent));
+  context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_ROLLED_BACK);
+  CHECK(c.restore_running==i);CHECK(!install_transaction_load(&c.transaction,&saved));CHECK(saved.was_running==i);install_plan_free(&saved);
+  equal_set(&c,1);install_context_release(&c);
+ }
+ fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;
+ script(root,"etc/rc.d/rcS.d/S21apache","#!/bin/sh\nunknown-service\n");context_init(&c,&f,root);
+ CHECK(install_orchestrate(&c,&p)==INSTALL_REFUSED);CHECK(!f.stops);install_context_release(&c);
  fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;
  context_init(&c,&f,root);r=install_orchestrate(&c,&p);stage=c.stage;CHECK(r==INSTALL_COMPLETED);equal_set(&c,0);CHECK(f.starts==1&&f.stops==1);install_context_release(&c);
- for(i=0;i<4;i++){context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_UNCHANGED);CHECK(f.starts==1&&f.stops==1);install_context_release(&c);}
+ for(i=0;i<4;i++){context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_UNCHANGED);CHECK(f.starts==1&&f.stops==1);CHECK(!strcmp(c.decision,"no-op")&&!strcmp(c.decision_health,"healthy")&&!c.decision_count);install_context_release(&c);}
  /* Repair a missing owned clock marker, preserving all user settings. */
  {install_file_t absent={0,0,0,0};CHECK(!install_file_publish(root,"etc/4vrs-clock-managed",&absent));}
- context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);equal_set(&c,0);install_context_release(&c);
+ context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);CHECK(!strcmp(c.decision,"repair-plan-differs")&&!strcmp(c.decision_path,"etc/4vrs-clock-managed")&&c.decision_count==1&&(c.decision_mask&1));equal_set(&c,0);install_context_release(&c);
+ /* Equal files but unhealthy platform must still repair, never no-op. */
+ f.fail_verify=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_ROLLED_BACK);CHECK(!strcmp(c.decision,"repair-platform-unhealthy")&&!strcmp(c.decision_health,"unspecified")&&!c.decision_count);install_context_release(&c);f.fail_verify=0;
  /* An activation failure rolls back the WHOLE set and old service. */
  p.payload[1].data=(unsigned char*)"updated gateway";p.payload[1].size=strlen((char*)p.payload[1].data);f.fail_start=1;
  context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_ROLLED_BACK);CHECK(c.failure_stage&&!strcmp(c.failure_stage,"services-start"));equal_set(&c,1);CHECK(f.running);install_context_release(&c);
@@ -178,6 +227,7 @@ int INSTALL_ORCHESTRATOR_MAIN(int argc,char**argv){
   f.cut="restore";child=fork();CHECK(child>=0);if(!child){context_init(&c,&f,root);(void)install_recover_entry(&c,0,"start");_exit(78);}CHECK(waitpid(child,&status,0)==child);CHECK(WIFEXITED(status)&&WEXITSTATUS(status)==77);
  }
  f.cut=0;context_init(&c,&f,root);CHECK(install_recover_only(&c)==INSTALL_ROLLED_BACK);CHECK(f.entries==0);CHECK(!install_transaction_load(&c.transaction,&c.plan));equal_set(&c,1);install_context_release(&c);
+ nv_boundary_test(argv[1]);
  /* Leave a terminal fixture for the actual shell-gate/chroot test. */
  fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);install_context_release(&c);
  {char location[1024];FILE*out;CHECK(snprintf(location,sizeof(location),"%s/shell-root.txt",argv[1])>0);out=fopen(location,"w");CHECK(out!=0);CHECK(fprintf(out,"%s\n",root)>0);CHECK(!fclose(out));}

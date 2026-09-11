@@ -11,6 +11,8 @@
 typedef struct gateway_network_supervisor_status {
     gateway_network_state_t state;
     core_tick_t deadline;
+    gateway_network_rollback_reason_t rollback_reason;
+    int error_code;
 } gateway_network_supervisor_status_t;
 typedef core_tick_t (*gateway_network_supervisor_clock_fn)(void *);
 

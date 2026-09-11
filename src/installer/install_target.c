@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include "installer/install_target.h"
 #include "installer/install_readiness.h"
+#include "installer/install_apache.h"
 #include "network/gateway_network_boot.h"
 #include <sys/utsname.h>
 #include <sys/stat.h>
@@ -59,6 +60,7 @@ static int inspect(void*v,unsigned int*running){
  install_target_t*t=v;
  if(!access("/var/hda/4vrs/disable-autostart",F_OK)){t->installer->stage="user-disabled-autostart";return -1;}
  if(scan(v,running,0))return -1;
+ if(!t->installer->entry_mode){unsigned int apache;if(install_apache_inspect(&apache)||install_apache_ports())return -1;if(apache)*running|=INSTALL_APACHE_RUNNING;}
  if(!t->baseline_valid){if(gateway_network_observe(&t->baseline)||t->baseline.unsupported)return -1;t->baseline_valid=1;}
  return 0;
 }
@@ -88,6 +90,7 @@ static int stop(void*v){
  install_target_t*t=v;unsigned int running;install_file_t absent={0,0,0,0};int status;pid_t g;
  install_process_t children[128];unsigned int count,i;
  /* Refresh identities at every stop, including rollback after new activation. */
+ if(t->installer->transaction_services&&install_apache_stop())return -1;
  if(scan(v,&running,0))return -1;
  if(descendants(t,children,&count))return -1;
  if(t->have_application){if(install_process_stop(&t->application,55000))return -1;(void)waitpid(t->application.pid,&status,WNOHANG);t->have_application=0;}
@@ -138,27 +141,31 @@ static int network_start(install_target_t*t,unsigned int runtime){
  return -1;
 }
 static int start(void*v,unsigned int old){
+ if(old&&install_apache_restore(((install_target_t*)v)->installer->restore_running&INSTALL_APACHE_RUNNING))return -1;
  /* Restoring a formerly unmanaged running installation does not repeat
   * vendor ifup on its already configured interfaces. Guardian termination
   * restores the imported baseline; verify checks it before completion. */
  if((!old||!access("/etc/4vrs-network/enabled",F_OK))&&network_start(v,1))return -1;
+ if(old&&!( ((install_target_t*)v)->installer->restore_running&1U))return 0;
  return start_application(v);
 }
+static int verify_failure(install_target_t*t,const char*reason){t->installer->verify_reason=reason;return -1;}
 static int verify(void*v,unsigned int old){
  install_target_t*t=v;gateway_network_observation_t now;gateway_network_service_status_t s;unsigned int i,managed=!access("/etc/4vrs-network/enabled",F_OK);
- if(t->have_application){if(install_process_matches(&t->application)!=1||install_readiness(t->application.pid))return -1;}
- else if(!old)return -1;
- if(gateway_network_observe(&now)||now.unsupported)return -1;
- if(managed&&(service(&s)||!s.ready||!s.settled||s.error))return -1;
+ {unsigned int apache;if(install_apache_inspect(&apache))return verify_failure(t,"apache-inspection");if(apache!=(old&&!!(t->installer->restore_running&INSTALL_APACHE_RUNNING)))return verify_failure(t,"apache-running-state");}
+ if(t->have_application){if(install_process_matches(&t->application)!=1)return verify_failure(t,"application-identity");if(install_readiness(t->application.pid))return verify_failure(t,"application-readiness");}
+ else if(!old)return verify_failure(t,"application-absent");
+ if(gateway_network_observe(&now)||now.unsupported)return verify_failure(t,"network-observation");
+ if(managed&&(service(&s)||!s.ready||!s.settled||s.error))return verify_failure(t,"network-service-health");
  if(t->baseline_valid){for(i=0;i<2;i++){
-   if(managed&&s.policy.lan[i].mode==GATEWAY_LAN_DHCP_CLIENT){if(!s.lease_valid[i])return -1;continue;}
-   if(strcmp(now.lan[i].address,t->baseline.lan[i].address)||strcmp(now.lan[i].netmask,t->baseline.lan[i].netmask)||strcmp(now.lan[i].broadcast,t->baseline.lan[i].broadcast)||now.lan[i].up!=t->baseline.lan[i].up)return -1;
+   if(managed&&s.policy.lan[i].mode==GATEWAY_LAN_DHCP_CLIENT){if(!s.lease_valid[i])return verify_failure(t,"dhcp-lease");continue;}
+   if(strcmp(now.lan[i].address,t->baseline.lan[i].address)||strcmp(now.lan[i].netmask,t->baseline.lan[i].netmask)||strcmp(now.lan[i].broadcast,t->baseline.lan[i].broadcast)||now.lan[i].up!=t->baseline.lan[i].up)return verify_failure(t,i?"lan2-baseline":"lan1-baseline");
   }
-  if(now.default_lan!=t->baseline.default_lan)return -1;
-  if((!managed||!s.policy.default_lan||s.policy.lan[s.policy.default_lan-1].mode==GATEWAY_LAN_STATIC)&&strcmp(now.gateway,t->baseline.gateway))return -1;
-  if((!managed||!s.policy.automatic_dns)&&memcmp(now.dns,t->baseline.dns,sizeof(now.dns)))return -1;
+  if(now.default_lan!=t->baseline.default_lan)return verify_failure(t,"default-lan-baseline");
+  if((!managed||!s.policy.default_lan||s.policy.lan[s.policy.default_lan-1].mode==GATEWAY_LAN_STATIC)&&strcmp(now.gateway,t->baseline.gateway))return verify_failure(t,"gateway-baseline");
+  if((!managed||!s.policy.automatic_dns)&&memcmp(now.dns,t->baseline.dns,sizeof(now.dns)))return verify_failure(t,"dns-baseline");
  }
- return 0;
+ t->installer->verify_reason="healthy";return 0;
 }
 static int entry(void*v,unsigned int application,const char*action,unsigned int fallback){
  install_target_t*t=v;char path[128];
@@ -180,5 +187,5 @@ static int capacity(void*v,size_t early,size_t compact){
  return 0;
 }
 static const install_platform_t platform={detect,cf_available,inspect,stop,start,verify,entry,capacity};
-void install_target_init(install_context_t*c,install_target_t*t){memset(c,0,sizeof(*c));memset(t,0,sizeof(*t));t->installer=c;c->root="/";c->platform=&platform;c->platform_context=t;c->network=gateway_network_environment_production();c->stage="initial";}
+void install_target_init(install_context_t*c,install_target_t*t){memset(c,0,sizeof(*c));memset(t,0,sizeof(*t));t->installer=c;c->root="/";c->platform=&platform;c->platform_context=t;c->restore_apache=install_apache_restore;c->network=gateway_network_environment_production();c->stage="initial";}
 int install_target_lock(void){int fd;struct stat s;fd=open("/etc/4vrs-installer/install.lock",O_RDWR|O_CREAT|O_NOFOLLOW,0600);if(fd<0)return -1;if(fstat(fd,&s)||!S_ISREG(s.st_mode)||s.st_nlink!=1||s.st_uid!=0||(s.st_mode&0077)||flock(fd,LOCK_EX|LOCK_NB)){close(fd);return -1;}return fd;}

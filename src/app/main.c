@@ -9,6 +9,10 @@
 #include "panel/gateway_panel.h"
 #include "panel/gateway_panel_moxa.h"
 
+#ifdef FOURVRS_WITH_WEB
+#include "web/web_gateway.h"
+static web_gateway_t web;
+#endif
 static gateway_run_control_t *active_control;
 static gateway_application_t application;
 static gateway_console_t console;
@@ -31,4 +35,16 @@ if(argc==3&&!strcmp(argv[1],"--network-enroll")){
  result=gateway_network_enroll_detailed(gateway_network_environment_production(),bindings,&stage);
  fprintf(stderr,"network-enroll %s stage=%s\n",result?"failed":"ok",stage);return result?1:0;
 }
-if(argc>2){return GATEWAY_EXIT_INVALID_INVOCATION;}if(argc==2)directory=argv[1];if(gateway_application_init_production(&application,directory)!=0)return GATEWAY_EXIT_FATAL_STARTUP;gateway_panel_moxa_context_init(&panel_moxa);gateway_panel_init(&panel,gateway_panel_moxa_ops(),&panel_moxa);gateway_startup_presentation_init(&presentation,GATEWAY_SPLASH_ASCII);active_control=&application.run_control;if(install_signals()!=0){gateway_application_request_stop(&application);while(!gateway_application_finished(&application)){gateway_application_step(&application);gateway_panel_step(&panel,&application);}gateway_panel_shutdown(&panel);return GATEWAY_EXIT_FATAL_STARTUP;}printf("product=%s version=%s state=starting\n",FOURVRS_PRODUCT_NAME,FOURVRS_VERSION);fflush(stdout);while(!gateway_application_finished(&application)){gateway_application_step(&application);gateway_panel_step(&panel,&application);present_event();if(application.coordinator.state!=announced&&(application.coordinator.state==GATEWAY_APP_READY||application.coordinator.state==GATEWAY_APP_DEGRADED||application.coordinator.state==GATEWAY_APP_SAFE_MODE||application.coordinator.state==GATEWAY_APP_FATAL_ERROR)){announced=application.coordinator.state;printf("configuration_source=%s startup_result=%s\n",source_name(application.coordinator.config_source),state_name(announced));fflush(stdout);if(announced!=GATEWAY_APP_FATAL_ERROR&&gateway_console_init(&console,gateway_console_stdio_ops(),stdout)==0)console_ready=1;}if(console_ready&&gateway_console_step(&console,&application)!=0)console_ready=0;if(!gateway_application_finished(&application))application.dependencies.wait(application.dependencies.wait_context,GATEWAY_APPLICATION_WAIT_USEC);}gateway_panel_shutdown(&panel);active_control=0;return(int)gateway_application_exit_status(&application);}
+if(argc>2){return GATEWAY_EXIT_INVALID_INVOCATION;}if(argc==2)directory=argv[1];if(gateway_application_init_production(&application,directory)!=0)return GATEWAY_EXIT_FATAL_STARTUP;
+#ifdef FOURVRS_WITH_WEB
+if(web_gateway_init(&web,&application,"/var/hda/4vrs/security","/var/hda/4vrs/bin/4vrs-web",443,80))application.web.error=1;
+#endif
+gateway_panel_moxa_context_init(&panel_moxa);gateway_panel_init(&panel,gateway_panel_moxa_ops(),&panel_moxa);gateway_startup_presentation_init(&presentation,GATEWAY_SPLASH_ASCII);active_control=&application.run_control;if(install_signals()!=0){gateway_application_request_stop(&application);while(!gateway_application_finished(&application)){gateway_application_step(&application);gateway_panel_step(&panel,&application);}gateway_panel_shutdown(&panel);return GATEWAY_EXIT_FATAL_STARTUP;}printf("product=%s version=%s state=starting\n",FOURVRS_PRODUCT_NAME,FOURVRS_VERSION);fflush(stdout);while(!gateway_application_finished(&application)){gateway_application_step(&application);gateway_panel_step(&panel,&application);
+#ifdef FOURVRS_WITH_WEB
+web_gateway_step(&web);
+#endif
+present_event();if(application.coordinator.state!=announced&&(application.coordinator.state==GATEWAY_APP_READY||application.coordinator.state==GATEWAY_APP_DEGRADED||application.coordinator.state==GATEWAY_APP_SAFE_MODE||application.coordinator.state==GATEWAY_APP_FATAL_ERROR)){announced=application.coordinator.state;printf("configuration_source=%s startup_result=%s\n",source_name(application.coordinator.config_source),state_name(announced));fflush(stdout);if(announced!=GATEWAY_APP_FATAL_ERROR&&gateway_console_init(&console,gateway_console_stdio_ops(),stdout)==0)console_ready=1;}if(console_ready&&gateway_console_step(&console,&application)!=0)console_ready=0;if(!gateway_application_finished(&application))application.dependencies.wait(application.dependencies.wait_context,GATEWAY_APPLICATION_WAIT_USEC);}
+#ifdef FOURVRS_WITH_WEB
+web_gateway_close(&web);
+#endif
+gateway_panel_shutdown(&panel);active_control=0;return(int)gateway_application_exit_status(&application);}

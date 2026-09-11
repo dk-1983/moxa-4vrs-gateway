@@ -528,6 +528,7 @@ int gateway_network_runtime_start(gateway_network_runtime_t *r,const gateway_net
         gateway_network_store_unlock(lock);close(pair[1]);_exit(result?1:0);
     }
     close(pair[1]);r->fd=pair[0];r->pid=(int)pid;r->status.state=GATEWAY_NETWORK_APPLYING;
+    r->status.deadline=0;r->status.rollback_reason=GATEWAY_NETWORK_REASON_NONE;r->status.error_code=0;
     r->binding_index=r->binding_wait=r->binding_ack=r->stop_sent=0;return 0;
 }
 int gateway_network_runtime_command(gateway_network_runtime_t *r,char command)
@@ -554,33 +555,41 @@ static void accept_observation(gateway_network_runtime_t *r,const gateway_networ
   if(r->observed_valid&&snapshot->recovery_generation==2U){r->confirmed=r->candidate;r->recovery_kept=1;}
  }
 }
+static void read_observer(gateway_network_runtime_t *r)
+{
+    gateway_network_service_status_t snapshot;ssize_t n;
+    if(r->observer_received||r->observer_failed)return;
+    n=read(r->observer_fd,&snapshot,sizeof(snapshot));
+    if(n==(ssize_t)sizeof(snapshot)){
+        /* A complete frame may precede child exit by several application ticks.
+         * Remember consumption even when its epoch has become obsolete. */
+        r->observer_received=1;
+        if(r->observer_epoch==r->observation_epoch)accept_observation(r,&snapshot);
+    }else if(n>=0||(errno!=EAGAIN&&errno!=EWOULDBLOCK&&errno!=EINTR)){
+        /* Child writes one fixed-size frame. Partial/EOF is never a snapshot. */
+        r->observer_failed=1;
+    }
+}
 static void poll_observer(gateway_network_runtime_t *r)
 {
     core_tick_t now;int status,pair[2],flags;pid_t pid;
-    gateway_network_service_status_t snapshot;ssize_t n;
+    gateway_network_service_status_t snapshot;
     const gateway_network_environment_t *e=r->environment;
     if(!e||!e->read_network)return;
     now=(e->clock?e->clock:monotonic)(e->clock_context);
     if(r->observer_pid){
-        n=read(r->observer_fd,&snapshot,sizeof(snapshot));
-        if(n==(ssize_t)sizeof(snapshot)&&r->observer_epoch==r->observation_epoch){
-            accept_observation(r,&snapshot);
-        }
+        read_observer(r);
         pid=waitpid((pid_t)r->observer_pid,&status,WNOHANG);
         if(pid==r->observer_pid||(pid<0&&errno!=EINTR)){
-            if(n!=(ssize_t)sizeof(snapshot)&&pid>0&&WIFEXITED(status)&&!WEXITSTATUS(status)){
-                n=read(r->observer_fd,&snapshot,sizeof(snapshot));
-                if(n==(ssize_t)sizeof(snapshot)&&r->observer_epoch==r->observation_epoch){
-                    accept_observation(r,&snapshot);
-                }
-                else r->observation_error=1;
-            }
-            if(pid<0||!WIFEXITED(status)||WEXITSTATUS(status))r->observation_error=1;
+            if(pid>0&&WIFEXITED(status)&&!WEXITSTATUS(status))read_observer(r);
+            if(pid<0||!WIFEXITED(status)||WEXITSTATUS(status)||!r->observer_received)r->observer_failed=1;
+            if(r->observer_failed&&r->observer_epoch==r->observation_epoch)r->observation_error=1;
             close(r->observer_fd);r->observer_fd=-1;r->observer_pid=0;r->observe_at=now+(r->pid?250U:1000U);
             if(r->observer_epoch!=r->observation_epoch)r->observe_at=now;
             if(r->observation_error)memset(r->lease_valid,0,sizeof(r->lease_valid));
         }else if((int32_t)(now-r->observer_deadline)>=0){
-            (void)kill((pid_t)r->observer_pid,SIGKILL);r->observation_error=1;
+            (void)kill((pid_t)r->observer_pid,SIGKILL);r->observer_failed=1;
+            if(r->observer_epoch==r->observation_epoch){r->observation_error=1;memset(r->lease_valid,0,sizeof(r->lease_valid));}
         }
         return;
     }
@@ -606,6 +615,7 @@ static void poll_observer(gateway_network_runtime_t *r)
         }
         _exit(write(pair[1],&snapshot,sizeof(snapshot))==(ssize_t)sizeof(snapshot)?0:1);}
     close(pair[1]);r->observer_fd=pair[0];r->observer_pid=(int)pid;r->observer_deadline=now+200U;r->observer_epoch=r->observation_epoch;
+    r->observer_received=r->observer_failed=0;
 }
 void gateway_network_runtime_poll(gateway_network_runtime_t *r)
 {

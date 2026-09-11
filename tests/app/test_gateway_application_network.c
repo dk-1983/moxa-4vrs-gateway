@@ -848,5 +848,9 @@ static void moxa2_dns_flow(void)
     cleanup(&f);
     printf("moxa2 DNS archive lifecycle: %u checks, %u failed\n",checks,failed);
 }
+
+#ifndef WEB_INTEGRATION_FIXTURE
 int main(void)
 {if(getenv("MOXA2_DNS_BASELINE")){moxa2_dns_flow();return failed?1:0;}if(getenv("DHCP_RENEW_ONLY")){renewal_transactions();printf("renewal integration: %u checks, %u failed\n",checks,failed);return failed?1:0;}if(getenv("R7_RETAINED")){use_full=use_service=1;canonical_flow();printf("retained baseline checks=%u failed=%u\n",checks,failed);return failed?1:0;}cold_boot_flow(0);cold_boot_flow(1);renewal_transactions();boot_stage_failures();transaction_supervisor_death();menu_full();interrupted_keep();service_transactions();binding_edits();full_transactions();use_full=1;crash(0);crash(1);use_full=0;printf("application network legacy seqpacket=%u\n",getenv("LAN2_LEGACY_PEER")?1U:0U);invalid_networks();canonical_flow();transactions();faults();bounded_and_bindings();crash(0);crash(1);menu();graceful_stop();printf("application network: %u checks, %u failed\n",checks,failed);return failed?1:0;}
+
+#endif

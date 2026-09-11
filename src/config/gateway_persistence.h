@@ -5,6 +5,8 @@
 #include "gateway/gateway_controller.h"
 
 #define GATEWAY_CONFIG_SCHEMA_VERSION 1U
+#define GATEWAY_CONFIG_WEB_SCHEMA_VERSION 2U
+#define GATEWAY_CONFIG_PROTOCOL_SCHEMA_VERSION 3U
 #define GATEWAY_CONFIG_MAX_BYTES 4096U
 #define GATEWAY_CONFIG_PATH_MAX 256U
 #define GATEWAY_CONFIG_ACTIVE_NAME "gateway.conf"
@@ -14,6 +16,9 @@
 #define GATEWAY_NTP_SERVER_MAX 64U
 
 typedef struct gateway_product_settings {
+    unsigned int web_protocol; /* 0=HTTP, 1=HTTPS (TLS); legacy files decode as HTTPS */
+    unsigned int web_enabled;
+    unsigned int web_interface; /* 0=LAN1/eth0, 1=LAN2/eth1, 2=Both */
     unsigned int backlight_on;
     int ntp_enabled;
     unsigned int ntp_interval_hours;

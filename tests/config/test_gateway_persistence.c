@@ -17,7 +17,7 @@ static void rechecksum(char*b,size_t n){char*p=strstr(b,"crc32=");unsigned long 
 
 static void round_trips(void)
 {gateway_persistent_config_t a,b;char text[GATEWAY_CONFIG_MAX_BYTES],bad[GATEWAY_CONFIG_MAX_BYTES];size_t n;unsigned int i;gateway_persistent_defaults(&a);CHECK(gateway_config_encode(&a,text,sizeof(text),&n)==GATEWAY_CONFIG_OK);CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_OK);CHECK(memcmp(&a,&b,sizeof(a))==0);for(i=0;i<8U;++i){a.ports[i].enabled=(i&1U)==0;a.ports[i].mode=(serial_mode_t)(i%SERIAL_MODE_COUNT);a.ports[i].baud=baud_value((int)(i+10U));a.ports[i].data_bits=7U+(i&1U);a.ports[i].parity=(parity_mode_t)(i%PARITY_COUNT);a.ports[i].stop_bits=1U+(i&1U);a.ports[i].endpoint_port=1502U+i;a.ports[i].revision=20U+i;}strcpy(a.ports[0].bind_address,"127.0.0.1");CHECK(gateway_config_encode(&a,text,sizeof(text),&n)==GATEWAY_CONFIG_OK);CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_OK&&memcmp(&a,&b,sizeof(a))==0);
-memcpy(bad,text,n+1U);bad[0]='X';CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_INVALID);CHECK(gateway_config_decode(text,n/2U,&b)==GATEWAY_CONFIG_INVALID);CHECK(gateway_config_decode("",0,&b)==GATEWAY_CONFIG_INVALID);memcpy(bad,text,n+1U);{char*p=strstr(bad,"schema=1");CHECK(p!=0);if(p)p[7]='2';}CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_UNSUPPORTED_VERSION);memcpy(bad,text,n+1U);{char*p=strstr(bad,"port.1.enabled=");CHECK(p!=0);if(p)p[15]='x';}CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_INVALID);
+memcpy(bad,text,n+1U);bad[0]='X';CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_INVALID);CHECK(gateway_config_decode(text,n/2U,&b)==GATEWAY_CONFIG_INVALID);CHECK(gateway_config_decode("",0,&b)==GATEWAY_CONFIG_INVALID);memcpy(bad,text,n+1U);{char*p=strstr(bad,"schema=1");CHECK(p!=0);if(p)p[7]='4';}CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_UNSUPPORTED_VERSION);memcpy(bad,text,n+1U);{char*p=strstr(bad,"port.1.enabled=");CHECK(p!=0);if(p)p[15]='x';}CHECK(gateway_config_decode(bad,n,&b)==GATEWAY_CONFIG_INVALID);
 }
 
 static void strict_parser_matrix(void)
@@ -34,7 +34,7 @@ INVALID_REPLACE("port.1.endpoint_port=502","port.1.endpoint_port=0");
 memcpy(bad,text,n+1U);bad[n-10U]^=1;CHECK(gateway_config_decode(bad,n,&out)==GATEWAY_CONFIG_INVALID);CHECK(gateway_config_decode(text,GATEWAY_CONFIG_MAX_BYTES+1U,&out)==GATEWAY_CONFIG_INVALID);}
 
 static void invalid_typed(void)
-{gateway_persistent_config_t c;char b[4096];size_t n;gateway_persistent_defaults(&c);c.ports[1].uart_index=0;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[1].endpoint_port=502;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[0].data_bits=9;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[0].endpoint_port=0;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);strcpy(c.ports[0].bind_address,"invalid");CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);c.schema_version=2;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_UNSUPPORTED_VERSION);}
+{gateway_persistent_config_t c;char b[4096];size_t n;gateway_persistent_defaults(&c);c.ports[1].uart_index=0;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[1].endpoint_port=502;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[0].data_bits=9;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);c.ports[0].endpoint_port=0;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);gateway_persistent_defaults(&c);strcpy(c.ports[0].bind_address,"invalid");CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_INVALID);c.schema_version=4;CHECK(gateway_config_encode(&c,b,sizeof(b),&n)==GATEWAY_CONFIG_UNSUPPORTED_VERSION);}
 
 static void filesystem_cases(const char*d)
 {gateway_persistent_config_t a,b;gateway_config_source_t source;char p[256];remove_files(d);CHECK(gateway_config_startup_select(d,&b,&source)==GATEWAY_CONFIG_ABSENT&&source==GATEWAY_CONFIG_SOURCE_DEFAULTS&&b.ports[0].enabled);gateway_persistent_defaults(&a);CHECK(gateway_config_save(d,&a,GATEWAY_SAVE_FAIL_NONE)==GATEWAY_CONFIG_OK);CHECK(gateway_config_save(d,&a,GATEWAY_SAVE_FAIL_NONE)==GATEWAY_CONFIG_UNCHANGED);a.ports[0].endpoint_port=1502;a.ports[0].revision=2;CHECK(gateway_config_save(d,&a,GATEWAY_SAVE_FAIL_NONE)==GATEWAY_CONFIG_OK);CHECK(gateway_config_startup_select(d,&b,&source)==GATEWAY_CONFIG_OK&&source==GATEWAY_CONFIG_SOURCE_ACTIVE&&b.ports[0].endpoint_port==1502);path(p,d,GATEWAY_CONFIG_ACTIVE_NAME);CHECK(write_text(p,"corrupt")==0);CHECK(gateway_config_startup_select(d,&b,&source)==GATEWAY_CONFIG_OK&&source==GATEWAY_CONFIG_SOURCE_BACKUP&&b.ports[0].endpoint_port==502);path(p,d,GATEWAY_CONFIG_BACKUP_NAME);CHECK(write_text(p,"bad")==0);CHECK(gateway_config_startup_select(d,&b,&source)==GATEWAY_CONFIG_INVALID&&source==GATEWAY_CONFIG_SOURCE_SAFE_MODE&&!b.ports[0].enabled&&!b.ports[7].enabled);remove_files(d);
@@ -86,6 +86,18 @@ static void interval_crc_and_rollback(const char *d)
  CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_INVALID);remove_files(d);
 }
 
+static void web_protocol_roundtrip(void)
+{
+ gateway_persistent_config_t a,b;char text[GATEWAY_CONFIG_MAX_BYTES];size_t n;unsigned int schema,mode;
+ for(schema=1;schema<=3;++schema)for(mode=0;mode<2;++mode){
+  gateway_persistent_defaults(&a);a.schema_version=schema;a.settings.web_protocol=mode;
+  if(schema<3&&!mode){CHECK(gateway_config_encode(&a,text,sizeof(text),&n)==GATEWAY_CONFIG_INVALID);continue;}
+  CHECK(gateway_config_encode(&a,text,sizeof(text),&n)==GATEWAY_CONFIG_OK);
+  CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_OK&&b.settings.web_protocol==mode);
+  if(schema==3){n=replace_value(text,n,mode?"web.protocol=1":"web.protocol=0","web.protocol=2");rechecksum(text,n);CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_INVALID);}
+ }
+}
+
 static void binding_policy_roundtrip(void)
 {
     gateway_persistent_config_t a,b;char text[GATEWAY_CONFIG_MAX_BYTES];size_t n;unsigned int i;
@@ -108,4 +120,4 @@ static void backlight_durable(const char*d){gateway_persistent_config_t a,b;char
  CHECK(gateway_config_encode(&b,text,sizeof(text),&n)==GATEWAY_CONFIG_OK);n=replace_value(text,n,"display.backlight_on=0","display.backlight_on=2");rechecksum(text,n);CHECK(gateway_config_decode(text,n,&b)==GATEWAY_CONFIG_INVALID);
  path(file,d,GATEWAY_CONFIG_ACTIVE_NAME);(void)file;remove_files(d);
 }
-int main(int argc,char**argv){backlight_roundtrip();binding_policy_roundtrip();if(argc!=2)return 2;if(strcmp(argv[1],"--parser-only")==0){interval_settings();printf("interval parser checks=%u failed=%u word_bits=%u\n",checks,failed,(unsigned)(sizeof(unsigned long)*8U));return failed?1:0;}backlight_durable(argv[1]);interval_crc_and_rollback(argv[1]);interval_settings();round_trips();strict_parser_matrix();invalid_typed();filesystem_cases(argv[1]);staged_runtime_contract(argv[1]);product_time_settings();printf("persistence checks=%u failed=%u config=%u max_file=%u max_fds=2 steady_files=2\n",checks,failed,gateway_persistent_config_memory_bytes(),GATEWAY_CONFIG_MAX_BYTES);return failed?1:0;}
+int main(int argc,char**argv){web_protocol_roundtrip();backlight_roundtrip();binding_policy_roundtrip();if(argc!=2)return 2;if(strcmp(argv[1],"--parser-only")==0){interval_settings();printf("interval parser checks=%u failed=%u word_bits=%u\n",checks,failed,(unsigned)(sizeof(unsigned long)*8U));return failed?1:0;}backlight_durable(argv[1]);interval_crc_and_rollback(argv[1]);interval_settings();round_trips();strict_parser_matrix();invalid_typed();filesystem_cases(argv[1]);staged_runtime_contract(argv[1]);product_time_settings();printf("persistence checks=%u failed=%u config=%u max_file=%u max_fds=2 steady_files=2\n",checks,failed,gateway_persistent_config_memory_bytes(),GATEWAY_CONFIG_MAX_BYTES);return failed?1:0;}

@@ -57,7 +57,7 @@ int gateway_application_network_apply(gateway_application_t *a,const gateway_net
         if(lan&&settings->lan[lan-1U].mode==GATEWAY_LAN_STATIC)strcpy(mapped.ports[i].bind_address,settings->lan[lan-1U].address);
     }
     if(gateway_configuration_validate(mapped.ports,errors))return -1;
-    return gateway_network_runtime_start(&a->network,settings);
+    {int r=gateway_network_runtime_start(&a->network,settings);if(!r){gateway_application_revision_advance(a);a->network_operation=a->revision;}return r;}
 }
 static void dynamic_bindings(gateway_application_t *a,core_tick_t now)
 {
@@ -94,6 +94,7 @@ void gateway_application_network_step(gateway_application_t *a,core_tick_t now)
     gateway_port_config_t desired;gateway_network_profile_t *profile;unsigned int index;
     if(a->run_control.stop_requested)gateway_network_runtime_stop(n);
     gateway_network_runtime_poll(n);
+    if(a->revision_network_state!=(unsigned int)n->status.state){a->revision_network_state=(unsigned int)n->status.state;gateway_application_revision_advance(a);}
     if(a->run_control.stop_requested||!a->coordinator.controller_initialized)return;
     if(n->available&&!gateway_network_runtime_busy(n)&&!configuration_busy(a))dynamic_bindings(a,now);
     if(n->status.state==GATEWAY_NETWORK_KEPT){

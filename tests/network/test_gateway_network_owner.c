@@ -53,6 +53,10 @@ int OWNER_TEST_ENTRY(void)
 {
     gateway_network_owner_t o;fake_owner_t f;gateway_network_profile_t baseline,dhcp;gateway_network_settings_t settings;
     unsigned int writes,opens;core_tick_t expiry;
+    setup(&o,&f,&baseline);f.live.lan[1].link=0;
+    CHECK(gateway_network_owner_policy(&o,&baseline,0)==0);steps(&o,0,1000);
+    CHECK(!o.error&&o.settled&&o.observed.lan[0].link&&!o.observed.lan[1].link);
+    puts("PASS static owner settles with unselected LAN2 link down");
     setup(&o,&f,&baseline);settings=baseline.settings;settings.lan[1].mode=GATEWAY_LAN_DHCP_CLIENT;
     settings.default_lan=2;settings.automatic_dns=1;
     CHECK(gateway_network_profile_candidate(&baseline,&settings,&dhcp)==0);

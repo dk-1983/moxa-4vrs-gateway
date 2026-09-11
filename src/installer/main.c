@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include "installer/install_target.h"
+#include "installer/install_diagnostic.h"
 #include "network/gateway_network_runtime.h"
 #include <sys/stat.h>
 #include <unistd.h>
@@ -18,9 +19,9 @@ static install_package_t package;
 static unsigned int recovery_only;
 static const char version[] = INSTALL_RELEASE;
 static int result_file(int result){
- char text[512];install_file_t f;int n;
- n=snprintf(text,sizeof(text),"version=%s\nresult=%d\nstage=%s\ndetail=%d\nfailure_stage=%s\nfailure_detail=%d\nutc=%lu\ngateway_sha256=%s\n",
- version,result,context.stage?context.stage:"unknown",context.detail,context.failure_stage?context.failure_stage:"none",context.failure_detail,(unsigned long)time(0),package.digest[1]);
+ char text[1024];install_file_t f;int n;
+ n=snprintf(text,sizeof(text),"version=%s\nresult=%d\nstage=%s\ndetail=%d\nfailure_stage=%s\nfailure_detail=%d\nutc=%lu\ngateway_sha256=%s\ndecision=%s\ndecision_health=%s\ndecision_count=%u\ndecision_path=%s\ndecision_mask=%u\n",
+ version,result,context.stage?context.stage:"unknown",context.detail,context.failure_stage?context.failure_stage:"none",context.failure_detail,(unsigned long)time(0),package.digest[1],context.decision?context.decision:"not-reached",context.decision_health?context.decision_health:"not-run",context.decision_count,context.decision_path,context.decision_mask);
  if(n<0||(size_t)n>=sizeof(text))return -1;
  f.kind=1;f.mode=0600;f.data=(unsigned char*)text;f.size=(size_t)n;
  return install_file_publish("/etc/4vrs-installer","result",&f);
@@ -41,9 +42,10 @@ static int launch(int lock){pid_t child;
 int main(int argc,char**argv){
  int lock,r,application=0;char cwd[1024];const char*stage="invocation";
  install_target_init(&context,&target);
+ if(argc==2&&!strcmp(argv[1],"--decision-journal"))return install_decision_journal();
  if(argc==2&&!strcmp(argv[1],"--status")){
   install_file_t f;
-  if(install_file_read("/etc/4vrs-installer","result",&f)||f.kind!=1||f.size>512)return 1;
+  if(install_file_read("/etc/4vrs-installer","result",&f)||f.kind!=1||f.size>1024)return 1;
   fwrite(f.data,1,f.size,stdout);install_file_free(&f);return 0;
  }
  if(argc==2&&!strcmp(argv[1],"--recover")){

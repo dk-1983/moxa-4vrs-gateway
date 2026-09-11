@@ -1,0 +1,14 @@
+{
+  "target": "10.0.2.13",
+  "ssh_port": 622,
+  "ssh_user": "",
+  "known_hosts": "",
+  "authorization_reference": "",
+  "approved_mac": "00:90:E8:1F:4C:F1",
+  "approved_cf_uuid": "2ad4f17a-0eb1-bc47-8c4e-b23d70f39b52",
+  "protocol": "http",
+  "certificate_sha256": "",
+  "sample_period_s": 20,
+  "phases": [{"name":"baseline","seconds":60},{"name":"user-only","seconds":60},{"name":"mixed","seconds":120}],
+  "modbus": null
+}

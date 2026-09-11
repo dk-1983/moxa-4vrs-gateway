@@ -16,6 +16,7 @@ root, out, probe = map(Path, sys.argv[1:])
 spec = importlib.util.spec_from_file_location('package', root / 'tools/build-installer-package.py')
 package = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(package)
+names = package.PAYLOAD_NAMES + ('4vrs-web','4vrs-rng','4vrs-kdf')
 
 
 def elf():
@@ -29,19 +30,21 @@ def elf():
     loader = b'/lib/ld-linux.so.3\0'
     struct.pack_into('>I', b, 100, len(loader))
     b[128:128+len(loader)] = loader
-    b[160:174] = b'v2026.01.01\0\0\0'
+    b[160:174] = b'v2026.02.01\0\0\0'
     return bytes(b)
 
 
 with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
     tmp = Path(tmp)
     sources = []
-    for i, name in enumerate(package.PAYLOAD_NAMES):
+    for i, name in enumerate(names):
         path = tmp / name
-        path.write_bytes(elf() if i < 2 else b'#!/bin/sh\nexit 0\n')
+        path.write_bytes(elf() if i < 2 or i >= 4 else b'#!/bin/sh\nexit 0\n')
         sources.append(path)
     archive = tmp / 'package.tar.gz'
-    package.package('v2026.01.01', *sources, archive)
+    license_file = tmp / 'license'
+    license_file.write_bytes(b'test fixture license')
+    package.package('v2026.02.01', *sources[:4], archive, web=sources[4], rng=sources[5], kdf=sources[6], license_file=license_file)
     baseline = tmp / 'baseline'
     baseline.mkdir(mode=0o700)
     with tarfile.open(archive) as tar:
@@ -58,13 +61,13 @@ with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
         cases += 1
 
     run(baseline, True)
-    for name in package.PAYLOAD_NAMES + ('manifest.json', 'SHA256SUMS'):
+    for name in names + ('manifest.json', 'SHA256SUMS'):
         case = tmp / ('changed-' + name)
         shutil.copytree(baseline, case)
         target = case / name
         target.write_bytes(target.read_bytes() + b'X')
         run(case, False)
-    for name in package.PAYLOAD_NAMES:
+    for name in names:
         case = tmp / ('link-' + name)
         shutil.copytree(baseline, case)
         target = case / name
@@ -74,7 +77,7 @@ with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
     case = tmp / 'duplicate'
     shutil.copytree(baseline, case)
     target = case / 'manifest.json'
-    target.write_bytes(target.read_bytes().replace(b'"format": 1,', b'"format": 1, "format": 1,'))
+    target.write_bytes(target.read_bytes().replace(b'"format": 3,', b'"format": 3, "format": 3,'))
     run(case, False)
     case = tmp / 'mixed-versions'
     shutil.copytree(baseline, case)
@@ -89,6 +92,6 @@ with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
     manifest_path.write_text(json.dumps(manifest, sort_keys=True, indent=2) + '\n')
     (case / 'SHA256SUMS').write_text(''.join(
         hashlib.sha256((case / name).read_bytes()).hexdigest() + '  ' + name + '\n'
-        for name in sorted(package.PAYLOAD_NAMES + ('manifest.json',))))
+        for name in sorted(names + ('manifest.json',))))
     run(case, False)
     print(f'native package reader: {cases} cases passed (synthetic ELF, no target execution)')
