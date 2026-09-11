@@ -2,6 +2,23 @@
 
 [README](../README.md) · [LCD / Web](screens.md) · [Release scope](release-final.md)
 
+## Contents
+
+- [Vendor firmware requirement](#vendor-firmware-requirement)
+- [Installation](#installation)
+- [Menu tree](#menu-tree)
+- [Web panel tree](#web-panel-tree)
+- [Operation and navigation](#operation-and-navigation)
+- [Home screen](#home-screen)
+- [Serial ports and transports](#serial-ports-and-transports)
+- [Network settings](#network-settings)
+- [Clock and NTP](#clock-and-ntp)
+- [Diagnostics and stopping](#diagnostics-and-stopping)
+- [Quick troubleshooting](#quick-troubleshooting)
+- [Web on UC-7420-LX Plus](#web-on-uc-7420-lx-plus)
+- [LCD — backlight and Web Server](#lcd--backlight-and-web-server)
+- [Web — pages and actions](#web--pages-and-actions)
+
 ## Vendor firmware requirement
 
 Before installing 4VRS Gateway on **Moxa UC-7420-LX Plus**, upgrade the vendor
@@ -61,14 +78,49 @@ Home screen
     │           └── F1 Revert / timer expiry — roll back
     ├── Diagnostics
     │   └── F3 Events → Startup Events → F2/F4: entries
-    ├── System
-    │   ├── Date & Time → F5 Set Time
-    │   └── F4 Platform
-    │       └── F5 Network Time
-    │           ├── F5 Edit: enable, server, interval
-    │           └── F4 Test / Stop: NTP diagnostics
+    ├── System — F2/F4: Date & Time ↔ Platform ↔ Display ↔ Web Server
+    │   ├── Date & Time → F5 Set Time → F3 Next → confirmation
+    │   ├── Platform → F5 Network Time
+    │   │   ├── F5 Edit: enable / server / interval → confirmation
+    │   │   └── F4 Test / Stop
+    │   ├── Display → F3 Open → Backlight → F3 Open
+    │   │   └── F2/F4 On/Off → F3 Save
+    │   └── Web Server → F3 Open
+    │       ├── Enable / Disable → F3 Set
+    │       ├── Iface LAN1 / LAN2 / Both → F3 Set
+    │       ├── New code → F3 Set → One-time code
+    │       ├── Recover access → F3 Set → F3 Yes / F1 No
+    │       ├── HTTP cleartext / HTTPS not rec. → F3 Set
+    │       └── F5 URLs → [HTTPS only] F5 Cert → SHA-256
     ├── Shutdown → confirm stopping Gateway
     └── About — product and version
+```
+
+
+
+System opens at Date & Time. F4 cycles through Platform → Display → Web Server → Date & Time; F2 moves backwards. Thus F2 from Date & Time reaches Web Server directly. F3 opens Display or Web Server; F5 opens Network Time only on Platform. Tree labels use the LCD language.
+
+## Web panel tree
+
+```text
+Web
+├── Administrator sign in / initial enrollment / access recovery
+└── Signed in
+    ├── Overview → Refresh / Diagnostics
+    ├── Ports → P1 … P8 → Edit → Save
+    ├── Network → Review → Apply → Keep / Revert
+    ├── Diagnostics → Startup events / P1 … P8 Details
+    ├── System
+    │   ├── Web Server → State / Interface / Protocol → Save
+    │   ├── Backlight → Save
+    │   ├── NTP → Enabled / Server / Interval → Save
+    │   ├── Manual time → Save
+    │   ├── Test NTP / Stop NTP test
+    │   ├── Security → Change password → Save
+    │   ├── Stop Gateway → confirmation
+    │   └── [HTTPS only] TLS / HTTPS → status / certificate SHA-256
+    ├── Help
+    └── About
 ```
 
 ## Operation and navigation
@@ -120,8 +172,8 @@ prove that an instrument answered. Check a real client transaction as well.
 
 F2/F4 move the selection, F3 opens it and F1 returns to Home. Use Status for
 application state, Ports for per-port counters, Configuration for settings,
-Diagnostics for diagnostic information/startup events, System for the clock
-and platform, and About for the version. Shutdown stops the application only.
+Diagnostics for diagnostic information/startup events, System for the clock, NTP, display
+and Web Server, and About for the version. Shutdown stops the application only.
 
 ## Serial ports and transports
 
@@ -410,3 +462,133 @@ After optimization, normal Web panel use places little load on the processor: in
 HTTP is recommended for a dedicated trusted management network and remains the default for new installations. HTTP sends passwords and data without encryption. HTTPS (TLS) remains available, but is not recommended on Moxa UC-7420-LX Plus. Upgrades preserve explicit HTTP/HTTPS choices; schema 1/2 configurations without a protocol field retain legacy HTTPS. A single-client limit and password hashing do not protect data transmitted over HTTP.
 
 [Measurement conditions / условия измерений](release-final.md).
+
+## LCD — backlight and Web Server
+
+<table><tr><td><a href="../assets/images/menu/system-display.png"><img src="../assets/images/menu/system-display.png" alt="system-display" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/display-menu.png"><img src="../assets/images/menu/display-menu.png" alt="display-menu" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2)
+      └─ F3 Open → Display menu ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/backlight-on.png"><img src="../assets/images/menu/backlight-on.png" alt="backlight-on" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2, F3 Open)
+      └─ Backlight (F3 Open) → On ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-system-menu.png"><img src="../assets/images/menu/web/web-system-menu.png" alt="web-system-menu" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2 from Date & Time) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-server-http.png"><img src="../assets/images/menu/web/web-server-http.png" alt="web-server-http" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ HTTP cleartext ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-https-addresses.png"><img src="../assets/images/menu/web/web-https-addresses.png" alt="web-https-addresses" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ URLs (F5) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-certificate.png"><img src="../assets/images/menu/web/web-certificate.png" alt="web-certificate" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ URLs (F5)
+         └─ Cert (F5) ←</pre></td></tr></table>
+
+On Display press F3, then F3 on Backlight; F2/F4 select On/Off and F3 saves. Stored is the saved choice; Command reports the backlight command result.
+
+In Web Server, F2/F4 select one of five rows. Enable/Disable names the action: Disable with Running means the server is enabled. F3 changes the selected enable state, interface or protocol and starts persistence. Wait for Saving… to finish; repeated switching does not require leaving via F5/F1. On Save failed or Config conflict, check the outcome and reopen the page. New code issues a one-time code; Recover access requires confirmation. F5 opens addresses; Unavailable means no usable URL on that interface. In HTTPS, F5 Cert shows the fingerprint: compare all 64 SHA-256 digits against the browser certificate. F1 returns to Web Server.
+
+## Web — pages and actions
+
+Only one Web TCP connection is served at a time; additional TCP connections are closed before TLS without replacing the active one. This is a connection limit, not a guarantee of one tab or one user. If a connection is refused, close unnecessary connections and retry after the active one is released.
+
+### Sign-in and access recovery
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-sign-in-security-help-ru.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-sign-in-security-help-ru.png" alt="web-sign-in-security-help-ru" width="600"></a></td><td><pre>Web
+└─ Вход администратора
+   └─ Справка о соединении ←</pre></td></tr></table>
+
+Create the first administrator using the one-time LCD code and your own password. The code lasts three minutes with at most five attempts. Request another through LCD System → Web Server → New code. Later sign-ins require the password only. Password length is 12–128 UTF-8 bytes, not necessarily 12–128 characters. The eye inside each field shows or hides that field. Forgot password? requests physical confirmation: press F3 on the device, then enter the display code and a new password. This recovers Web access; it does not reset port configuration.
+
+### Overview
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-overview-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-overview-en.png" alt="web-overview-en" width="600"></a></td><td><pre>Web
+└─ Overview ←</pre></td></tr></table>
+
+Shows port readiness, TCP connections, port alarms, Web/clock state and OS uptime. Refresh updates the snapshot; Diagnostics opens diagnostics. Check the update timestamp: a stale snapshot does not establish current state. Port readiness and a TCP connection alone do not prove a successful instrument response.
+
+### Ports
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-ports-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-ports-en.png" alt="web-ports-en" width="600"></a></td><td><pre>Web
+└─ Ports ←</pre></td></tr></table>
+
+The P1–P8 list shows enable state, UART, transport and listener address. Edit opens the selected physical port. Disabled does not mean the hardware port is absent. 0.0.0.0 is a wildcard listener; clients connect to the actual device IP.
+
+### Port settings
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-port-p1-settings-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-port-p1-settings-en.png" alt="web-port-p1-settings-en" width="600"></a></td><td><pre>Web
+└─ Ports
+   └─ P1 → Edit ←</pre></td></tr></table>
+
+Set State, Serial mode, Baud, Data bits, Parity, Stop bits, Transport, Bind IP, TCP/UDP port and Special baud when needed. Save submits changes. Check the result and actual communication: changing UART or transport can interrupt existing connections. If LCD changes caused a configuration conflict, reopen the form and review its values.
+
+### Network
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-network-settings-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-network-settings-en.png" alt="web-network-settings-en" width="600"></a></td><td><pre>Web
+└─ Network ←</pre></td></tr></table>
+
+LAN1 and LAN2 have separate Static/DHCP, IP, netmask and gateway settings. Default route selects the route interface; DNS uses manual servers or a DHCP source. Observed shows live state, not just saved policy. Review displays the complete draft without applying it. Apply starts temporary activation; reconnect to the new address if needed. Keep confirms persistence within 60 seconds. Revert or timeout restores the previous network. Do not submit another network draft while confirmation is pending.
+
+### Diagnostics — startup events
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-startup-events-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-startup-events-en.png" alt="web-diagnostics-startup-events-en" width="600"></a></td><td><pre>Web
+└─ Diagnostics
+   └─ Startup Events ←</pre></td></tr></table>
+
+The table is a startup event history, not the current boot percentage. A dash in Ports means the event has no associated port; a dash in Error means no error is reported for it. These are not missing counters. Starting rows remain historical events after Ready / Completed / 100%. P1–P8 buttons open port details.
+
+### Port diagnostics
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-port-p1-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-port-p1-en.png" alt="web-diagnostics-port-p1-en" width="600"></a></td><td><pre>Web
+└─ Diagnostics
+   └─ P1 ←</pre></td></tr></table>
+
+State and Last error accompany counters for the current port run: requests, completions, timeouts, recoveries, queues, CRC/protocol errors and RAW bytes. Zero is a counter value; event-table dashes have a different meaning. Counters depend on the transport, are not a persistent measurement archive, and do not prove losslessness in unqualified scenarios.
+
+### System — Web Server, backlight and time
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png" alt="web-system-web-server-http-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Web Server
+      └─ Protocol: HTTP ←</pre></td></tr></table>
+
+Web Server contains State, Interface (LAN1/LAN2/Both) and Protocol (HTTP/HTTPS). Save applies the settings; changing protocol or interface may disconnect the Web session. Open the matching http:// or https:// address shown by LCD F5 URLs. Backlight has its own Save button. NTP saves enable, server and 1/6/24-hour interval; Manual time sets date/time separately. Test NTP performs up to three attempts at one-minute intervals; Stop NTP test ends it. These controls do not replace saving the NTP configuration.
+
+### System — Security and stopping
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-system-security-password-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-system-security-password-en.png" alt="web-system-security-password-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Security
+      └─ Change password ←</pre></td></tr></table>
+
+To change the password, enter the current password, new password and its repeat. Save stores it and returns to sign-in with the new password. All three fields have an eye inside. Stop Gateway requires confirmation and stops the application and serial transports; Web disconnects too. It does not power off the OS. In HTTPS, a following section displays TLS state, certificate SHA-256 and expiry; HTTP omits that section.
+
+### Help
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-help-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-help-en.png" alt="web-help-en" width="600"></a></td><td><pre>Web
+└─ Help ←</pre></td></tr></table>
+
+Built-in Help covers getting started, Gateway settings, connections/cables, maintenance, diagnostics, hardware and sources. Images are examples: do not copy their IPs or settings as defaults. The complete current LCD tree is at the start of this guide.
+
+### About
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-about-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-about-en.png" alt="web-about-en" width="600"></a></td><td><pre>Web
+└─ About ←</pre></td></tr></table>
+
+Shows product, version, model, kernel and architecture. Include these details and the exact triggering action in an issue report. The panel header provides RU/EN language, theme switching and sign-out.
+

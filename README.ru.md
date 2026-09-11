@@ -38,7 +38,7 @@ RS-422 и возвращает его ответы программе. В Gatewa
 
 ## Дисплей и локальное меню
 
-<img src="assets/images/menu/home.png" alt="Главный экран и кнопки F1–F5" width="360">
+<table><tr><td><a href="assets/images/menu/home.png"><img src="assets/images/menu/home.png" alt="home" width="360"></a></td><td><pre>Home (F3 → Main Menu) ←</pre></td></tr></table>
 
 *Изображение главного экрана.*
 
@@ -49,7 +49,8 @@ RS-422 и возвращает его ответы программе. В Gatewa
 на подсказки кнопок внизу дисплея. Настройка портов, Apply/Keep/Revert сети и NTP
 описаны в [инструкции пользователя](docs/user-guide.ru.md).
 
-<img src="assets/images/menu/main-menu.png" alt="Главное меню, выбран Status" width="360">
+<table><tr><td><a href="assets/images/menu/main-menu.png"><img src="assets/images/menu/main-menu.png" alt="main-menu" width="360"></a></td><td><pre>Home
+└─ Main Menu (F3) ←</pre></td></tr></table>
 
 *Главное меню.*
 
@@ -61,13 +62,14 @@ RS-422 и возвращает его ответы программе. В Gatewa
 | Ports | Состояния и счётчики отдельных портов |
 | Configuration | Параметры линии и транспорта, переход к настройкам сети |
 | Diagnostics | Диагностика и события запуска |
-| System | Дата и время, информация о платформе, NTP |
+| System | Дата и время, платформа, NTP, Display / Backlight и Web Server |
 | Shutdown | Остановка Gateway; не выключает ОС Moxa |
 | About | Название продукта и версия |
 
 ### Состояния портов
 
-<img src="assets/images/menu/ports.png" alt="Список портов, выбран P1" width="360">
+<table><tr><td><a href="assets/images/menu/ports.png"><img src="assets/images/menu/ports.png" alt="ports" width="360"></a></td><td><pre>Main Menu
+└─ Ports ←</pre></td></tr></table>
 
 *Список портов.*
 
@@ -75,7 +77,9 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 **F3 Detail** открывает страницы состояния выбранного порта. `READY` означает
 готовность порта, а не подтверждённый ответ подключённого прибора.
 
-<img src="assets/images/menu/port-details.png" alt="Параметры подключения порта" width="360">
+<table><tr><td><a href="assets/images/menu/port-details.png"><img src="assets/images/menu/port-details.png" alt="port-details" width="360"></a></td><td><pre>Main Menu
+└─ Ports
+   └─ P1 ←</pre></td></tr></table>
 
 *Параметры подключения порта.*
 
@@ -86,12 +90,16 @@ F2/F4 перемещают выбор среди P1–P8; список прок�
 
 ### Конфигурация и сеть
 
-<img src="assets/images/menu/configuration.png" alt="Меню конфигурации" width="360">
+<table><tr><td><a href="assets/images/menu/configuration.png"><img src="assets/images/menu/configuration.png" alt="configuration" width="360"></a></td><td><pre>Main Menu
+└─ Configuration ←</pre></td></tr></table>
 
 F2/F4 выбирают порт, **F3 Select** открывает его настройки. **F5 Network**
 открывает страницы LAN, основного маршрута и DNS.
 
-<img src="assets/images/menu/network-lan2.png" alt="Подтверждённая политика LAN2" width="360">
+<table><tr><td><a href="assets/images/menu/network-lan2.png"><img src="assets/images/menu/network-lan2.png" alt="network-lan2" width="360"></a></td><td><pre>Main Menu
+└─ Configuration
+   └─ Network (F5)
+      └─ LAN2 ←</pre></td></tr></table>
 
 *Сетевые настройки LAN2.*
 
@@ -101,7 +109,10 @@ F5 открывает редактор, F1 возвращает назад. Из
 
 ### Часы и NTP
 
-<img src="assets/images/menu/network-time.png" alt="Настройки Network Time: NTP синхронизирован" width="360">
+<table><tr><td><a href="assets/images/menu/network-time.png"><img src="assets/images/menu/network-time.png" alt="network-time" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Platform (F4)
+      └─ Network Time (F5) ←</pre></td></tr></table>
 
 Откройте **System → F4 Platform → F5 Network Time**, чтобы посмотреть состояние синхронизации
 и настройки. **F5 Edit** открывает редактирование NTP. Штатный интервал — 1, 6
@@ -112,7 +123,8 @@ F5 открывает редактор, F1 возвращает назад. Из
 
 ### Диагностика
 
-<img src="assets/images/menu/diagnostics.png" alt="Счётчики диагностики" width="360">
+<table><tr><td><a href="assets/images/menu/diagnostics.png"><img src="assets/images/menu/diagnostics.png" alt="diagnostics" width="360"></a></td><td><pre>Main Menu
+└─ Diagnostics ←</pre></td></tr></table>
 
 *Счётчики диагностики.*
 
@@ -120,7 +132,9 @@ F5 открывает редактор, F1 возвращает назад. Из
 завершённых запросов, тайм-аутов, восстановлений, устаревших ответов и
 максимальную глубину очереди. **F3 Events** открывает события запуска.
 
-<img src="assets/images/menu/startup-events.png" alt="События запуска" width="360">
+<table><tr><td><a href="assets/images/menu/startup-events.png"><img src="assets/images/menu/startup-events.png" alt="startup-events" width="360"></a></td><td><pre>Main Menu
+└─ Diagnostics
+   └─ Startup Events (F3 Events on LCD) ←</pre></td></tr></table>
 
 *События запуска.*
 
@@ -192,3 +206,17 @@ HTTP рекомендуется для выделенной доверенной
 [Условия измерений и ограничения](docs/release-final.ru.md).
 
 [Предлагаемая политика RNG и изменения кода](docs/rng-autonomous-v1.ru.md) · [Область предварительного выпуска](docs/releases/v2026.02.01-scope.ru.md).
+
+### Web и новые пункты LCD
+
+[Полное дерево LCD, дерево Web и пошаговые действия](docs/user-guide.ru.md). System включает Display / Backlight и Web Server: включение, интерфейс, HTTP/HTTPS, одноразовый код, восстановление доступа, адреса и сертификат. Все семь разделов Web и формы настроек проиллюстрированы в руководстве.
+
+<table><tr><td><a href="assets/images/menu/web/web-server-http.png"><img src="assets/images/menu/web/web-server-http.png" alt="web-server-http" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ HTTP cleartext ←</pre></td></tr></table>
+
+<table><tr><td><a href="assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png"><img src="assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png" alt="web-system-web-server-http-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Web Server
+      └─ Protocol: HTTP ←</pre></td></tr></table>

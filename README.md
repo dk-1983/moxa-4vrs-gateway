@@ -34,11 +34,11 @@ returns its replies to the software. Select the same transport in Gateway and
 your software: **Modbus TCP, Modbus UDP, RTU over UDP, RAW TCP or RAW UDP**.
 Their connection and data-framing rules are described in the table above.
 
-The automatic installer and backlight controls are implemented, with scoped hardware acceptance from prior releases. Candidate v2026.02.01 adds Web and a separate CF preparation wizard; their tested boundaries are listed in the validation status.
+The automatic installer and backlight controls are implemented, with scoped hardware acceptance from prior releases. Release v2026.02.01 adds Web and a separate CF preparation wizard; their tested boundaries are listed in the validation status.
 
 ## Display and local menu
 
-<img src="assets/images/menu/home.png" alt="Home screen and F1–F5 keys" width="360">
+<table><tr><td><a href="assets/images/menu/home.png"><img src="assets/images/menu/home.png" alt="home" width="360"></a></td><td><pre>Home (F3 → Main Menu) ←</pre></td></tr></table>
 
 *Home screen.*
 
@@ -49,7 +49,8 @@ Port readiness is not proof of an instrument response. **F1 Help** opens help;
 between settings. See the [user guide](docs/user-guide.md) for port configuration,
 network Apply/Keep/Revert and NTP.
 
-<img src="assets/images/menu/main-menu.png" alt="Main menu with Status selected" width="360">
+<table><tr><td><a href="assets/images/menu/main-menu.png"><img src="assets/images/menu/main-menu.png" alt="main-menu" width="360"></a></td><td><pre>Home
+└─ Main Menu (F3) ←</pre></td></tr></table>
 
 *Main menu.*
 
@@ -61,13 +62,14 @@ Use **F2/F4** to move, **F3** to open a section and **F1** to return.
 | Ports | Individual port states and counters |
 | Configuration | Serial/transport settings and access to network settings |
 | Diagnostics | Diagnostics and startup events |
-| System | Date/time, platform information and NTP |
+| System | Date/time, platform, NTP, Display / Backlight and Web Server |
 | Shutdown | Stop Gateway; does not power off the Moxa OS |
 | About | Product and version information |
 
 ### Port status
 
-<img src="assets/images/menu/ports.png" alt="Ports list with P1 selected" width="360">
+<table><tr><td><a href="assets/images/menu/ports.png"><img src="assets/images/menu/ports.png" alt="ports" width="360"></a></td><td><pre>Main Menu
+└─ Ports ←</pre></td></tr></table>
 
 *Port list.*
 
@@ -75,7 +77,9 @@ Use F2/F4 to select among P1–P8; the list scrolls to reveal the remaining
 ports. **F3 Detail** opens the selected port's status pages. `READY` describes
 the port runtime, not a confirmed response from a connected instrument.
 
-<img src="assets/images/menu/port-details.png" alt="Port connection details" width="360">
+<table><tr><td><a href="assets/images/menu/port-details.png"><img src="assets/images/menu/port-details.png" alt="port-details" width="360"></a></td><td><pre>Main Menu
+└─ Ports
+   └─ P1 ←</pre></td></tr></table>
 
 *Port connection settings.*
 
@@ -86,12 +90,16 @@ settings, not the factory defaults. F2/F4 cycle through the four detail pages.
 
 ### Configuration and network
 
-<img src="assets/images/menu/configuration.png" alt="Configuration menu" width="360">
+<table><tr><td><a href="assets/images/menu/configuration.png"><img src="assets/images/menu/configuration.png" alt="configuration" width="360"></a></td><td><pre>Main Menu
+└─ Configuration ←</pre></td></tr></table>
 
 F2/F4 select a port; **F3 Select** opens its configuration. **F5 Network**
 opens the LAN, default-route and DNS pages.
 
-<img src="assets/images/menu/network-lan2.png" alt="Confirmed LAN2 policy" width="360">
+<table><tr><td><a href="assets/images/menu/network-lan2.png"><img src="assets/images/menu/network-lan2.png" alt="network-lan2" width="360"></a></td><td><pre>Main Menu
+└─ Configuration
+   └─ Network (F5)
+      └─ LAN2 ←</pre></td></tr></table>
 
 *LAN2 network settings.*
 
@@ -101,7 +109,10 @@ available during the confirmation window. See the [network instructions](docs/us
 
 ### Clock and NTP
 
-<img src="assets/images/menu/network-time.png" alt="Network Time settings with NTP synchronized" width="360">
+<table><tr><td><a href="assets/images/menu/network-time.png"><img src="assets/images/menu/network-time.png" alt="network-time" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Platform (F4)
+      └─ Network Time (F5) ←</pre></td></tr></table>
 
 Open **System → F4 Platform → F5 Network Time** to view synchronization status and settings.
 **F5 Edit** changes the NTP settings. Choose a normal interval of 1, 6 or 24 hours;
@@ -112,7 +123,8 @@ then automatically returns to the configured schedule.
 
 ### Diagnostics
 
-<img src="assets/images/menu/diagnostics.png" alt="Diagnostics counters" width="360">
+<table><tr><td><a href="assets/images/menu/diagnostics.png"><img src="assets/images/menu/diagnostics.png" alt="diagnostics" width="360"></a></td><td><pre>Main Menu
+└─ Diagnostics ←</pre></td></tr></table>
 
 *Diagnostics counters.*
 
@@ -120,7 +132,9 @@ Open **Main Menu → Diagnostics** to view accepted and completed requests,
 timeouts, recoveries, stale responses and the queue high-water mark.
 **F3 Events** opens startup events.
 
-<img src="assets/images/menu/startup-events.png" alt="Startup events" width="360">
+<table><tr><td><a href="assets/images/menu/startup-events.png"><img src="assets/images/menu/startup-events.png" alt="startup-events" width="360"></a></td><td><pre>Main Menu
+└─ Diagnostics
+   └─ Startup Events (F3 Events on LCD) ←</pre></td></tr></table>
 
 *Startup events.*
 
@@ -191,3 +205,17 @@ HTTP is recommended for a dedicated trusted management network and remains the d
 [Measurement conditions and limitations](docs/release-final.md).
 
 [Autonomous RNG operation](docs/rng-autonomous-v1.md) · [Release scope](docs/releases/v2026.02.01-scope.md).
+
+### Web and new LCD controls
+
+[Complete LCD/Web trees and operating instructions](docs/user-guide.md). System includes Display / Backlight and Web Server: enable, interface, HTTP/HTTPS, one-time code, access recovery, URLs and certificate. All seven Web sections and settings forms are illustrated in the guide.
+
+<table><tr><td><a href="assets/images/menu/web/web-server-http.png"><img src="assets/images/menu/web/web-server-http.png" alt="web-server-http" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ HTTP cleartext ←</pre></td></tr></table>
+
+<table><tr><td><a href="assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png"><img src="assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png" alt="web-system-web-server-http-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Web Server
+      └─ Protocol: HTTP ←</pre></td></tr></table>

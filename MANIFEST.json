@@ -32,12 +32,12 @@
     "sha256": "44d3f9fabdce9048bf2bb1f5ef9ba30111b695e8217dd028ab12c4e4e1b5c0a0"
   },
   "README.md": {
-    "bytes": 9759,
-    "sha256": "fa2bd4008d06af0a653d1240b275e439d2ea4581e0b748d6991babb90c504068"
+    "bytes": 11973,
+    "sha256": "2b3cba8874248a3268106e3cf67672dd12053930489766540736795c36695d1c"
   },
   "README.ru.md": {
-    "bytes": 15854,
-    "sha256": "2df39e8ef9232a128d3e8f123038c032c2643980e509011b5bdc74aefce81cae"
+    "bytes": 18075,
+    "sha256": "4d572686ee517eba4c1f04e30c0a24b4aa48f6c80b2ae3f4df6eb0402b92d606"
   },
   "SECURITY.md": {
     "bytes": 1234,
@@ -240,12 +240,12 @@
     "sha256": "92056303f2745ed1f106b73e3a9eecd2b065946ab85e895e620e19b2d36eb0eb"
   },
   "docs/cf-wizard.md": {
-    "bytes": 9269,
-    "sha256": "b8d8f658497c243d624490114dcd69b8e8d1227e174809c86db7f6074e1b6c18"
+    "bytes": 8231,
+    "sha256": "cd4e63e0868e8f1b28ab38e3913984bf212cfa4ba3812e33a5e09a88bed02531"
   },
   "docs/cf-wizard.ru.md": {
-    "bytes": 14763,
-    "sha256": "37cf5faf0a8a4e3bf2606bd3c0a478068b7b793698dc8dcc07686592c45fac0a"
+    "bytes": 13433,
+    "sha256": "9dec72f68913a1dc2174b2d47fc647f79ed197ef508568cf15debbcd6b024b9a"
   },
   "docs/forensics/moxa2-web-ipc-lan-return-20260911.ru.md": {
     "bytes": 2262,
@@ -256,12 +256,12 @@
     "sha256": "d3b0c65f4507993d1bfe6d5e03a4f6450b8732dff513c2c789d52ad26234b4ac"
   },
   "docs/installation.md": {
-    "bytes": 6014,
-    "sha256": "6290d6bcc2c233b164ddc95b8e453e3cc708e3e32255d29fd34f27f2de34a769"
+    "bytes": 1086,
+    "sha256": "8dc213c62027ddcfb9b204cc82f657d20035a22a9fc7789b1fdb8f51e2d7be8e"
   },
   "docs/installation.ru.md": {
-    "bytes": 8627,
-    "sha256": "dee9040bcc3566c537a764220c9dbc0d7a1fe7d05784eb6d1d77ef1423fb3290"
+    "bytes": 1785,
+    "sha256": "e70729e4dae1da479010258e2864e37ddec2b7f4ce1ce4fb369b9fcbd249acec"
   },
   "docs/missing-current-screens.md": {
     "bytes": 1254,
@@ -272,12 +272,12 @@
     "sha256": "b705d796f1706b021298fcaad687cb544448b9af944492bda75952f6ca542908"
   },
   "docs/release-final-commissioning.md": {
-    "bytes": 4589,
-    "sha256": "a3b4e56d075fad5496c78cc381d229cbf72669e391d75415246670bb0bdb6af9"
+    "bytes": 8481,
+    "sha256": "6f757a04ba3306115ac1209a529c81374bd4694222cd008e09d4b1d88a0ace1b"
   },
   "docs/release-final-commissioning.ru.md": {
-    "bytes": 7629,
-    "sha256": "4c172c879001ac296db982518afb2543a5d297da8c6dd961d719e9e82649df97"
+    "bytes": 13472,
+    "sha256": "e8018dec81f607784e32900371a9917bea0eaea14cca4f837da0e923cf738c95"
   },
   "docs/release-final-noop-hardware.md": {
     "bytes": 2728,
@@ -326,6 +326,14 @@
   "docs/releases/v2026.01.01.ru.md": {
     "bytes": 2255,
     "sha256": "588fdaf9e64a1453895ebccc1dff37e4b519f4f90a2d4b719caba5fdf8f338e3"
+  },
+  "docs/releases/v2026.02.01-documentation-r2.md": {
+    "bytes": 1824,
+    "sha256": "c7541f87be9d5d4677a971e7d8e6ea7481b79cd83c22aee4e0abb6a0f67a8c06"
+  },
+  "docs/releases/v2026.02.01-documentation-r2.ru.md": {
+    "bytes": 3185,
+    "sha256": "d98a19755c22b77a99673ac3cf503bd683d94d970e672ea7d10b5ee5c5446ab9"
   },
   "docs/releases/v2026.02.01-final-review.md": {
     "bytes": 1011,
@@ -392,20 +400,20 @@
     "sha256": "ca7bd7f222226c18f3f50ad64b99bc5a600aa04cfa00711dad852f0d7bb8e15c"
   },
   "docs/screens.md": {
-    "bytes": 8857,
-    "sha256": "6a31c43e868026a1417392cc63a4503fdb05b9bb6925c17f09c60a0a2798940b"
+    "bytes": 8907,
+    "sha256": "83265fe30f72555dea0f560a6793b0b043a3627229626e7ed4a7ca51d341585d"
   },
   "docs/screens.ru.md": {
-    "bytes": 9229,
-    "sha256": "f55ea575cf1b285a6d933ee27699e14cc2ad3638836996b27bf09f387bfbe99d"
+    "bytes": 9270,
+    "sha256": "6da7aa618dc818569335f9994d9f1d086e832c785954f11ce42decb8c7bb0814"
   },
   "docs/user-guide.md": {
-    "bytes": 17409,
-    "sha256": "8cd7b635742e169f6c69d94ac23fe3ade68fbacfd55c133f19969f4677699928"
+    "bytes": 31042,
+    "sha256": "f3802fe0a426deef79bb53c9ccf80736babbdc934d54d1da717569619ca9e8b8"
   },
   "docs/user-guide.ru.md": {
-    "bytes": 26717,
-    "sha256": "ec6cdf4ffa79242129ff664836e9a2447f95986470582bed8766c050169cb247"
+    "bytes": 45445,
+    "sha256": "764a31f4bdfc05abc5510ae3fe34eb5eaa0a6d17facdcc74decaa5e7614bb391"
   },
   "docs/validation.md": {
     "bytes": 174,
@@ -1837,7 +1845,7 @@
   },
   "tools/cf-package.py": {
     "bytes": 5807,
-    "sha256": "ced1c50615853e13993a4109586c9ccc525d082848bc00786e7f617837e4db65"
+    "sha256": "fc4330c0c9cb896b4d01dfba74bbcf678e3a8444c7b6e48def2682e2699919e6"
   },
   "tools/cf-wizard.py": {
     "bytes": 25693,

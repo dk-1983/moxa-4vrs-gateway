@@ -8,7 +8,7 @@ import struct
 import tarfile
 
 # The qualified Web candidate is immutable; update this pin only with a qualified delivery.
-ARCHIVE_SHA256 = 'f519719cadca03b98ae00870581068961aee450ba79b60c57a5c893d2a471690'
+ARCHIVE_SHA256 = '624f807edb127977e09dde918460653b32b2b6f3590869080a6c144e6478844c'
 PAYLOAD = {'4vrs-install', '4vrs-gateway', '4vrs-gateway.init',
            '4vrs-networking-wrapper', '4vrs-web', '4vrs-rng', '4vrs-kdf'}
 NAMES = PAYLOAD | {'manifest.json', 'SHA256SUMS', 'LICENSE.mbedtls', 'NOTICE'}

@@ -2,6 +2,23 @@
 
 [README](../README.ru.md) · [LCD / Web](screens.ru.md) · [Release scope](release-final.ru.md)
 
+## Содержание
+
+- [Требование к заводской прошивке](#требование-к-заводской-прошивке)
+- [Установка](#установка)
+- [Дерево меню](#дерево-меню)
+- [Дерево Web-панели](#дерево-web-панели)
+- [Эксплуатация и навигация](#эксплуатация-и-навигация)
+- [Главный экран](#главный-экран)
+- [Последовательные порты и транспорты](#последовательные-порты-и-транспорты)
+- [Настройки сети](#настройки-сети)
+- [Часы и NTP](#часы-и-ntp)
+- [Диагностика и остановка](#диагностика-и-остановка)
+- [Быстрая проверка проблем](#быстрая-проверка-проблем)
+- [Web на UC-7420-LX Plus](#web-на-uc-7420-lx-plus)
+- [LCD — подсветка и Web Server](#lcd--подсветка-и-web-server)
+- [Web — страницы и действия](#web--страницы-и-действия)
+
 ## Требование к заводской прошивке
 
 Перед установкой 4VRS Gateway на **Moxa UC-7420-LX Plus** обновите заводскую
@@ -62,14 +79,49 @@ Flash: заранее сохраните нужные настройки и об
     │           └── F1 Revert / истечение таймера — откатить
     ├── Diagnostics
     │   └── F3 Events → Startup Events → F2/F4: записи
-    ├── System
-    │   ├── Date & Time → F5 Set Time
-    │   └── F4 Platform
-    │       └── F5 Network Time
-    │           ├── F5 Edit: включение, сервер, интервал
-    │           └── F4 Test / Stop: диагностика NTP
+    ├── System — F2/F4: Date & Time ↔ Platform ↔ Display ↔ Web Server
+    │   ├── Date & Time → F5 Set Time → F3 Next → confirmation
+    │   ├── Platform → F5 Network Time
+    │   │   ├── F5 Edit: enable / server / interval → confirmation
+    │   │   └── F4 Test / Stop
+    │   ├── Display → F3 Open → Backlight → F3 Open
+    │   │   └── F2/F4 On/Off → F3 Save
+    │   └── Web Server → F3 Open
+    │       ├── Enable / Disable → F3 Set
+    │       ├── Iface LAN1 / LAN2 / Both → F3 Set
+    │       ├── New code → F3 Set → One-time code
+    │       ├── Recover access → F3 Set → F3 Yes / F1 No
+    │       ├── HTTP cleartext / HTTPS not rec. → F3 Set
+    │       └── F5 URLs → [HTTPS only] F5 Cert → SHA-256
     ├── Shutdown → подтверждение остановки Gateway
     └── About — название и версия
+```
+
+
+
+System открывается на Date & Time. F4 последовательно переключает Platform → Display → Web Server → Date & Time; F2 идёт в обратном направлении. Поэтому из Date & Time можно сразу попасть на Web Server кнопкой F2. Display и Web Server открываются F3; Network Time открывается F5 только на Platform. Названия дерева сохранены на языке LCD.
+
+## Дерево Web-панели
+
+```text
+Web
+├── Administrator sign in / initial enrollment / access recovery
+└── Signed in
+    ├── Overview → Refresh / Diagnostics
+    ├── Ports → P1 … P8 → Edit → Save
+    ├── Network → Review → Apply → Keep / Revert
+    ├── Diagnostics → Startup events / P1 … P8 Details
+    ├── System
+    │   ├── Web Server → State / Interface / Protocol → Save
+    │   ├── Backlight → Save
+    │   ├── NTP → Enabled / Server / Interval → Save
+    │   ├── Manual time → Save
+    │   ├── Test NTP / Stop NTP test
+    │   ├── Security → Change password → Save
+    │   ├── Stop Gateway → confirmation
+    │   └── [HTTPS only] TLS / HTTPS → status / certificate SHA-256
+    ├── Help
+    └── About
 ```
 
 ## Эксплуатация и навигация
@@ -414,3 +466,133 @@ HTTPS не рекомендуется для данного прибора из-
 HTTP рекомендуется для выделенной доверенной сети управления и остаётся режимом по умолчанию новой установки. HTTP передаёт пароль и данные без шифрования. HTTPS (TLS) остаётся доступной, но не рекомендуемой опцией на Moxa UC-7420-LX Plus. Обновление сохраняет явный выбор HTTP/HTTPS; конфигурация schema 1/2 без поля протокола сохраняет прежний HTTPS. Ограничение одним клиентом и хеширование пароля не защищают передаваемые по HTTP данные.
 
 [Measurement conditions / условия измерений](release-final.ru.md).
+
+## LCD — подсветка и Web Server
+
+<table><tr><td><a href="../assets/images/menu/system-display.png"><img src="../assets/images/menu/system-display.png" alt="system-display" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/display-menu.png"><img src="../assets/images/menu/display-menu.png" alt="display-menu" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2)
+      └─ F3 Open → Display menu ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/backlight-on.png"><img src="../assets/images/menu/backlight-on.png" alt="backlight-on" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Display (F4 × 2, F3 Open)
+      └─ Backlight (F3 Open) → On ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-system-menu.png"><img src="../assets/images/menu/web/web-system-menu.png" alt="web-system-menu" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2 from Date & Time) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-server-http.png"><img src="../assets/images/menu/web/web-server-http.png" alt="web-server-http" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ HTTP cleartext ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-https-addresses.png"><img src="../assets/images/menu/web/web-https-addresses.png" alt="web-https-addresses" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ URLs (F5) ←</pre></td></tr></table>
+
+<table><tr><td><a href="../assets/images/menu/web/web-certificate.png"><img src="../assets/images/menu/web/web-certificate.png" alt="web-certificate" width="360"></a></td><td><pre>Main Menu
+└─ System
+   └─ Web Server (F2, F3 Open)
+      └─ URLs (F5)
+         └─ Cert (F5) ←</pre></td></tr></table>
+
+На странице Display нажмите F3, затем F3 на Backlight; F2/F4 выбирают On/Off, F3 сохраняет. Stored — сохранённый выбор, Command — результат команды подсветке.
+
+В Web Server F2/F4 выбирают одну из пяти строк. Enable/Disable — действие, поэтому надпись Disable при Running означает, что сервер включён. F3 меняет выбранное включение, интерфейс или протокол и запускает сохранение. Дождитесь завершения Saving…; повторное переключение не требует выхода через F5/F1. При Save failed или Config conflict проверьте результат и откройте страницу заново. New code выдаёт одноразовый код, Recover access запрашивает подтверждение. F5 открывает адреса; Unavailable означает отсутствие доступного URL на данном интерфейсе. В HTTPS F5 Cert показывает отпечаток: сравните все 64 знака SHA-256 с сертификатом браузера. F1 возвращает к Web Server.
+
+## Web — страницы и действия
+
+Один Web TCP-сеанс обслуживается одновременно; дополнительные TCP-соединения закрываются до TLS и не вытесняют действующее. Это ограничение соединений, а не гарантия одной вкладки или одного пользователя. При отказе подключения закройте лишние подключения и повторите после освобождения текущего.
+
+### Вход и восстановление доступа
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-sign-in-security-help-ru.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-sign-in-security-help-ru.png" alt="web-sign-in-security-help-ru" width="600"></a></td><td><pre>Web
+└─ Вход администратора
+   └─ Справка о соединении ←</pre></td></tr></table>
+
+Первый администратор создаётся по одноразовому коду с LCD и вашему новому паролю. Код действует три минуты, допускается не более пяти попыток. Для нового кода откройте LCD System → Web Server → New code. Последующий вход требует только пароля. Пароль занимает 12–128 байт UTF-8; это не всегда 12–128 символов. Глаз внутри каждого поля показывает или скрывает только это поле. «Забыли пароль?» запрашивает подтверждение на приборе: F3 подтверждает восстановление, затем введите код с дисплея и новый пароль. Это восстановление Web-доступа, а не сброс конфигурации портов.
+
+### Обзор — Overview
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-overview-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-overview-en.png" alt="web-overview-en" width="600"></a></td><td><pre>Web
+└─ Overview ←</pre></td></tr></table>
+
+Показывает готовность портов, TCP-соединения, аварии портов, состояние Web, часов и время работы ОС. Refresh обновляет данные, Diagnostics открывает диагностику. Следите за отметкой обновления: устаревший снимок не доказывает текущее состояние. Готовность порта и TCP-соединение сами по себе не подтверждают успешный ответ датчика.
+
+### Порты — Ports
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-ports-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-ports-en.png" alt="web-ports-en" width="600"></a></td><td><pre>Web
+└─ Ports ←</pre></td></tr></table>
+
+В списке P1–P8 указаны включение, UART, транспорт и адрес прослушивания. Edit открывает настройки выбранного физического порта. Disabled не означает отсутствующий аппаратный порт. Адрес 0.0.0.0 означает прослушивание всех подходящих локальных адресов; клиент подключается к реальному IP прибора.
+
+### Настройка порта
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-port-p1-settings-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-port-p1-settings-en.png" alt="web-port-p1-settings-en" width="600"></a></td><td><pre>Web
+└─ Ports
+   └─ P1 → Edit ←</pre></td></tr></table>
+
+Настройте State, Serial mode, Baud, Data bits, Parity, Stop bits, Transport, Bind IP, TCP/UDP port и при необходимости Special baud. Изменения вступают в силу после Save. Проверьте результат и фактический обмен: изменение UART или транспорта может прервать текущие соединения. При конфликте с настройкой из LCD откройте форму заново и повторно проверьте значения.
+
+### Сеть — Network
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-network-settings-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-network-settings-en.png" alt="web-network-settings-en" width="600"></a></td><td><pre>Web
+└─ Network ←</pre></td></tr></table>
+
+LAN1 и LAN2 настраиваются отдельно: Static/DHCP, IP, маска и шлюз. Default route выбирает интерфейс основного маршрута; DNS задаёт серверы вручную либо источник DHCP. Observed отражает наблюдаемое состояние, а не только сохранённую настройку. Review показывает общий проект изменений и ничего не применяет. Apply запускает временное применение; при смене адреса подключитесь к новому. Keep подтверждает сохранение в течение 60 секунд. Revert или истечение времени возвращает предыдущую сеть. Не запускайте новый проект сети, пока предыдущая операция ожидает подтверждения.
+
+### Диагностика — события запуска
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-startup-events-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-startup-events-en.png" alt="web-diagnostics-startup-events-en" width="600"></a></td><td><pre>Web
+└─ Diagnostics
+   └─ Startup Events ←</pre></td></tr></table>
+
+Таблица содержит историю этапов запуска, а не текущий процент загрузки. Прочерк в Ports означает, что событие не привязано к порту; в Error — отсутствие указанной ошибки. Это не потерянные счётчики. Строки Starting остаются историческими событиями даже после Ready / Completed / 100%. Кнопки P1–P8 открывают детали портов.
+
+### Диагностика порта
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-port-p1-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-port-p1-en.png" alt="web-diagnostics-port-p1-en" width="600"></a></td><td><pre>Web
+└─ Diagnostics
+   └─ P1 ←</pre></td></tr></table>
+
+Состояние и Last error дополняются счётчиками текущего запуска порта: запросы, ответы, тайм-ауты, восстановления, очередь, CRC и ошибки протокола, RAW-байты. Ноль — числовое значение счётчика; прочерк в таблице событий имеет другой смысл. Счётчики зависят от транспорта, не являются постоянным архивом измерений и не доказывают отсутствие потерь в непроверенных режимах.
+
+### Система — Web Server, подсветка и время
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png" alt="web-system-web-server-http-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Web Server
+      └─ Protocol: HTTP ←</pre></td></tr></table>
+
+Web Server содержит State, Interface (LAN1/LAN2/Both) и Protocol (HTTP/HTTPS). Save применяет выбранные параметры; изменение протокола или интерфейса может разорвать текущий Web-сеанс. Откройте адрес с нужной схемой http:// или https://, показанный LCD F5 URLs. Backlight имеет отдельную кнопку Save. NTP сохраняет включение, сервер и интервал 1/6/24 часа; Manual time отдельно устанавливает дату и время. Test NTP выполняет до трёх попыток с минутным интервалом, Stop NTP test останавливает тест. Эти кнопки не заменяют сохранение настроек NTP.
+
+### Система — Security и остановка
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-system-security-password-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-system-security-password-en.png" alt="web-system-security-password-en" width="600"></a></td><td><pre>Web
+└─ System
+   └─ Security
+      └─ Change password ←</pre></td></tr></table>
+
+Для смены пароля введите текущий пароль, новый и повтор нового. Save сохраняет пароль и возвращает к входу с новым паролем. Глаза расположены внутри всех трёх полей. Stop Gateway требует подтверждения, останавливает приложение и последовательные транспорты; Web также отключается. Это не выключение питания ОС. В HTTPS ниже показываются TLS-состояние, SHA-256 сертификата и срок действия; в HTTP этот блок отсутствует.
+
+### Справка — Help
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-help-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-help-en.png" alt="web-help-en" width="600"></a></td><td><pre>Web
+└─ Help ←</pre></td></tr></table>
+
+Встроенная справка содержит начало работы, настройки Gateway, соединения и кабели, обслуживание, диагностику, сведения об оборудовании и источниках. Изображения — примеры, их IP и параметры не следует копировать как значения по умолчанию. Полное актуальное дерево LCD приведено в начале этого руководства.
+
+### О программе — About
+
+<table><tr><td><a href="../assets/images/screenshots/web-v2026.02.01-public/web-about-en.png"><img src="../assets/images/screenshots/web-v2026.02.01-public/web-about-en.png" alt="web-about-en" width="600"></a></td><td><pre>Web
+└─ About ←</pre></td></tr></table>
+
+Показывает продукт, версию, модель, ядро и архитектуру. При обращении по ошибке сообщите эти данные и точное действие, после которого возникла проблема. Вверху панели доступны язык RU/EN, переключение темы и выход из сеанса.
+

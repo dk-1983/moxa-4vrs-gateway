@@ -1,22 +1,8 @@
-> [Current commissioning / Актуальный ввод в эксплуатацию](release-final-commissioning.md).
+# CompactFlash wizard — v2026.02.01 / Ubuntu 24.04
 
-# CompactFlash installation and update — Ubuntu 24.04
+[Installation](installation.md) · [Initial activation](release-final-commissioning.md) · [Limits](release-final.md)
 
-> Current [release matrix](release-final.md). The user reduced the series to 10; 10/10 completed. Hardware no-op acceptance is closed; ready for release within the matrix scope. No power-series repeat is required.
-
-> Current candidate — **web-ipc-v1**: [safe Web IPC recovery after power loss](web-ipc-lifecycle.md). The agreed 10/10 power-cycle series is complete; the previous FAIL belongs to the old candidate.
-
-> Current local candidate includes the [slow NV commit fix](rng-autonomous-v1-slow-commit.md):
-> up to 30 seconds for RNG, stop after commit outcome, installer compatibility with schema 3.
-
-Current local bundle uses autonomous RNG schema 3. The wizard verifies schemas 1/2/3, including matching state/witness; new CF requires one explicit activation after preparation. See [policy and commands](rng-autonomous-v1.md). Normal restarts require no service.
-
-[Русский](cf-wizard.ru.md)
-
-Offline tool for Ubuntu 24.04 **x86-64** and Moxa UC-7420-LX Plus. The kit includes
-the complete qualified Web candidate and the existing native CF-bootstrap worker.
-It never connects to a Moxa or changes factory firmware. PC preparation ends with
-**activation pending**, not with a commissioned device.
+The wizard runs offline on Ubuntu 24.04 x86-64. It prepares CF and stages the complete installer; it does not connect to the device or change vendor firmware. New CF requires separate explicit RNG activation. Consistent active schema 3 restarts autonomously.
 
 ## Vendor firmware requirement
 
@@ -56,7 +42,7 @@ directory, then verify the kit:
 
 ```sh
 sudo install -d -m 0755 /opt/4vrs-cf-install-update
-sudo unzip 4vrs-cf-wizard-v2026.02.01-final-review.zip -d /opt/4vrs-cf-install-update
+sudo unzip 4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip -d /opt/4vrs-cf-install-update
 cd /opt/4vrs-cf-install-update
 sha256sum -c SHA256SUMS
 sudo python3 cf-wizard.py --list
@@ -108,7 +94,7 @@ the update. The wizard never provisions RNG in this scenario.
 The first mount is `ro,noload,nodev,nosuid,noexec`; used bytes and escaped top-level
 names are displayed without traversing private state. Confirm the exact **UPDATE**
 phrase. The complete package is staged separately under
-`4vrs-packages/gateway-f519719cadca03b9`. Active `4vrs/bin`, configurations,
+`4vrs-packages/gateway-624f807edb127977`. Active `4vrs/bin`, configurations,
 administrator/password state, TLS certificate/private key and current RNG are
 unchanged. Existing files are never copied into the portable kit or report.
 
@@ -155,9 +141,6 @@ sends passwords and data without encryption: use a dedicated trusted management
 network. HTTPS remains selectable but is not recommended on this device because
 of processing overhead and connection delays.
 
-Qualification uses file images with an injected mount boundary and public test
-RNG, not physical CF. Real mounting, removal, power loss and hardware commissioning
-remain unverified by this local task. On any failure, preserve files, check mounts,
-and do not remove the card until it is normally unmounted.
+Hardware checks covered new CF preparation/commissioning and 10 power cycles after completed commit. Power loss within writes, NAND lifetime and eight loaded physical ports remain unqualified. See the [release matrix](release-final.md).
 
 [Exact commissioning procedure](release-final-commissioning.md).
