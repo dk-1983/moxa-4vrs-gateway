@@ -1,0 +1,119 @@
+[
+    {
+        "file":  "web-about-en.png",
+        "source_sha256":  "86d084097f43f93ef497b98caa950820fe108380be374c68536c338d00116be0",
+        "sha256":  "2661c8bf8865d8fedec0c3ccb0b4689728cd1c039ea2bf5783f918b480ee78a2",
+        "crop":  [
+                     0,
+                     143,
+                     3834,
+                     1864
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-diagnostics-port-p1-en.png",
+        "source_sha256":  "a864efa08e5708ef0a20deb7dc7b679f4a506c0e8768dccf8df8c1b90d89b287",
+        "sha256":  "e3f2d6b6c90ec618ef6e4241cd33443b0a1bbf7bd2af5868780cf4a66c8400bf",
+        "crop":  [
+                     0,
+                     144,
+                     3832,
+                     1849
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-diagnostics-startup-events-en.png",
+        "source_sha256":  "13c23f99b3fe84bf08d42245a8a22bd805578dd289cdeaa8bb67b1636ec51c69",
+        "sha256":  "872974e3f3a3f319da6b30ce93fb11824378551c86bad583553bf1c29121a69b",
+        "crop":  [
+                     0,
+                     137,
+                     3829,
+                     1859
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-help-en.png",
+        "source_sha256":  "8706e3dc0134848c6ecd8a17efc0e4c4bb1ad6938c5fedd7e4b26054e3eb2890",
+        "sha256":  "212e32fe176cfe8fef6a90d0fd6d9ee380c25d30b0028fe2e90a516cafcf9e19",
+        "crop":  [
+                     0,
+                     140,
+                     3815,
+                     1860
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-network-settings-en.png",
+        "source_sha256":  "9c1b0680f4de227d71a8da2a27403b12d405c1d7dd7b74b25905f4d9a6bf7786",
+        "sha256":  "11a4ec6f4c5f3f127de415f1c3358ba04858b3541cc9ebbfdf6f3f3e57f72768",
+        "crop":  [
+                     0,
+                     143,
+                     3830,
+                     1862
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-overview-en.png",
+        "source_sha256":  "16edb7c530b8c78a02cddc1fdd91316db74ad9dfd790f4c0a4e6ac07215ce973",
+        "sha256":  "d6e83fda3903618a4746cbd79f6b5da027ba3bccc4ac367f820d871ef9593ed3",
+        "crop":  [
+                     0,
+                     139,
+                     3829,
+                     1857
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-port-p1-settings-en.png",
+        "source_sha256":  "e746e8292406d4734a762d6487af20a2031b168e75bfb87bccf9b836035c194e",
+        "sha256":  "9563d30aefe0d3c84faa49a259bd5ed479285a6bd1d966ee1bf779d0ecda9816",
+        "crop":  [
+                     0,
+                     148,
+                     3836,
+                     1861
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-ports-en.png",
+        "source_sha256":  "4d91816f994c2c215ef20b5a57bbf2b5b56a5c62df2fc021b8107e644f079f52",
+        "sha256":  "71589ce6ce440496ad356c85f9d145fc097db62d7c4f7cdd2c60131f9fdf3ab9",
+        "crop":  [
+                     0,
+                     140,
+                     3813,
+                     1860
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    },
+    {
+        "file":  "web-sign-in-security-help-ru.png",
+        "source_sha256":  "88b3f8f2c55915de6cbaa3026c12239fe4c303cf3b60eb391ae18a69e590f6c0",
+        "sha256":  "9bdc3b84758bbcb4c87e2369e0d6d1b3ab3194deab2162b77fa4160c6941a6ef",
+        "crop":  [
+                     0,
+                     137,
+                     3832,
+                     1861
+                 ],
+        "pixel_comparison":  "SHA256 of every retained decoded ARGB pixel matches",
+        "method":  "rectangle crop only; no image generation"
+    }
+]

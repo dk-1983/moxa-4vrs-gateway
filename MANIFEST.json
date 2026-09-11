@@ -1,15 +1,51 @@
 {
+  ".devcontainer/Dockerfile": {
+    "bytes": 416,
+    "sha256": "c802676c85e4568b2f48ff9ca44d47ab8fb91c8e020fdf2031f9746601623cdc"
+  },
+  ".devcontainer/devcontainer.json": {
+    "bytes": 681,
+    "sha256": "e29b260a95e2618619b66ec5b48caba2e20e0b316ccc0919e4a5751223f3f929"
+  },
+  ".dockerignore": {
+    "bytes": 3,
+    "sha256": "27f8eb8e845cec69706c9322b65654b2b1d0c8a226bfa711f99b8b7df24c217d"
+  },
+  ".gitattributes": {
+    "bytes": 54,
+    "sha256": "d47daeb1e95936b706bb9c7a86ccdfcf6d54f5ec8679d78f97455dbd0ebeee97"
+  },
+  ".gitignore": {
+    "bytes": 550,
+    "sha256": "55e3f3175f7837c45facb726bc1998748fce42092b1487bf218e26b493c08719"
+  },
+  "CONTRIBUTING.md": {
+    "bytes": 1757,
+    "sha256": "836951032a820687c006887093b59f77efb6397c6afc2af4a4de79963a479cb3"
+  },
+  "CONTRIBUTING.ru.md": {
+    "bytes": 3147,
+    "sha256": "d44724410c36fd1c1fca2fdfb3829c8874a607f24ece0e180930bd6596ee3885"
+  },
   "LICENSE": {
     "bytes": 1073,
     "sha256": "44d3f9fabdce9048bf2bb1f5ef9ba30111b695e8217dd028ab12c4e4e1b5c0a0"
   },
   "README.md": {
-    "bytes": 319,
-    "sha256": "f303d6e4e1f827885b1b6ce5c666d28b5501c3fa779309abecd9e8d7044951b0"
+    "bytes": 9796,
+    "sha256": "f101f6ecd43761a1fc36d20a116d4d5b4d36b8b98e8d25bb321333fceac0d53d"
   },
   "README.ru.md": {
-    "bytes": 380,
-    "sha256": "6a100a03cb2e9bdc8c23b1d275cfd528e0285e559a70b4ba1fec5e8011586878"
+    "bytes": 15839,
+    "sha256": "3afce9be8de12b5f3789f7e0d1cbfd88f00b878393911145b9093f6a0141898b"
+  },
+  "SECURITY.md": {
+    "bytes": 1234,
+    "sha256": "d297b6f5618c8738abcf1f2640335a7b7158a9da13e29404f00c7f57b77f21c3"
+  },
+  "SECURITY.ru.md": {
+    "bytes": 2054,
+    "sha256": "4486b81736ee5de0799135971f794b2143cd2dd04844280865b2bfe2fda98505"
   },
   "THIRD_PARTY.md": {
     "bytes": 1424,
@@ -59,9 +95,157 @@
     "bytes": 4260,
     "sha256": "aee0b61979d4d8b6ee47c383f87cd4c17485a9e71cffc26bf62dc2e38377b715"
   },
+  "assets/images/banner.png": {
+    "bytes": 1762912,
+    "sha256": "29d5729518e33270c6d055ae929dbb3c1d4ffe7bf3af2d65cc8817c0ade73b31"
+  },
+  "assets/images/menu/README.md": {
+    "bytes": 3169,
+    "sha256": "019408b3dec1615666c452b4c971eab5f3dc63cfb72c04be84dda7ba710d4566"
+  },
+  "assets/images/menu/backlight-on.png": {
+    "bytes": 2210619,
+    "sha256": "3d96c7b2095487a8d08def51bfe9ec4744489c10de4f10062fc95c0bd8202a69"
+  },
+  "assets/images/menu/configuration.png": {
+    "bytes": 2103454,
+    "sha256": "ce8f09d6b152ef4591fa2c9176ae197cecdcb2c273bab8c490ae2e4fa1c8188d"
+  },
+  "assets/images/menu/diagnostics.png": {
+    "bytes": 2088376,
+    "sha256": "b446b9887959dc8081d245c3f588d03e442ab513add99304d7d06ea0cf6a8fd8"
+  },
+  "assets/images/menu/display-menu.png": {
+    "bytes": 2223047,
+    "sha256": "68616d45919c1b3d9e6cfbfb2e167ff3e974773335b5ba5b17e2e851ab39f5e8"
+  },
+  "assets/images/menu/home.png": {
+    "bytes": 2069243,
+    "sha256": "b1f973f5384b9366a8b5fdb072c82c4f9c6bf7dd3bfd5db2cf114b1f127ad007"
+  },
+  "assets/images/menu/main-menu.png": {
+    "bytes": 2376250,
+    "sha256": "5a0bc77dddf2e5e2c8ac89389449a4732f829aaee0318ff7bbd5225821d2df0b"
+  },
+  "assets/images/menu/network-lan2.png": {
+    "bytes": 2010636,
+    "sha256": "d88e401992f65e5dabb6b6e9987ae5bc62e4830b89eee260918541baa93d643f"
+  },
+  "assets/images/menu/network-time.png": {
+    "bytes": 2476147,
+    "sha256": "616f12b57e1b8459a921fb0b9efc04618a288be5d4145d89858ee58f9b90aea9"
+  },
+  "assets/images/menu/port-details.png": {
+    "bytes": 2118784,
+    "sha256": "251e98fd357e2b17396d7e369b0c92191b78d18587cc716df33dc27c98f76f98"
+  },
+  "assets/images/menu/ports.png": {
+    "bytes": 2417326,
+    "sha256": "a421d6506588ac9c67b891c1c3ef19631ff9658985c6b9fed920d499402b2404"
+  },
+  "assets/images/menu/startup-events.png": {
+    "bytes": 2374216,
+    "sha256": "b7c08378f0970cd1af8389c25370cb8784ba89ee34186bf0e6848c20b3c26473"
+  },
+  "assets/images/menu/system-display.png": {
+    "bytes": 2146716,
+    "sha256": "9bf910989c8b6d10bb2b517c3d1ad676b070aa4e79de04c0de8e7e6a0b97d720"
+  },
+  "assets/images/menu/web/web-certificate.png": {
+    "bytes": 2088909,
+    "sha256": "da25cd52eafbcf7aef0e1d7046aadaba13ca93a562a74268d8c457d2007bb3eb"
+  },
+  "assets/images/menu/web/web-https-addresses.png": {
+    "bytes": 1940207,
+    "sha256": "66e46c10b7690fb207f87083a06c0d9f2d5f59e208ae8b5165295120086ddc65"
+  },
+  "assets/images/menu/web/web-server-http.png": {
+    "bytes": 1947676,
+    "sha256": "2227942336d7032e01e21eaa0f54471ceeae7e3c88999f3f68028920298e03aa"
+  },
+  "assets/images/menu/web/web-system-menu.png": {
+    "bytes": 2102761,
+    "sha256": "5aa533c48882ed0365f5181666e66dcbb105fa0361e6ae9ee4494dccc30f70e1"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/manifest.json": {
+    "bytes": 4866,
+    "sha256": "a1822a9f76d8b89eed4469e3ddbef959992e24c6801c1bf5d73d006106ee6ec6"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-about-en.png": {
+    "bytes": 93196,
+    "sha256": "2661c8bf8865d8fedec0c3ccb0b4689728cd1c039ea2bf5783f918b480ee78a2"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-port-p1-en.png": {
+    "bytes": 119628,
+    "sha256": "e3f2d6b6c90ec618ef6e4241cd33443b0a1bbf7bd2af5868780cf4a66c8400bf"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-diagnostics-startup-events-en.png": {
+    "bytes": 165390,
+    "sha256": "872974e3f3a3f319da6b30ce93fb11824378551c86bad583553bf1c29121a69b"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-help-en.png": {
+    "bytes": 713915,
+    "sha256": "212e32fe176cfe8fef6a90d0fd6d9ee380c25d30b0028fe2e90a516cafcf9e19"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-network-settings-en.png": {
+    "bytes": 86674,
+    "sha256": "11a4ec6f4c5f3f127de415f1c3358ba04858b3541cc9ebbfdf6f3f3e57f72768"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-overview-en.png": {
+    "bytes": 120720,
+    "sha256": "d6e83fda3903618a4746cbd79f6b5da027ba3bccc4ac367f820d871ef9593ed3"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-port-p1-settings-en.png": {
+    "bytes": 119665,
+    "sha256": "9563d30aefe0d3c84faa49a259bd5ed479285a6bd1d966ee1bf779d0ecda9816"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-ports-en.png": {
+    "bytes": 142314,
+    "sha256": "71589ce6ce440496ad356c85f9d145fc097db62d7c4f7cdd2c60131f9fdf3ab9"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-sign-in-security-help-ru.png": {
+    "bytes": 92127,
+    "sha256": "9bdc3b84758bbcb4c87e2369e0d6d1b3ab3194deab2162b77fa4160c6941a6ef"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-system-security-password-en.png": {
+    "bytes": 136153,
+    "sha256": "0b2ac046545f7b037cbe468f50151351670c6e94227a5a1c4425aa87a140eb4e"
+  },
+  "assets/images/screenshots/web-v2026.02.01-public/web-system-web-server-http-en.png": {
+    "bytes": 144232,
+    "sha256": "2838e48cdcbec972a30f97e4d21ba06b7d3424eec397114f7907e2e942c07bd8"
+  },
   "deploy/.gitkeep": {
     "bytes": 1,
     "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  "deploy/4vrs-gateway.init": {
+    "bytes": 1499,
+    "sha256": "169aa50191e73b918664d2497714ec4e63bbc01e9baf0035ffe7ddbde109e894"
+  },
+  "deploy/4vrs-networking-wrapper": {
+    "bytes": 891,
+    "sha256": "e3805881e1d51ff2315d11e92ab0abf14dd6331fc7d825af12e9925120c6458b"
+  },
+  "docs/architecture/build-environment.md": {
+    "bytes": 4966,
+    "sha256": "dc58e3a01108aa6279c1c280e01dfb39d373461c46141d5ec2f33d166a92a6a7"
+  },
+  "docs/backlight.md": {
+    "bytes": 1965,
+    "sha256": "63dc1c36644ff6d011db12630badeb4be2361517d101b3964feac3ff33fd915c"
+  },
+  "docs/backlight.ru.md": {
+    "bytes": 2471,
+    "sha256": "92056303f2745ed1f106b73e3a9eecd2b065946ab85e895e620e19b2d36eb0eb"
+  },
+  "docs/cf-wizard.md": {
+    "bytes": 9269,
+    "sha256": "b8d8f658497c243d624490114dcd69b8e8d1227e174809c86db7f6074e1b6c18"
+  },
+  "docs/cf-wizard.ru.md": {
+    "bytes": 14763,
+    "sha256": "37cf5faf0a8a4e3bf2606bd3c0a478068b7b793698dc8dcc07686592c45fac0a"
   },
   "docs/forensics/moxa2-web-ipc-lan-return-20260911.ru.md": {
     "bytes": 2262,
@@ -70,6 +254,22 @@
   "docs/forensics/moxa2-web-ipc-power-cycles-20260911.ru.md": {
     "bytes": 6535,
     "sha256": "d3b0c65f4507993d1bfe6d5e03a4f6450b8732dff513c2c789d52ad26234b4ac"
+  },
+  "docs/installation.md": {
+    "bytes": 6014,
+    "sha256": "6290d6bcc2c233b164ddc95b8e453e3cc708e3e32255d29fd34f27f2de34a769"
+  },
+  "docs/installation.ru.md": {
+    "bytes": 8627,
+    "sha256": "dee9040bcc3566c537a764220c9dbc0d7a1fe7d05784eb6d1d77ef1423fb3290"
+  },
+  "docs/missing-current-screens.md": {
+    "bytes": 1254,
+    "sha256": "a65422bed5710e459fcc745a81c74dd78e038b8bac08a1d7e48b8a38e0f2ae9d"
+  },
+  "docs/missing-current-screens.ru.md": {
+    "bytes": 1652,
+    "sha256": "b705d796f1706b021298fcaad687cb544448b9af944492bda75952f6ca542908"
   },
   "docs/release-final-commissioning.md": {
     "bytes": 4589,
@@ -103,6 +303,30 @@
     "bytes": 8025,
     "sha256": "e5b978daa87af510099d82c6c39b6816b74c255139cdd2cd340f356df9061662"
   },
+  "docs/releases/v2026.01.00-evidence.json": {
+    "bytes": 27985,
+    "sha256": "844edc457055f63e852c563f40139879e46c6d44a52315019feda7a067379774"
+  },
+  "docs/releases/v2026.01.00.md": {
+    "bytes": 1553,
+    "sha256": "a87f1ccaf80702a2c25763a2d6a2e3cded05de40ff0966298cab98f251b82166"
+  },
+  "docs/releases/v2026.01.00.ru.md": {
+    "bytes": 2269,
+    "sha256": "32ab1bfce25edbcc65fac2fe642dc6feaeb6f6112401f1a42adafa6fd15506a9"
+  },
+  "docs/releases/v2026.01.01-evidence.json": {
+    "bytes": 14377,
+    "sha256": "9e22e62590da64eeb880adb07905bcf916efda044700f25ecca0dc896915d0d3"
+  },
+  "docs/releases/v2026.01.01.md": {
+    "bytes": 1446,
+    "sha256": "a2ac2b54f4b3229c898e2963ab1342d225f878e3b27111b54c6bc2ac46b504ce"
+  },
+  "docs/releases/v2026.01.01.ru.md": {
+    "bytes": 2255,
+    "sha256": "588fdaf9e64a1453895ebccc1dff37e4b519f4f90a2d4b719caba5fdf8f338e3"
+  },
   "docs/releases/v2026.02.01-final-review.md": {
     "bytes": 1011,
     "sha256": "c45d6ce81f0d2cd0fec89e41ec9410f6a75b07b5102da9485343e33278c360e2"
@@ -110,6 +334,30 @@
   "docs/releases/v2026.02.01-final-review.ru.md": {
     "bytes": 1683,
     "sha256": "a3e874b5b0738e00e2882720f21f5d0444dca98b861c20739f5290fde98918bc"
+  },
+  "docs/releases/v2026.02.01-install.md": {
+    "bytes": 140,
+    "sha256": "e8d2c18413309e7db93b8d9807c3bfc9a24766acd5935b7987a764b1c1838d97"
+  },
+  "docs/releases/v2026.02.01-install.ru.md": {
+    "bytes": 146,
+    "sha256": "6a056da338c84d35f4ae1245d2aede46b9188100af9f1cae4149ccd44fb4aa89"
+  },
+  "docs/releases/v2026.02.01-scope.md": {
+    "bytes": 177,
+    "sha256": "d4c445c0c55029e34f9d94899bad316ab93727bc897776a7047ba69b5358d66a"
+  },
+  "docs/releases/v2026.02.01-scope.ru.md": {
+    "bytes": 180,
+    "sha256": "bde039cdf54282423cd677b1c748754f22a366c4bb99744f0f1e8c33650dc12e"
+  },
+  "docs/releases/v2026.02.01.md": {
+    "bytes": 175,
+    "sha256": "6cc8cfbbe50e756ae7395ac8a63feefad06e9e64e8b68c3d673f448758e00d5a"
+  },
+  "docs/releases/v2026.02.01.ru.md": {
+    "bytes": 178,
+    "sha256": "cdc221ef8be703c661ed66fb9b27a6fd0bc285032b1a300ad3e82c589801645e"
   },
   "docs/rng-autonomous-v1-hardware.md": {
     "bytes": 3487,
@@ -142,6 +390,38 @@
   "docs/rng-autonomous-v1.ru.md": {
     "bytes": 12634,
     "sha256": "ca7bd7f222226c18f3f50ad64b99bc5a600aa04cfa00711dad852f0d7bb8e15c"
+  },
+  "docs/screens.md": {
+    "bytes": 8857,
+    "sha256": "6a31c43e868026a1417392cc63a4503fdb05b9bb6925c17f09c60a0a2798940b"
+  },
+  "docs/screens.ru.md": {
+    "bytes": 9229,
+    "sha256": "f55ea575cf1b285a6d933ee27699e14cc2ad3638836996b27bf09f387bfbe99d"
+  },
+  "docs/user-guide.md": {
+    "bytes": 17409,
+    "sha256": "8cd7b635742e169f6c69d94ac23fe3ade68fbacfd55c133f19969f4677699928"
+  },
+  "docs/user-guide.ru.md": {
+    "bytes": 26717,
+    "sha256": "ec6cdf4ffa79242129ff664836e9a2447f95986470582bed8766c050169cb247"
+  },
+  "docs/validation.md": {
+    "bytes": 174,
+    "sha256": "143d46f11ff694b912cdb0f9768c0c979ce268e61fcd914ce8ffa83944fb6f8e"
+  },
+  "docs/validation.ru.md": {
+    "bytes": 177,
+    "sha256": "4e2c13987e75998f2ba74535d491d57c86308c12016eb2d9e0e28701ba0b2c51"
+  },
+  "docs/versioning.md": {
+    "bytes": 2232,
+    "sha256": "4cb2d6536f5444494a6ea2e942d3f049ecccb890d8a2d9e237ddbd34c7e8d442"
+  },
+  "docs/versioning.ru.md": {
+    "bytes": 3825,
+    "sha256": "f6e5d1ccda833c0439fe9bd57f0e5d06075c5ab02cb284e4aabe6e0ad74474ab"
   },
   "docs/web-ipc-lifecycle.md": {
     "bytes": 7346,
@@ -1954,5 +2234,13 @@
   "tools/web-package-contract.py": {
     "bytes": 2635,
     "sha256": "c16aba0ae8cb3436e805f81f4989346a2b94af3398d357667c1f54a361aa311b"
+  },
+  "vendor/README.md": {
+    "bytes": 367,
+    "sha256": "e77aed402c23dd5dcd26c49c9d3f72e8920df496f45b32734a9f9e28ceb74a19"
+  },
+  "vendor/download-manifest.md": {
+    "bytes": 1452,
+    "sha256": "c10bdae5cdc71ce7a7352a8e218a5c33f8de950ba51f88513a6d5eff2f796082"
   }
 }
