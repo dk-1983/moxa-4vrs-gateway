@@ -1,0 +1,14 @@
+#ifndef FOURVRS_UI_DEFAULTS_H
+#define FOURVRS_UI_DEFAULTS_H
+
+#define UI_COLUMNS 16
+#define UI_ROWS 8
+#define UI_CONTENT_LAST_ROW 5
+#define UI_STATUS_ROW 6
+#define UI_RESERVED_ROW 7
+
+#define UI_SPLASH_SECONDS 2
+#define UI_NAV_IDLE_SECONDS 60
+#define UI_POLL_USEC 20000
+
+#endif

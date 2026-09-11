@@ -1,0 +1,20 @@
+[
+  {
+    "source": "assets\\images\\menu\\main-menu.png",
+    "source_sha256": "5a0bc77dddf2e5e2c8ac89389449a4732f829aaee0318ff7bbd5225821d2df0b",
+    "asset": "assets\\help\\main-menu.png",
+    "sha256": "b1c38f5fe79cd60568d752f10eb67f36c07f9d8f8ee0db13c55d839494876197",
+    "bytes": 100993,
+    "width": 360,
+    "height": 216
+  },
+  {
+    "source": "assets\\images\\menu\\configuration.png",
+    "source_sha256": "ce8f09d6b152ef4591fa2c9176ae197cecdcb2c273bab8c490ae2e4fa1c8188d",
+    "asset": "assets\\help\\configuration.png",
+    "sha256": "f0844b6402585236a7ffa60097b06bdb6a32b560c3484583a7e28cd6c5dd67b2",
+    "bytes": 114241,
+    "width": 360,
+    "height": 270
+  }
+]

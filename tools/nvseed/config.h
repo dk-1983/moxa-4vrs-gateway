@@ -1,0 +1,14 @@
+#ifndef FOURVRS_NV_PROTOTYPE_CONFIG_H
+#define FOURVRS_NV_PROTOTYPE_CONFIG_H
+/* Isolated profile: never included by the product build. */
+#define MBEDTLS_AES_C
+#define MBEDTLS_MD_C
+#define MBEDTLS_SHA256_C
+#define MBEDTLS_CTR_DRBG_C
+#define MBEDTLS_ENTROPY_C
+#define MBEDTLS_ENTROPY_FORCE_SHA256
+#define MBEDTLS_NO_PLATFORM_ENTROPY
+#define MBEDTLS_ENTROPY_NV_SEED
+#define MBEDTLS_PLATFORM_C
+#define MBEDTLS_PLATFORM_NV_SEED_ALT
+#endif
