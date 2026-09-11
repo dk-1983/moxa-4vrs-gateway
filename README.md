@@ -168,9 +168,7 @@ and device experiments. See the [validation status](docs/validation.md)
 for passed cases and remaining qualification. Component tests, TCP connections
 and instrument transactions prove different scopes.
 
-Versions follow [`vYEAR.RELEASE.PATCH`](docs/versioning.md), with a one-time initial-version exception:
-first public release `v2026.00.01`, next 2026 feature release `v2026.01.00`.
-Development candidate names are not published releases.
+Versions use [`vYEAR.RELEASE.PATCH`](docs/versioning.md). Release and patch counters start at `00`, except for the first public release, `v2026.00.01`. The current published release is **v2026.02.01**.
 
 ## Contributing and license
 

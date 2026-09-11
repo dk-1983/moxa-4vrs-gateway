@@ -32,12 +32,12 @@
     "sha256": "44d3f9fabdce9048bf2bb1f5ef9ba30111b695e8217dd028ab12c4e4e1b5c0a0"
   },
   "README.md": {
-    "bytes": 9796,
-    "sha256": "f101f6ecd43761a1fc36d20a116d4d5b4d36b8b98e8d25bb321333fceac0d53d"
+    "bytes": 9759,
+    "sha256": "fa2bd4008d06af0a653d1240b275e439d2ea4581e0b748d6991babb90c504068"
   },
   "README.ru.md": {
-    "bytes": 15839,
-    "sha256": "3afce9be8de12b5f3789f7e0d1cbfd88f00b878393911145b9093f6a0141898b"
+    "bytes": 15854,
+    "sha256": "2df39e8ef9232a128d3e8f123038c032c2643980e509011b5bdc74aefce81cae"
   },
   "SECURITY.md": {
     "bytes": 1234,
@@ -416,12 +416,12 @@
     "sha256": "4e2c13987e75998f2ba74535d491d57c86308c12016eb2d9e0e28701ba0b2c51"
   },
   "docs/versioning.md": {
-    "bytes": 2232,
-    "sha256": "4cb2d6536f5444494a6ea2e942d3f049ecccb890d8a2d9e237ddbd34c7e8d442"
+    "bytes": 2393,
+    "sha256": "66063dab4bd4d07f651aa512b81a00a1270b3d87f708a7c515e461267e5fcdf8"
   },
   "docs/versioning.ru.md": {
-    "bytes": 3825,
-    "sha256": "f6e5d1ccda833c0439fe9bd57f0e5d06075c5ab02cb284e4aabe6e0ad74474ab"
+    "bytes": 4199,
+    "sha256": "12de8b65021505c2e3975b90f7ce930a65453ad97f0939ac05c804ff619485c7"
   },
   "docs/web-ipc-lifecycle.md": {
     "bytes": 7346,

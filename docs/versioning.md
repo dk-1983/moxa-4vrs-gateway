@@ -29,18 +29,20 @@ release is required. Subsequent releases follow the normal sequence below.
 | Second feature release in 2026 | `v2026.01.00` |
 | First correction to the second feature release | `v2026.01.01` |
 
-The next feature release focuses on an automatic Gateway download and
-installation system: develop it, test it, then publish the release. Implementation
-details will be defined separately. If published in 2026, its version is
-`v2026.01.00`. The web interface is deferred to a later release.
+## Published releases
+
+The `v2026.00.02` and `v2026.00.03` entries above are numbering examples, not publication history.
+
+- `v2026.00.01`: first public release.
+- `v2026.01.00`: automatic installer and backlight control.
+- `v2026.01.01`: installer clock-script compatibility fix.
+- `v2026.02.01`: current release with Web management, CF wizard and autonomous RNG within the documented operating scope.
+
+Published version numbers are retained. `v2026.02.01` does not imply that `v2026.02.00` was published separately. The next correction in this branch is `v2026.02.02`; the next feature release in 2026 is `v2026.03.00`.
 
 ## Build and publication identity
 
-Existing development labels such as r15 are internal build identifiers.
-Preserve their hashes and historical reports. No version-only rebuild or
-change to `src/version.h` is required for the first public release because it
-already reports v2026.00.01. This naming decision does not replace artifact,
-installation or hardware validation, and does not itself publish a release.
+Internal build identifiers and candidate labels are not published versions. A version number does not replace artifact, installation or hardware validation.
 
 The product version is independent of the persistent-configuration schema.
 Published Git tags and release assets must identify the exact tested source
