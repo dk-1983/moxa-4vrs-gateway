@@ -129,7 +129,14 @@ static int open_ipc(web_gateway_t *w){
  if(fd<0)return -1;strcpy(w->socket_path,w->ipc_endpoint.path);w->listener=fd;return 0;
 }
 static void stop_service(web_gateway_t *w){if(w->pid>0&&!w->stopping){kill(w->pid,SIGTERM);w->stopping=1;w->started_at=web_now();}close_peer(w);web_ipc_endpoint_close(&w->ipc_endpoint,w->listener);w->listener=-1;}
-void web_gateway_close(web_gateway_t *w){if(!w->initialized)return;rng_stop(w);if(w->rng_pid>0)waitpid(w->rng_pid,NULL,0);w->rng_pid=0;web_security_cancel(&w->security);stop_service(w);if(w->pid>0){kill(w->pid,SIGKILL);waitpid(w->pid,NULL,0);w->pid=0;}}
+/* Never terminate an RNG transaction to satisfy an interface deadline.
+ * On timeout retain the PID and report failure; the diagnostic UI stays alive. */
+static pid_t wait_stopped(pid_t pid,int *status){uint32_t start=web_now();pid_t r;
+ for(;;){r=waitpid(pid,status,WNOHANG);if(r==pid)return r;if(r<0&&errno!=EINTR)return -1;
+  if((uint32_t)(web_now()-start)>=60000U){errno=ETIMEDOUT;return -1;}usleep(100000);}}
+int web_gateway_close(web_gateway_t *w){int status=0,result=0;pid_t reaped;if(!w->initialized)return 0;rng_stop(w);
+ if(w->rng_pid>0){reaped=wait_stopped(w->rng_pid,&status);if(reaped<0||!WIFEXITED(status)||WEXITSTATUS(status))result=-1;else w->rng_pid=0;}
+ web_security_cancel(&w->security);stop_service(w);if(w->pid>0){kill(w->pid,SIGKILL);reaped=wait_stopped(w->pid,&status);if(reaped<0)result=-1;else w->pid=0;}return result;}
 unsigned int web_gateway_network_error(const gateway_network_runtime_t *network,unsigned int selected,char addresses[2][16])
 {
  unsigned int i;memset(addresses,0,32);

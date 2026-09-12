@@ -92,12 +92,12 @@ def check_script(data):
 def package(version, installer, gateway, init_script, wrapper, output, *, web=None, license_file=None, rng=None, kdf=None):
     if not re.fullmatch(r"v[0-9]{4}\.[0-9]{2,}\.[0-9]{2,}", version):
         raise ValueError("invalid package version")
-    if version in ('v2026.02.01', 'v2026.02.02') and web is None:
+    if version in ('v2026.02.01', 'v2026.02.03') and web is None:
         raise ValueError('v2026.02.01 requires the format-2 Web payload')
     sources = (installer, gateway, init_script, wrapper)
     names = PAYLOAD_NAMES
     if web is not None:
-        if version not in ('v2026.02.01', 'v2026.02.02') or license_file is None:
+        if version not in ('v2026.02.01', 'v2026.02.03') or license_file is None:
             raise ValueError('format 2 requires the qualified version and Mbed TLS license')
         if rng is None or kdf is None: raise ValueError('format 3 requires RNG and KDF executables')
         sources += (web,rng,kdf)

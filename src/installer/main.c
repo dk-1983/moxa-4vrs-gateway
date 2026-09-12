@@ -57,7 +57,10 @@ int main(int argc,char**argv){
  if(argc==3&&(!strcmp(argv[1],"--network-entry")||!strcmp(argv[1],"--application-entry"))){
   unsigned int waited=0;
   application=!strcmp(argv[1],"--application-entry");
-  if(context.platform->detect(&target)||install_layout(&context,0))return 1;
+  /* Application start repairs vendor-reset CF permissions under the lock
+   * in install_recover_entry before validating the complete CF layout. */
+  if(context.platform->detect(&target))return 1;
+  if((!application||strcmp(argv[2],"start"))&&install_layout(&context,0))return 1;
   lock=install_target_lock();if(lock<0)return 1;
   /* rcS need not stop on an S39 failure: S40 and the application entry
    * themselves are protected. Only application startup waits for late CF. */
