@@ -1,5 +1,7 @@
 # Web IPC after power loss — web-ipc-v1
 
+The v2026.02.03 candidate uses `/var/4vrs-web-ipc` in RAM on both target OS families. Historical results below concern the previous path; they do not constitute a repeat qualification of this candidate. Installation, HTTP and stop/start were verified on Moxa #3; the physical power-cycle series was not repeated for this change. Old objects in `/tmp` are not removed automatically.
+
 > Current [release matrix](release-final.md). The user reduced the series to 10; 10/10 completed. Hardware no-op acceptance is closed; ready for release within the matrix scope. No power-series repeat is required.
 
 [Русский](web-ipc-lifecycle.ru.md)
@@ -16,7 +18,7 @@ These hardware facts come from the operator's message. The supplied desktop loca
 
 ## Ownership protocol
 
-1. Gateway creates `/tmp/4vrs-web-ipc` with exact mode 0711 and its UID/GID. Every ancestor must be a real directory with a trusted owner; other-user write permission requires the sticky bit. Symlinks, foreign ownership or unsafe modes fail without repairing the object. O_DIRECTORY/O_NOFOLLOW and matching device/inode checks verify the opened directory.
+1. Gateway creates `/var/4vrs-web-ipc` with exact mode 0711 and its UID/GID. Every ancestor must be a real directory with a trusted owner; other-user write permission requires the sticky bit. Symlinks, foreign ownership or unsafe modes fail without repairing the object. O_DIRECTORY/O_NOFOLLOW and matching device/inode checks verify the opened directory.
 2. `<PID>.lock` protects `<PID>.sock`: an empty regular file, mode 0600, one hard link, correct UID/GID, no symlink following. A nonblocking `fcntl(F_SETLK)` lock is held throughout endpoint lifetime. Descriptors have FD_CLOEXEC. A competing process cannot take the endpoint.
 3. A leftover is removed only if it is an owned socket with one hard link, its exact path is absent from successfully read `/proc/net/unix`, and a repeated device/inode check matches. Bound but not listening sockets are also treated as active. No connection probe is made to another service. Proc read failure prevents deletion. Regular files, directories, symlinks and active sockets are preserved.
 4. Successful bind immediately records inode identity, before chmod 0666, listen and nonblocking mode. Failure at a later stage cleans up only this inode while holding the lock, even before Gateway receives the listener. A replacement object is neither deleted nor chmodded during cleanup. Cleanup failure leaves the remainder for a subsequent complete safety check; there is no unconditional removal.
