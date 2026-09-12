@@ -122,7 +122,7 @@ try:
  api('backlight',{'enabled':1,'revision':current['revision']},expected=409);check('panel change invalidates Web draft',True)
  check('CSRF rejected',request('/api/backlight',{'enabled':1,'revision':api('system')['revision']},headers={'X-CSRF-Token':'a'*64})[0]==401)
  # An unrelated process cannot become the Gateway IPC peer.
- peer=socket.socket(socket.AF_UNIX);peer.connect(f'/tmp/4vrs-web-ipc/{process.pid}.sock');peer.settimeout(2)
+ peer=socket.socket(socket.AF_UNIX);peer.connect(f'/var/4vrs-web-ipc/{process.pid}.sock');peer.settimeout(2)
  try:peer.sendall(b'4V\x01\0\0\0\0\x09op=hello\n');denied=peer.recv(20)==b''
  except ConnectionResetError:denied=True
  peer.close();check('wrong IPC peer rejected',denied)

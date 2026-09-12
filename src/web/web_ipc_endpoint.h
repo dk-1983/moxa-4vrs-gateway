@@ -1,6 +1,8 @@
 #ifndef FOURVRS_WEB_IPC_ENDPOINT_H
 #define FOURVRS_WEB_IPC_ENDPOINT_H
 #include <sys/types.h>
+/* Vendor /var is RAM-backed on both targeted vendor OS families. */
+#define FOURVRS_WEB_IPC_DIRECTORY "/var/4vrs-web-ipc"
 typedef struct web_ipc_endpoint {
  int lock_fd,bound;
  dev_t device;

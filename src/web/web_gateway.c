@@ -113,7 +113,7 @@ static int rng_launch(web_gateway_t*w){int a[2],b[2],x,y,pid;char binary[512],pa
 }
 static int retry_init(web_gateway_t *w){char dir[256],binary[256];gateway_application_t *a=w->app;unsigned int https=w->https_port,http=w->http_port;strcpy(dir,w->directory);strcpy(binary,w->binary);return web_gateway_init(w,a,dir,binary,https,http);}
 int web_gateway_local(void *context,unsigned int action){web_gateway_t *w=context;int r;if(!w->initialized&&retry_init(w))return -1;w->app->web.recovery_prompt=0;r=web_security_local(&w->security,action,web_now());strcpy(w->app->web.code,w->security.code);w->app->web.enrollment=w->security.code[0]!=0;w->app->web.seconds_left=w->app->web.enrollment?WEB_CODE_MS/1000:0;if(r)w->app->web.error=1;return r;}
-int web_gateway_init(web_gateway_t *w,gateway_application_t *a,const char *dir,const char *binary,unsigned int https,unsigned int http){char path[512];struct stat st;struct rlimit core={0,0};setrlimit(RLIMIT_CORE,&core);memset(w,0,sizeof(*w));w->listener=w->peer=w->rng_web=-1;web_ipc_endpoint_init(&w->ipc_endpoint);w->app=a;w->protocol_seen=a->coordinator.selected.settings.web_protocol;w->https_port=https;w->http_port=http;w->peer_uid=geteuid()?geteuid():65534;if(strlen(dir)>240||strlen(binary)>255)return -1;strcpy(w->directory,dir);strcpy(w->binary,binary);snprintf(w->socket_path,sizeof(w->socket_path),"/tmp/4vrs-web-ipc/%lu.sock",(unsigned long)getpid());a->web.local=web_gateway_local;a->web.context=w;
+int web_gateway_init(web_gateway_t *w,gateway_application_t *a,const char *dir,const char *binary,unsigned int https,unsigned int http){char path[512];struct stat st;struct rlimit core={0,0};setrlimit(RLIMIT_CORE,&core);memset(w,0,sizeof(*w));w->listener=w->peer=w->rng_web=-1;web_ipc_endpoint_init(&w->ipc_endpoint);w->app=a;w->protocol_seen=a->coordinator.selected.settings.web_protocol;w->https_port=https;w->http_port=http;w->peer_uid=geteuid()?geteuid():65534;if(strlen(dir)>240||strlen(binary)>255)return -1;strcpy(w->directory,dir);strcpy(w->binary,binary);snprintf(w->socket_path,sizeof(w->socket_path),FOURVRS_WEB_IPC_DIRECTORY "/%lu.sock",(unsigned long)getpid());a->web.local=web_gateway_local;a->web.context=w;
 
 #ifndef WEB_HOST_TEST
  {struct stat parent,cf;if(strncmp(dir,"/var/hda/",9)||stat("/var",&parent)||stat("/var/hda",&cf)||parent.st_dev==cf.st_dev)return -1;}
@@ -125,7 +125,7 @@ static int open_ipc(web_gateway_t *w){
 #ifdef WEB_HOST_TEST
  if(getenv("WEB_IPC_TEST_ID"))id=strtoul(getenv("WEB_IPC_TEST_ID"),NULL,10);
 #endif
- fd=web_ipc_endpoint_open(&w->ipc_endpoint,"/tmp/4vrs-web-ipc",id);
+ fd=web_ipc_endpoint_open(&w->ipc_endpoint,FOURVRS_WEB_IPC_DIRECTORY,id);
  if(fd<0)return -1;strcpy(w->socket_path,w->ipc_endpoint.path);w->listener=fd;return 0;
 }
 static void stop_service(web_gateway_t *w){if(w->pid>0&&!w->stopping){kill(w->pid,SIGTERM);w->stopping=1;w->started_at=web_now();}close_peer(w);web_ipc_endpoint_close(&w->ipc_endpoint,w->listener);w->listener=-1;}
