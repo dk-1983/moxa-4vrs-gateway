@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include "installer/install_target.h"
 #include "installer/install_readiness.h"
 #include "installer/install_apache.h"
@@ -20,7 +21,7 @@
 #include <errno.h>
 #define APP "/var/hda/4vrs/bin/4vrs-gateway"
 #define HELPER "/etc/4vrs-network/gateway-network-recovery"
-static unsigned long long tick(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
+static unsigned long long tick(void){struct timespec t;if(gateway_monotonic_time(&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
 static int cf_available(void*v){struct stat a,b;struct statvfs fs;(void)v;if(stat("/var",&a)||stat("/var/hda",&b))return errno==ENOENT?0:-1;if(a.st_dev==b.st_dev)return 0;if(!S_ISDIR(b.st_mode)||statvfs("/var/hda",&fs))return -1;return(fs.f_flag&ST_RDONLY)?-1:1;}
 static int detect(void*v){struct utsname u;struct stat s;unsigned int i;char path[64];struct statvfs fs;(void)v;
  if(geteuid()!=0||uname(&u)||strncmp(u.machine,"arm",3)||strncmp(u.release,"2.6.10",6)||!strstr(u.release,"xscale_be"))return -1;

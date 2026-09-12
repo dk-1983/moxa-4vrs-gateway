@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -31,7 +32,7 @@ typedef struct service_context {
 static volatile sig_atomic_t stopping;
 static void stop_signal(int signal_number){(void)signal_number;stopping=1;}
 static core_tick_t now_ms(void)
-{struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))_exit(125);return (core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
+{struct timespec t;if(gateway_monotonic_time(&t))_exit(125);return (core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
 static int path(char *out,size_t cap,const char *directory,const char *name)
 {int n=snprintf(out,cap,"%s/%s",directory,name);return n<0||(size_t)n>=cap?-1:0;}
 static int nonblock(int fd)

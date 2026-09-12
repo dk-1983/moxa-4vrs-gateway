@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <net/if.h>
@@ -55,7 +56,7 @@ static int route(int fd,unsigned long operation,unsigned int lan,const char *gat
     if(!lan)return 0;
     if(lan>2U||gateway_ipv4_parse(gateway,&ip))return -1;
     memset(&entry,0,sizeof(entry));sa(&entry.rt_dst,0);sa(&entry.rt_genmask,0);sa(&entry.rt_gateway,ip);
-    snprintf(device,sizeof(device),"eth%u",lan-1U);entry.rt_dev=device;entry.rt_flags=RTF_UP|RTF_GATEWAY;
+    snprintf(device,sizeof(device),"" FOURVRS_LAN_PREFIX "%u",lan-1U);entry.rt_dev=device;entry.rt_flags=RTF_UP|RTF_GATEWAY;
     return ioctl(fd,operation,&entry);
 }
 static int same(const gateway_lan_observation_t *a,const gateway_lan_observation_t *b)
@@ -89,7 +90,7 @@ int gateway_network_system_write(const gateway_network_observation_t *desired,co
     if(ioctl(fd,SIOCGIFCONF,&inventory)||inventory.ifc_len<0||inventory.ifc_len>=(int)sizeof(list))goto done;
     count=(unsigned int)inventory.ifc_len/sizeof(list[0]);
     for(i=0;i<count;++i){struct sockaddr_in a;unsigned long other,other_mask;
-        if(!strcmp(list[i].ifr_name,"lo")||!strcmp(list[i].ifr_name,"eth0")||!strcmp(list[i].ifr_name,"eth1"))continue;
+        if(!strcmp(list[i].ifr_name,"lo")||!strcmp(list[i].ifr_name,"" FOURVRS_LAN_PREFIX "0")||!strcmp(list[i].ifr_name,"" FOURVRS_LAN_PREFIX "1"))continue;
         memcpy(&a,&list[i].ifr_addr,sizeof(a));other=ntohl(a.sin_addr.s_addr);if(!other)continue;
         req=list[i];if(ioctl(fd,SIOCGIFNETMASK,&req))goto done;
         memcpy(&a,&req.ifr_netmask,sizeof(a));other_mask=ntohl(a.sin_addr.s_addr);
@@ -100,7 +101,7 @@ int gateway_network_system_write(const gateway_network_observation_t *desired,co
     if(route_changed&&route(fd,SIOCDELRT,current.default_lan,current.gateway))goto done;
     for(i=0;i<2U;++i){
         if(same(&current.lan[i],&desired->lan[i]))continue;
-        memset(&req,0,sizeof(req));snprintf(req.ifr_name,sizeof(req.ifr_name),"eth%u",i);
+        memset(&req,0,sizeof(req));snprintf(req.ifr_name,sizeof(req.ifr_name),"" FOURVRS_LAN_PREFIX "%u",i);
         sa(&req.ifr_addr,ip[i]);if(ioctl(fd,SIOCSIFADDR,&req))goto done;
         if(ip[i]){
             sa(&req.ifr_netmask,mask[i]);if(ioctl(fd,SIOCSIFNETMASK,&req))goto done;

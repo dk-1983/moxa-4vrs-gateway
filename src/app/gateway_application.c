@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
+#include "core/monotonic.h"
 #include <dirent.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -34,7 +36,7 @@ const char *gateway_rtc_state_name(gateway_rtc_state_t state)
 int gateway_platform_info_default(void*context,gateway_platform_info_t*i)
 {struct utsname u;(void)context;if(!i)return-1;memset(i,0,sizeof(*i));if(uname(&u)!=0)return-1;
 #if defined(__arm__)
-copy_text(i->model,sizeof(i->model),"Moxa UC-7420 Plus");copy_text(i->architecture,sizeof(i->architecture),"ARM XScale");
+copy_text(i->model,sizeof(i->model),FOURVRS_MODEL_SHORT);copy_text(i->architecture,sizeof(i->architecture),"ARM XScale");
 #else
 copy_text(i->model,sizeof(i->model),"Host development");copy_text(i->architecture,sizeof(i->architecture),u.machine);
 #endif
@@ -49,7 +51,7 @@ i->big_endian=0U;
 return 0;}
 
 core_tick_t gateway_application_monotonic_ms(void*context)
-{struct timespec t;(void)context;if(clock_gettime(CLOCK_MONOTONIC,&t)!=0)return 0;return(core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
+{struct timespec t;(void)context;if(gateway_monotonic_time(&t)!=0)return 0;return(core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
 static unsigned int leap_year(unsigned int y){return(y%4U==0U&&y%100U!=0U)||y%400U==0U;}
 int gateway_system_time_validate(const gateway_system_time_t*v)
 {static const unsigned int days[]={31U,28U,31U,30U,31U,30U,31U,31U,30U,31U,30U,31U};unsigned int limit;if(!v||v->year<GATEWAY_SYSTEM_TIME_YEAR_MIN||v->year>GATEWAY_SYSTEM_TIME_YEAR_MAX||v->month<1U||v->month>12U||v->hour>23U||v->minute>59U||v->second>59U)return-1;limit=days[v->month-1U];if(v->month==2U&&leap_year(v->year))++limit;return v->day>=1U&&v->day<=limit?0:-1;}

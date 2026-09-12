@@ -1,3 +1,4 @@
+#include "core/platform.h"
 #include <stdio.h>
 #include <string.h>
 #include "network/gateway_network_document.h"
@@ -53,7 +54,7 @@ static int iface(const line_t *l, int *owned, gateway_lan_mode_t *mode)
     if (strcmp(l->key, "iface")) return 0;
     n = sscanf(l->value, "%31s %31s %31s %1s", name, family, method, extra);
     if (n != 3) return -1;
-    *owned = !strcmp(name,"eth0") ? 0 : !strcmp(name,"eth1") ? 1 : -1;
+    *owned = !strcmp(name,"" FOURVRS_LAN_PREFIX "0") ? 0 : !strcmp(name,"" FOURVRS_LAN_PREFIX "1") ? 1 : -1;
     if (*owned < 0) return 1;
     if (strcmp(family,"inet")) return -1;
     if (!strcmp(method,"static")) *mode = GATEWAY_LAN_STATIC;
@@ -168,7 +169,7 @@ static int render_lan(const gateway_network_settings_t *s, unsigned int lan,
     int n;
     unsigned long ip, mask, broadcast, network;
     const gateway_lan_settings_t *p = &s->lan[lan];
-    n = snprintf(b,sizeof(b),"iface eth%u inet %s\n",lan,
+    n = snprintf(b,sizeof(b),"iface " FOURVRS_LAN_PREFIX "%u inet %s\n",lan,
                  p->mode == GATEWAY_LAN_STATIC ? "static" : "dhcp");
     if (n < 0 || (size_t)n >= sizeof(b) || append(out,cap,used,b,(size_t)n)) return -1;
     if (p->mode == GATEWAY_LAN_DHCP_CLIENT) return 0;

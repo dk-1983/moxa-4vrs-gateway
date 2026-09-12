@@ -1,0 +1,12 @@
+#ifndef FOURVRS_PLATFORM_H
+#define FOURVRS_PLATFORM_H
+#ifdef FOURVRS_LINUX24
+#define FOURVRS_LAN_PREFIX "ixp"
+#define FOURVRS_MODEL_SHORT "Moxa UC-7420-LX"
+#define FOURVRS_MODEL_FULL "Moxa UC-7420-LX"
+#else
+#define FOURVRS_LAN_PREFIX "eth"
+#define FOURVRS_MODEL_SHORT "Moxa UC-7420 Plus"
+#define FOURVRS_MODEL_FULL "Moxa UC-7420-LX Plus"
+#endif
+#endif

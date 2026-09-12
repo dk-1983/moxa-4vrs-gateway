@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
+#include "core/monotonic.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -21,7 +23,7 @@
 static core_tick_t monotonic(void *unused)
 {
     struct timespec t;(void)unused;
-    if(clock_gettime(CLOCK_MONOTONIC,&t))_exit(125);
+    if(gateway_monotonic_time(&t))_exit(125);
     return (core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);
 }
 static int read_text(const char *path,char *out,size_t capacity)
@@ -57,7 +59,7 @@ static int static_scope(const gateway_network_profile_t *p)
         if(n>=sizeof(line))return -1;
         memcpy(line,s,n);line[n]=0;s+=n;if(*s)++s;
         if(sscanf(line," %63s",word)!=1||word[0]=='#')continue;
-        if(!strcmp(word,"iface")){if(sscanf(line," iface %63s",name)!=1)return -1;owned=!strcmp(name,"eth1");continue;}
+        if(!strcmp(word,"iface")){if(sscanf(line," iface %63s",name)!=1)return -1;owned=!strcmp(name,"" FOURVRS_LAN_PREFIX "1");continue;}
         if(!strcmp(word,"auto")||!strcmp(word,"allow-hotplug")){owned=0;continue;}
         if(owned&&strcmp(word,"address")&&strcmp(word,"netmask")&&strcmp(word,"network")&&strcmp(word,"broadcast"))return -1;
     }
@@ -145,13 +147,13 @@ static int write_real(void *unused,const gateway_lan_observation_t *lan)
     if(ioctl(fd,SIOCGIFCONF,&list)||list.ifc_len>=(int)sizeof(inventory))goto done;
     count=(unsigned int)list.ifc_len/sizeof(struct ifreq);
     for(i=0;i<count;++i){unsigned long other,other_mask;struct sockaddr_in a;
-        if(!strcmp(inventory[i].ifr_name,"eth1")||!strncmp(inventory[i].ifr_name,"lo",3))continue;
+        if(!strcmp(inventory[i].ifr_name,"" FOURVRS_LAN_PREFIX "1")||!strncmp(inventory[i].ifr_name,"lo",3))continue;
         memcpy(&a,&inventory[i].ifr_addr,sizeof(a));other=ntohl(a.sin_addr.s_addr);
         request=inventory[i];if(ioctl(fd,SIOCGIFNETMASK,&request))goto done;
         memcpy(&a,&request.ifr_netmask,sizeof(a));other_mask=ntohl(a.sin_addr.s_addr);
         if((ip&(mask&other_mask))==(other&(mask&other_mask)))goto done;
     }
-    memset(&request,0,sizeof(request));strcpy(request.ifr_name,"eth1");
+    memset(&request,0,sizeof(request));strcpy(request.ifr_name,"" FOURVRS_LAN_PREFIX "1");
     sockaddr_set(&request.ifr_addr,ip);if(ioctl(fd,SIOCSIFADDR,&request))goto done;
     sockaddr_set(&request.ifr_netmask,mask);if(ioctl(fd,SIOCSIFNETMASK,&request))goto done;
     sockaddr_set(&request.ifr_broadaddr,broadcast);if(ioctl(fd,SIOCSIFBRDADDR,&request))goto done;
@@ -175,8 +177,8 @@ static int profile_scope(const gateway_network_environment_t *e,const gateway_ne
         memcpy(line,s,n);line[n]=0;s+=n;if(*s)++s;
         if(sscanf(line," %63s",key)!=1||key[0]=='#')continue;
         if(!strcmp(key,"iface")){if(sscanf(line," iface %63s",name)!=1)return -1;
-            if(!strncmp(name,"eth0:",5U)||!strncmp(name,"eth1:",5U)||!strncmp(name,"eth0.",5U)||!strncmp(name,"eth1.",5U))return -1;
-            owned=!strcmp(name,"eth0")||!strcmp(name,"eth1");continue;}
+            if(!strncmp(name,"" FOURVRS_LAN_PREFIX "0:",5U)||!strncmp(name,"" FOURVRS_LAN_PREFIX "1:",5U)||!strncmp(name,"" FOURVRS_LAN_PREFIX "0.",5U)||!strncmp(name,"" FOURVRS_LAN_PREFIX "1.",5U))return -1;
+            owned=!strcmp(name,"" FOURVRS_LAN_PREFIX "0")||!strcmp(name,"" FOURVRS_LAN_PREFIX "1");continue;}
         if(!strcmp(key,"auto")||!strcmp(key,"allow-hotplug")){owned=0;continue;}
         /* Static vendor DNS metadata must not outlive a switch to lease DNS.
          * New candidates remove it; refuse ambiguous retained auto-DNS profiles. */

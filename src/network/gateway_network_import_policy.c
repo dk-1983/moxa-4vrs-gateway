@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -14,7 +15,7 @@ int gateway_network_vendor_arguments(const char *bytes,size_t n,unsigned int *la
  name=strrchr(bytes,'/');name=name?name+1:bytes;if(strcmp(name,"dhcpcd"))return -1;
  *dns=*route=1;*lan=0;off=strlen(bytes)+1U;
  while(off<n){const char *arg=bytes+off;off+=strlen(arg)+1U;
-  if(!strcmp(arg,"eth0")||!strcmp(arg,"eth1")){if(found++)return -1;*lan=(unsigned int)(arg[3]-'0');continue;}
+  if(!strcmp(arg,"" FOURVRS_LAN_PREFIX "0")||!strcmp(arg,"" FOURVRS_LAN_PREFIX "1")){if(found++)return -1;*lan=(unsigned int)(arg[3]-'0');continue;}
   if(arg[0]!='-'||!arg[1])return -1;
   for(j=1;arg[j];++j){
    if(arg[j]=='R')*dns=0;
@@ -54,7 +55,7 @@ int gateway_network_import_policy(const char *proc,const char *leases,gateway_ne
   if(gateway_network_vendor_arguments(args,n,&lan,&dns,&route)||s.lan[lan].mode!=GATEWAY_LAN_DHCP_CLIENT||(seen&(1U<<lan)))goto done;
   seen|=1U<<lan;
   {char lease[8193];gateway_dhcp_lease_t parsed;
-   size=snprintf(path,sizeof(path),"%s/dhcpcd-eth%u.info",leases,lan);if(size<0||(size_t)size>=sizeof(path))goto done;
+   size=snprintf(path,sizeof(path),"%s/dhcpcd-" FOURVRS_LAN_PREFIX "%u.info",leases,lan);if(size<0||(size_t)size>=sizeof(path))goto done;
    if(read_data(path,lease,sizeof(lease)-1U,&n)||gateway_dhcp_lease_decode(lease,n,lan,&parsed))goto done;
    if(strcmp(parsed.address,live->lan[lan].address)||strcmp(parsed.netmask,live->lan[lan].netmask)||strcmp(parsed.broadcast,live->lan[lan].broadcast))goto done;
    if(dns){if(dns_source||strcmp(parsed.dns[0],live->dns[0])||strcmp(parsed.dns[1],live->dns[1]))goto done;dns_source=lan+1U;}

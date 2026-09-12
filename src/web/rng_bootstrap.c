@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 /* One transaction on an explicitly reserved physical console. No device discovery. */
+#include "core/monotonic.h"
 #include "web/exec_fds.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,7 +19,7 @@
 static volatile sig_atomic_t interrupted;
 static void stop(int sig) { interrupted=sig; }
 static void wipe(void *p,size_t n) { volatile unsigned char *b=p;while(n--)*b++=0; }
-static double now(void) { struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t)){interrupted=1;return 0;}return t.tv_sec+t.tv_nsec/1e9; }
+static double now(void) { struct timespec t;if(gateway_monotonic_time(&t)){interrupted=1;return 0;}return t.tv_sec+t.tv_nsec/1e9; }
 static int ready(int fd,int writing,double end) {
  fd_set s;struct timeval tv;double left;int r;
  while(!interrupted){left=end-now();if(left<=0)return -1;tv.tv_sec=(long)left;tv.tv_usec=(long)((left-tv.tv_sec)*1e6);

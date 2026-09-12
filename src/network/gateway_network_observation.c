@@ -1,6 +1,7 @@
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #define _POSIX_C_SOURCE 200112L
+#include "core/platform.h"
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -25,7 +26,7 @@ int gateway_dhcp_lease_decode(const char *data,size_t length,unsigned int lan,ga
     gateway_dhcp_lease_t lease;gateway_network_settings_t s;unsigned int seen=0;
     size_t off=0;unsigned long a,m,b;char expected[16];
     if(!data||!out||lan>1U||!length||length>8192U||memchr(data,0,length))return -1;
-    memset(&lease,0,sizeof(lease));snprintf(expected,sizeof(expected),"'eth%u'",lan);
+    memset(&lease,0,sizeof(lease));snprintf(expected,sizeof(expected),"'" FOURVRS_LAN_PREFIX "%u'",lan);
     while(off<length){const char *end=memchr(data+off,'\n',length-off);size_t n=end?(size_t)(end-data-off):length-off;
         char line[512],*value;unsigned int bit=0;int r=0;
         if(n>=sizeof(line))return -1;
@@ -66,7 +67,7 @@ int gateway_network_routes_decode(const char *data,size_t length,gateway_network
         if(sscanf(line,"%31s %lx %lx %lx %u %u %u %lx",name,&dest,&gw,&flags,&ref,&use,&metric,&mask)!=8)return -1;
         if(dest==0UL&&mask==0UL&&(flags&1UL)){
             if(++count>1U)return -1;
-            if(!strcmp(name,"eth0"))lan=1;else if(!strcmp(name,"eth1"))lan=2;else return -1;
+            if(!strcmp(name,"" FOURVRS_LAN_PREFIX "0"))lan=1;else if(!strcmp(name,"" FOURVRS_LAN_PREFIX "1"))lan=2;else return -1;
             if(gw>0xffffffffUL)return -1;
             gateway_ipv4_format((unsigned long)ntohl((unsigned int)gw),gateway);
         }
@@ -83,7 +84,7 @@ int gateway_network_observe(gateway_network_observation_t *out)
     memset(&result,0,sizeof(result));fd=socket(AF_INET,SOCK_DGRAM,0);if(fd<0)return -1;
     for(i=0;i<2U;++i){struct ifreq req;unsigned int k;unsigned long requests[3]={SIOCGIFADDR,SIOCGIFNETMASK,SIOCGIFBRDADDR};
         char *values[3]={result.lan[i].address,result.lan[i].netmask,result.lan[i].broadcast};
-        memset(&req,0,sizeof(req));snprintf(req.ifr_name,sizeof(req.ifr_name),"eth%u",i);
+        memset(&req,0,sizeof(req));snprintf(req.ifr_name,sizeof(req.ifr_name),"" FOURVRS_LAN_PREFIX "%u",i);
         if(ioctl(fd,SIOCGIFFLAGS,&req)){if(errno==ENODEV)continue;close(fd);return -1;}
         result.lan[i].present=1;result.lan[i].up=(req.ifr_flags&IFF_UP)!=0;result.lan[i].link=(req.ifr_flags&IFF_RUNNING)!=0;
         if(ioctl(fd,SIOCGIFHWADDR,&req)){close(fd);return -1;}memcpy(result.lan[i].mac,req.ifr_hwaddr.sa_data,6);

@@ -1,5 +1,6 @@
 #define _BSD_SOURCE 1
 
+#include "core/platform.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -78,12 +79,12 @@ static void render_home(ui_state_t *state, ui_screen_t *screen)
     ui_screen_clear(screen);
     ui_screen_set(screen, 0, "4VRS CONFIG");
     ui_screen_set(screen, 1, FOURVRS_VERSION);
-    ui_screen_set(screen, 2, "eth0");
+    ui_screen_set(screen, 2, "" FOURVRS_LAN_PREFIX "0");
     ui_screen_set(screen, 3, state->home.eth0_ipv4);
-    ui_screen_set(screen, 4, "eth1");
+    ui_screen_set(screen, 4, "" FOURVRS_LAN_PREFIX "1");
     ui_screen_set(screen, 5, state->home.eth1_ipv4);
     ui_screen_set(screen, 7, state->home.wall_clock_trusted ? "TIME VALID" : "TIME UNSYNCED");
-    printf("home_eth0=%s home_eth1=%s time=%s\n", state->home.eth0_ipv4,
+    printf("home_" FOURVRS_LAN_PREFIX "0=%s home_" FOURVRS_LAN_PREFIX "1=%s time=%s\n", state->home.eth0_ipv4,
            state->home.eth1_ipv4,
            state->home.wall_clock_trusted ? "TRUSTED" : "UNSYNCED");
 }
@@ -248,9 +249,9 @@ static void render_info(ui_state_t *state, ui_screen_t *screen)
         ui_screen_set(screen, 0, titles[state->selected]);
         if (state->selected == 0) {
             home_status_read(&state->home);
-            ui_screen_set(screen, 1, "eth0");
+            ui_screen_set(screen, 1, "" FOURVRS_LAN_PREFIX "0");
             ui_screen_set(screen, 2, state->home.eth0_ipv4);
-            ui_screen_set(screen, 3, "eth1");
+            ui_screen_set(screen, 3, "" FOURVRS_LAN_PREFIX "1");
             ui_screen_set(screen, 4, state->home.eth1_ipv4);
         } else if (state->selected == 3) {
             ui_screen_set(screen, 2, "TIME UNSYNCED");

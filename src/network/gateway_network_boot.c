@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
@@ -39,7 +40,7 @@ int gateway_network_unowned_checked(const char *text,size_t length,unsigned int 
             if(word[0]=='#')break;
             if(strlen(word)>=16U||!isalnum((unsigned char)word[0]))return -1;
             for(j=0;word[j];++j)if(!isalnum((unsigned char)word[j])&&word[j]!='_'&&word[j]!='.'&&word[j]!=':'&&word[j]!='-')return -1;
-            if(strcmp(word,"eth0")&&strcmp(word,"eth1")){
+            if(strcmp(word,"" FOURVRS_LAN_PREFIX "0")&&strcmp(word,"" FOURVRS_LAN_PREFIX "1")){
                 for(i=0;i<count&&strcmp(names[i],word);++i){}
                 if(i==count){if(count==32U)return -1;strcpy(names[count++],word);}
             }
