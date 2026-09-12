@@ -166,6 +166,21 @@ int INSTALL_ORCHESTRATOR_MAIN(int argc,char**argv){
   return r==0?0:1;
  }
  CHECK(argc==2);
+ /* A confirmed writable CF root is normalized, with no recursive chmod. */
+ {char path[1200],saved[1200],child[1200];struct stat st;unsigned int mode;
+  fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);
+  CHECK(!install_layout(&c,1));snprintf(path,sizeof(path),"%s/var/hda",root);
+  snprintf(child,sizeof(child),"%s/var/hda/4vrs",root);
+  for(mode=0;mode<3;mode++){unsigned int input=mode==0?0777:mode==1?0775:0700;
+   CHECK(!chmod(path,input));CHECK(!install_layout(&c,1));CHECK(!stat(path,&st));CHECK((st.st_mode&0777)==(input&~0022));
+   CHECK(!stat(child,&st));CHECK((st.st_mode&0777)==0700);}
+  CHECK(!chmod(path,0777));CHECK(install_layout(&c,0)!=0);CHECK(!stat(path,&st));CHECK((st.st_mode&0777)==0777);
+  f.cf=0;CHECK(install_layout(&c,1)!=0);CHECK(!stat(path,&st));CHECK((st.st_mode&0777)==0777);f.cf=1;
+  fail_sync=1;CHECK(install_layout(&c,1)!=0);CHECK(!fail_sync);CHECK(!install_layout(&c,1));
+  snprintf(saved,sizeof(saved),"%s/var/hda-saved",root);CHECK(!rename(path,saved));CHECK(!symlink(saved,path));
+  CHECK(!chmod(saved,0777));CHECK(install_layout(&c,1)!=0);CHECK(!stat(saved,&st));CHECK((st.st_mode&0777)==0777);
+  CHECK(!unlink(path));CHECK(!rename(saved,path));CHECK(!chmod(path,0755));install_context_release(&c);
+ }
  readiness_test(argv[1]);
  managed_r15_test(argv[1]);
  clock_rejection_test(argv[1]);

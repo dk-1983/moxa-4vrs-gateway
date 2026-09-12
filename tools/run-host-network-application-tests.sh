@@ -10,7 +10,7 @@ cc ${CFLAGS:--std=c99 -O2 -Wall -Wextra -Werror} -I"$root/src" -I"$root/tests" -
  "$root/src/modbus/modbus_tcp_adapter.c" "$root/src/modbus/mbap_stream.c" \
  "$root/src/modbus/modbus_crc.c" \
  "$root/src/uart/uart_backend.c" "$root/src/core/deadline.c" \
- "$root/src/core/port_runtime.c" "$root/src/core/mock_backend.c" "$root/src/panel/gateway_panel.c" "$root/src/diagnostics/gateway_diagnostics.c" -Wl,--wrap=recv,--wrap=fsync -lrt
+ "$root/src/core/port_runtime.c" "$root/src/core/mock_backend.c" "$root/src/panel/gateway_panel.c" "$root/src/panel/key_repeat.c" "$root/src/diagnostics/gateway_diagnostics.c" -Wl,--wrap=recv,--wrap=fsync -lrt
 "$out/test-gateway-application-network"
 LAN2_LEGACY_PEER=1 "$out/test-gateway-application-network"
 

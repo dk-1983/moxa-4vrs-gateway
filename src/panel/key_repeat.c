@@ -1,8 +1,8 @@
 #include <string.h>
 #include "panel/key_repeat.h"
 void key_repeat_init(key_repeat_t *s) { memset(s, 0, sizeof(*s)); }
-int key_repeat_step(key_repeat_t *s, uint32_t now, unsigned int mask,
-                    uint32_t context, int allowed)
+int key_repeat_scaled(key_repeat_t *s, uint32_t now, unsigned int mask,
+                    uint32_t context, int allowed, int numeric)
 {
     uint32_t interval;
     if (!s) return 0;
@@ -24,9 +24,11 @@ int key_repeat_step(key_repeat_t *s, uint32_t now, unsigned int mask,
     }
     /* 500ms initial delay, then 100ms; strictly after 5s -> 10ms.
      * Unsigned differences also support the 32-bit clock wrap. */
-    interval = s->started ? (now - s->pressed_at > 5000U ? 10U : 100U) : 500U;
+    interval = s->started ? (now - s->pressed_at > 5000U && !numeric ? 10U : 100U) : 500U;
     if (now - s->emitted_at < interval) return 0;
     s->emitted_at = now; /* no catch-up queue */
     s->started = 1;
-    return mask == 1U ? -1 : 1;
+    return (mask == 1U ? -1 : 1) * (numeric && now - s->pressed_at > 5000U ? 10 : 1);
 }
+int key_repeat_step(key_repeat_t*s,uint32_t now,unsigned int mask,uint32_t context,int allowed){return key_repeat_scaled(s,now,mask,context,allowed,0);}
+

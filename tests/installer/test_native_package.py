@@ -1,6 +1,7 @@
 """Exercise the production C reader on the existing packager's exact output."""
 import importlib.util
 import io
+import re
 import hashlib
 import json
 import os
@@ -16,6 +17,7 @@ root, out, probe = map(Path, sys.argv[1:])
 spec = importlib.util.spec_from_file_location('package', root / 'tools/build-installer-package.py')
 package = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(package)
+version=re.search(r'#define INSTALL_RELEASE "([^"]+)"',(root/'src/installer/install_package.h').read_text()).group(1)
 names = package.PAYLOAD_NAMES + ('4vrs-web','4vrs-rng','4vrs-kdf')
 
 
@@ -30,7 +32,8 @@ def elf():
     loader = b'/lib/ld-linux.so.3\0'
     struct.pack_into('>I', b, 100, len(loader))
     b[128:128+len(loader)] = loader
-    b[160:174] = b'v2026.02.01\0\0\0'
+    label=version.encode()+b'\0'
+    b[160:160+len(label)]=label
     return bytes(b)
 
 
@@ -44,7 +47,7 @@ with tempfile.TemporaryDirectory(prefix='native-package-', dir=out) as tmp:
     archive = tmp / 'package.tar.gz'
     license_file = tmp / 'license'
     license_file.write_bytes(b'test fixture license')
-    package.package('v2026.02.01', *sources[:4], archive, web=sources[4], rng=sources[5], kdf=sources[6], license_file=license_file)
+    package.package(version, *sources[:4], archive, web=sources[4], rng=sources[5], kdf=sources[6], license_file=license_file)
     baseline = tmp / 'baseline'
     baseline.mkdir(mode=0o700)
     with tarfile.open(archive) as tar:

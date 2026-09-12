@@ -8,7 +8,7 @@ import struct
 import tarfile
 
 # The qualified Web candidate is immutable; update this pin only with a qualified delivery.
-ARCHIVE_SHA256 = '624f807edb127977e09dde918460653b32b2b6f3590869080a6c144e6478844c'
+ARCHIVE_SHA256 = '66f2f1b780fdf9aa9da45019e39f1ab0ac12f47c084a5e6f044e1888bb79dc6c'
 PAYLOAD = {'4vrs-install', '4vrs-gateway', '4vrs-gateway.init',
            '4vrs-networking-wrapper', '4vrs-web', '4vrs-rng', '4vrs-kdf'}
 NAMES = PAYLOAD | {'manifest.json', 'SHA256SUMS', 'LICENSE.mbedtls', 'NOTICE'}
@@ -24,13 +24,13 @@ def load(path):
     files = {}
     with tarfile.open(path, 'r:gz') as archive:
         for item in archive:
-            check(item.isfile() and item.name == '4vrs-gateway-v2026.02.01/' + Path(item.name).name)
+            check(item.isfile() and item.name == '4vrs-gateway-v2026.02.02/' + Path(item.name).name)
             name = Path(item.name).name
             check(name in NAMES and name not in files and 0 < item.size < 8*1024*1024)
             files[name] = (archive.extractfile(item).read(), 0o755 if name in PAYLOAD else 0o644)
     check(set(files) == NAMES)
     manifest = json.loads(files['manifest.json'][0])
-    check(manifest['format'] == 3 and manifest['version'] == 'v2026.02.01')
+    check(manifest['format'] == 3 and manifest['version'] == 'v2026.02.02')
     check({i['name'] for i in manifest['files']} == PAYLOAD)
     for item in manifest['files']:
         data, mode = files[item['name']]

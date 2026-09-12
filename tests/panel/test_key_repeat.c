@@ -46,6 +46,12 @@ int main(void)
         seen |= 1U << list;
     }
     assert(octet < 256 && seen == 31);
+    key_repeat_init(&s);count=0;
+    assert(key_repeat_scaled(&s,0,2,1,1,1)==1);
+    for(i=40;i<=6000;i+=40)count+=key_repeat_scaled(&s,i,2,1,1,1);
+    assert(count==118); /* 38 ordinary + 8 ten-step emissions */
+    assert(!key_repeat_scaled(&s,6040,0,1,1,1));
+    assert(key_repeat_scaled(&s,6080,1,1,1,1)==-1);
     puts("key-repeat: timing, release, direction, context, commands, wrap, ports, lists PASS");
     return 0;
 }

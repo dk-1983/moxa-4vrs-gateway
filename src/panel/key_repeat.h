@@ -13,4 +13,7 @@ void key_repeat_init(key_repeat_t *state);
 int key_repeat_step(key_repeat_t *state, uint32_t monotonic_ms,
                     unsigned int physical_mask, uint32_t context,
                     int repeat_allowed);
+/* Numeric acceleration uses ten existing steps per 100ms tick: LCD redraw
+ * latency cannot collapse the requested tenfold change into a fewfold rate. */
+int key_repeat_scaled(key_repeat_t *, uint32_t, unsigned int, uint32_t, int, int);
 #endif

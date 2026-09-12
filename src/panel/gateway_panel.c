@@ -290,7 +290,56 @@ static void web_prompt(gateway_panel_t *p,gateway_application_t *a){
  if(a->web.recovery_prompt==1){if(!safe||web_drain(p)){a->web.recovery_prompt=0;return;}p->web_return=p->view;p->view=GATEWAY_PANEL_WEB_RECOVER;p->web_remote=1;p->web_prompt_ready=0;a->web.recovery_prompt=2;}
  if(a->web.show_code&&safe){a->web.show_code=0;p->view=GATEWAY_PANEL_WEB_CODE;}
 }
-void gateway_panel_step(gateway_panel_t*p,gateway_application_t*a){gateway_diagnostic_snapshot_t d;unsigned int raw=0;int r;gateway_panel_view_t old_view;if(!p||!a||!p->initialized)return;if(gateway_diagnostics_capture(a,&d)!=0)return;if(p->view==GATEWAY_PANEL_STARTUP&&(terminal(d.application.coordinator.state)||a->fatal_seen))p->view=GATEWAY_PANEL_HOME;web_transaction_result(p,a);web_prompt(p,a);if(p->health.keypad_available){r=p->ops->keypad_poll(p->ops_context,&raw);if(r<0){p->health.keypad_available=0;p->health.last_keypad_error=r;increment(&p->health.keypad_errors);p->ops->keypad_close(p->ops_context);}else if(r>0&&raw<=4U){old_view=p->view;increment(&p->health.key_event_count);if(!web_key(p,a,raw)&&!network_key(p,a,raw)&&!special_key(p,a,raw))key(p,a,raw,&d);
+static unsigned int repeat_context(const gateway_panel_t*p){
+ unsigned int field=0;
+ if(p->view==GATEWAY_PANEL_EDIT_FIELD)field=(p->field_index<<8)|p->edit_octet;
+ else if(p->view==GATEWAY_PANEL_TIME_EDIT)field=p->time_field;
+ else if(p->view==GATEWAY_PANEL_NTP_EDIT)field=(p->ntp_field<<8)|p->ntp_cursor;
+ else if(p->view==GATEWAY_PANEL_NETWORK_EDIT)field=(p->network_page<<8)|p->lan2_cursor;
+ return ((unsigned int)p->view<<24)|field;
+}
+static int repeat_allowed(const gateway_panel_t*p){
+ switch(p->view){
+ case GATEWAY_PANEL_HELP:case GATEWAY_PANEL_SYSTEM:
+ case GATEWAY_PANEL_MENU:case GATEWAY_PANEL_PORTS:case GATEWAY_PANEL_PORT_DETAIL:
+ case GATEWAY_PANEL_CONFIG_PORTS:case GATEWAY_PANEL_CONFIG_FIELDS:case GATEWAY_PANEL_EDIT_FIELD:
+ case GATEWAY_PANEL_STARTUP_EVENTS:case GATEWAY_PANEL_TIME_EDIT:case GATEWAY_PANEL_NTP_EDIT:
+ case GATEWAY_PANEL_NETWORK:case GATEWAY_PANEL_NETWORK_EDIT:case GATEWAY_PANEL_WEB:
+ case GATEWAY_PANEL_BACKLIGHT:return 1;
+ default:return 0;
+ }
+}
+static int repeat_numeric(const gateway_panel_t*p){
+ if(p->view==GATEWAY_PANEL_EDIT_FIELD)return p->field_index==4U||p->field_index==9U||p->field_index==10U;
+ if(p->view==GATEWAY_PANEL_TIME_EDIT)return 1;
+ if(p->view==GATEWAY_PANEL_NTP_EDIT)return p->ntp_field==2U;
+ if(p->view==GATEWAY_PANEL_NETWORK_EDIT)return p->network_page==2U?p->lan2_cursor>0U:p->lan2_cursor<8U;
+ return 0;
+}
+static int panel_poll(gateway_panel_t*p,core_tick_t now,unsigned int*raw){
+ unsigned int mask=0,direction,previous;int state,event=p->ops->keypad_poll(p->ops_context,raw),step;
+ p->repeat_count=1;
+ if(event<0||!p->key_state)return event;
+ state=p->key_state(p->ops_context,&mask);
+ if(state!=1){key_repeat_init(&p->repeat);p->repeat_armed=0;return event;}
+ direction=(mask&~10U)?3U:((mask&2U)?1U:0U)|((mask&8U)?2U:0U);
+ previous=p->repeat.mask;
+ step=key_repeat_scaled(&p->repeat,now,direction,repeat_context(p),repeat_allowed(p),repeat_numeric(p));
+ if(!direction||direction!=previous||p->repeat.blocked)p->repeat_armed=0;
+ /* The vendor PRESS queue owns the first step, including taps entirely
+  * between samples. Physical state supplies repeats only after that PRESS.
+  * Never infer a held key from queue silence. */
+ if(event>0){
+  if(!p->repeat.blocked&&repeat_allowed(p)&&
+     ((*raw==GATEWAY_PANEL_KEY_F2&&direction==1U)||
+      (*raw==GATEWAY_PANEL_KEY_F4&&direction==2U)))p->repeat_armed=1;
+  return event;
+ }
+ if(step&&p->repeat_armed){p->repeat_count=(unsigned int)(step<0?-step:step);/* Keep the physical key identity separate from signed step magnitude. */ *raw=direction==1U?GATEWAY_PANEL_KEY_F2:GATEWAY_PANEL_KEY_F4;return 1;}
+ return 0;
+}
+
+void gateway_panel_step(gateway_panel_t*p,gateway_application_t*a){gateway_diagnostic_snapshot_t d;unsigned int raw=0,repeats;int r;gateway_panel_view_t old_view;if(!p||!a||!p->initialized)return;if(gateway_diagnostics_capture(a,&d)!=0)return;if(p->view==GATEWAY_PANEL_STARTUP&&(terminal(d.application.coordinator.state)||a->fatal_seen))p->view=GATEWAY_PANEL_HOME;web_transaction_result(p,a);web_prompt(p,a);if(p->health.keypad_available){r=panel_poll(p,d.application.coordinator.uptime,&raw);if(r<0){p->health.keypad_available=0;p->health.last_keypad_error=r;increment(&p->health.keypad_errors);p->ops->keypad_close(p->ops_context);}else if(r>0&&raw<=4U){old_view=p->view;increment(&p->health.key_event_count);for(repeats=0;repeats<p->repeat_count;++repeats){if(!web_key(p,a,raw)&&!network_key(p,a,raw)&&!special_key(p,a,raw))key(p,a,raw,&d);if(p->view!=old_view)break;}
 if(p->view!=old_view&&(p->view==GATEWAY_PANEL_BACKLIGHT||p->view==GATEWAY_PANEL_WEB||p->view==GATEWAY_PANEL_SHUTDOWN_CONFIRM||(p->view==GATEWAY_PANEL_TIME_EDIT&&old_view==GATEWAY_PANEL_SYSTEM)||(p->view==GATEWAY_PANEL_NETWORK_EDIT&&old_view==GATEWAY_PANEL_NETWORK)))gateway_application_revision(a,p->draft_token);
 p->dirty=1;}}
  make_screen(p,&d,a);if(!p->have_displayed||memcmp(&p->next,&p->displayed,sizeof(p->next))!=0)p->dirty=1;if(p->dirty&&p->health.display_available){r=p->ops->display_draw(p->ops_context,&p->next);if(r==0){p->displayed=p->next;p->have_displayed=1;p->dirty=0;increment(&p->health.render_count);if(p->web_remote&&!p->web_prompt_ready){if(web_drain(p)){a->web.recovery_prompt=0;}else p->web_prompt_ready=1;}}else{p->health.display_available=0;p->health.last_display_error=r;increment(&p->health.display_errors);p->ops->display_close(p->ops_context);}}else if(p->health.display_available)increment(&p->health.suppressed_render_count);p->health.view=p->view;}

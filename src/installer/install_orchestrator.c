@@ -10,8 +10,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <fcntl.h>
 static int join(char*out,size_t capacity,const char*a,const char*b){size_t x=strlen(a),y=strlen(b);if(x+y+2>capacity)return -1;memcpy(out,a,x);out[x]='/';memcpy(out+x+1,b,y+1);return 0;}
 
+/* Only the confirmed CF root is normalized; never follow a link or change
+ * ownership, descendants, recovery-only invocations, or an unavailable CF. */
+static int prepare_cf_root(install_context_t*c){
+ char path[1024];struct stat before,opened,after;int fd,r=-1;
+ if(install_path(c->root,"var/hda",path)||lstat(path,&before)||
+    !S_ISDIR(before.st_mode)||before.st_uid!=geteuid())return -1;
+ fd=open(path,O_RDONLY|O_DIRECTORY|O_NOFOLLOW);if(fd<0)return -1;
+ if(fstat(fd,&opened)||opened.st_dev!=before.st_dev||opened.st_ino!=before.st_ino||
+    !S_ISDIR(opened.st_mode)||opened.st_uid!=geteuid())goto done;
+ if((opened.st_mode&0022)&&(fchmod(fd,(opened.st_mode&07777)&~0022)||fsync(fd)))goto done;
+ if(fstat(fd,&opened)||lstat(path,&after)||opened.st_dev!=after.st_dev||
+    opened.st_ino!=after.st_ino||!S_ISDIR(after.st_mode)||after.st_uid!=geteuid()||
+    (after.st_mode&0022))goto done;
+ r=0;
+ done:if(close(fd))r=-1;return r;
+}
 static int directory(install_context_t*c,const char*rel,unsigned int create){
  char path[1024],parent[1024],*slash;struct stat s;
  if(install_path(c->root,rel,path))return -1;
@@ -34,6 +51,7 @@ int install_layout(install_context_t*c,unsigned int create){
  c->stage="layout-storage";
  for(i=0;i<sizeof(parents)/sizeof(parents[0]);i++){
   if(i>=2&&c->platform->cf_available(c->platform_context)!=1){if(create)return -1;break;}
+  if(i==2&&create&&prepare_cf_root(c))return -1;
   if(directory(c,parents[i],create))return -1;
  }
  if(snprintf(c->state_directory,sizeof(c->state_directory),"%s%s%s",c->root,!strcmp(c->root,"/")?"":"/",INSTALL_RECOVERY_DIRECTORY)>=(int)sizeof(c->state_directory))return -1;

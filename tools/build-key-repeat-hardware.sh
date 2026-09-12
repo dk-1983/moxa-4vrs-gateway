@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 root=${1:-.};out=${2:-build/host-panel};mkdir -p "$out"
-cc ${CFLAGS:--std=c99 -O2 -Wall -Wextra -Werror} -I"$root/src" -I"$root/tests" -o "$out/test-gateway-panel" \
- "$root/tests/panel/test_gateway_panel.c" "$root/src/panel/gateway_panel.c" "$root/src/panel/key_repeat.c" \
+/usr/local/xscale_be/bin/xscale_be-gcc -std=c99 -Os -mcpu=xscale -mbig-endian -msoft-float -I"$root/src" -I"$root/tests" -o "$out/test-gateway-panel" \
+ "$root/tests/panel/key-repeat-hardware.c" "$root/src/panel/gateway_panel.c" "$root/src/panel/key_repeat.c" "$root/src/panel/gateway_panel_moxa.c" \
  "$root/src/diagnostics/gateway_diagnostics.c" "$root/src/app/gateway_application.c" "$root/src/app/gateway_application_network.c" "$root/src/network/gateway_network_runtime.c" "$root/src/network/gateway_network_import_policy.c" "$root/src/network/gateway_network_service.c" "$root/src/network/gateway_network_owner.c" "$root/src/network/gateway_dhcp_client.c" "$root/src/network/gateway_dhcp_wire.c" "$root/src/network/gateway_dhcp_io.c" "$root/src/network/gateway_network_system.c" "$root/src/network/gateway_network_settings.c" "$root/src/network/gateway_network_document.c" "$root/src/network/gateway_network_profile.c" "$root/src/network/gateway_network_store.c" "$root/src/network/gateway_network_manager.c" "$root/src/network/gateway_network_supervisor.c" "$root/src/network/gateway_network_observation.c" \
  "$root/src/gateway/gateway_coordinator.c" "$root/src/gateway/gateway_controller.c" \
  "$root/src/gateway/gateway_real_adapter.c" "$root/src/config/gateway_persistence.c" \
@@ -10,4 +10,3 @@ cc ${CFLAGS:--std=c99 -O2 -Wall -Wextra -Werror} -I"$root/src" -I"$root/tests" -
  "$root/src/modbus/modbus_dispatcher.c" "$root/src/modbus/modbus_tcp_adapter.c" \
  "$root/src/modbus/mbap_stream.c" "$root/src/modbus/modbus_crc.c" \
  "$root/src/uart/uart_backend.c" "$root/src/core/deadline.c" "$root/src/core/port_runtime.c" -lrt
-"$out/test-gateway-panel"

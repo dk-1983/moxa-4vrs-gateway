@@ -2,6 +2,7 @@
 #define FOURVRS_GATEWAY_PANEL_H
 
 #include "app/gateway_application.h"
+#include "panel/key_repeat.h"
 
 #define GATEWAY_PANEL_COLUMNS 16U
 #define GATEWAY_PANEL_ROWS 8U
@@ -81,6 +82,9 @@ typedef struct gateway_panel_health {
 } gateway_panel_health_t;
 
 typedef struct gateway_panel {
+    key_repeat_t repeat;
+    unsigned int repeat_armed, repeat_count;
+    int (*key_state)(void *, unsigned int *); /* 1 physical state, 0 unavailable, -1 error */
     char draft_token[64];
     char web_transaction_token[64];
     unsigned int web_pending, web_save_failed;

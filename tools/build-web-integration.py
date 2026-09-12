@@ -8,7 +8,7 @@ run(['python3',root/'tools/embed-web-assets.py',root,assets,out])
 run(['sh',root/'tools/build-web-tls.sh',root,tls,out/'tls',mode])
 cc='/usr/local/xscale_be/bin/xscale_be-gcc' if mode=='target' else 'cc'
 flags=['-std=c99','-Os','-Wall','-Wextra','-DMBEDTLS_CONFIG_FILE="web/mbedtls_config.h"','-I'+str(root/'src'),'-I'+str(root/'tests'),'-I'+str(tls/'include')]
-flags+=['-DFOURVRS_VERSION="v2026.02.01"']
+# Product version comes from src/version.h.
 if mode=='target':flags+=['-mcpu=xscale','-mbig-endian','-msoft-float']
 else:flags+=['-Wno-misleading-indentation','-DWEB_HOST_TEST']
 if mode=='ubsan':flags+=['-fsanitize=undefined','-fno-sanitize-recover=all','-g']
