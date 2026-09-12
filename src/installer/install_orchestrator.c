@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include "installer/install_orchestrator.h"
 #include "installer/install_scripts.h"
 #include "installer/install_apache.h"
@@ -65,7 +66,7 @@ static const char*const common_paths[]={
  "etc/4vrs-installer/networking","etc/4vrs-installer/application",
  "etc/rc.d/rcS.d/S40networking","etc/rc.d/rc3.d/S90fourvrs-gateway",
  "etc/rc.d/rc0.d/K10fourvrs-gateway","etc/rc.d/rc6.d/K10fourvrs-gateway",
- "var/hda/4vrs/bin/4vrs-web","etc/rc.d/rcS.d/S21apache",
+ "var/hda/4vrs/bin/4vrs-web",FOURVRS_APACHE_GATE,
  "var/hda/4vrs/bin/4vrs-rng","var/hda/4vrs/bin/4vrs-kdf"
 };
 int install_allow_path(void*v,const char*path,unsigned int flags){
@@ -200,7 +201,14 @@ int install_recover_only(install_context_t*c){
  c->stage="recover-only";return install_transaction_recover(&c->transaction);
 }
 int install_recover_entry(install_context_t*c,unsigned int application,const char*action){
- int r;c->entry_mode=1;c->stage="entry-layout";if(install_layout(c,0))return INSTALL_RECOVERY_REQUIRED;
+ int r;c->entry_mode=1;
+ /* Vendor PCMCIA startup chmods the mounted CF root a+w on every boot.
+  * Normalize only an authenticated start entry, never status/stop/recovery.
+  * The platform mount check and inode/no-follow checks remain mandatory. */
+ if(application&&action&&!strcmp(action,"start")&&c->platform->cf_available(c->platform_context)==1){
+  c->stage="entry-cf-permissions";if(prepare_cf_root(c))return INSTALL_RECOVERY_REQUIRED;
+ }
+ c->stage="entry-layout";if(install_layout(c,0))return INSTALL_RECOVERY_REQUIRED;
  r=active(c);if(r!=1)return INSTALL_RECOVERY_REQUIRED;
  c->stage="entry-recover";r=install_transaction_recover(&c->transaction);
  if(r==INSTALL_WAIT_CF){if(application)return r;return c->platform->entry(c->platform_context,0,action,1)?INSTALL_RECOVERY_REQUIRED:r;}

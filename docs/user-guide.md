@@ -1,4 +1,4 @@
-# 4VRS Gateway v2026.02.01 — User guide
+# 4VRS Gateway v2026.02.03 — User guide
 
 [README](../README.md) · [LCD / Web](screens.md) · [Release scope](release-final.md)
 
@@ -20,6 +20,10 @@
 - [Web — pages and actions](#web--pages-and-actions)
 
 ## Vendor firmware requirement
+
+Supported platforms are UC-7420-LX Plus with OS 1.6 / Linux 2.6.10 and UC-7420-LX without Plus with OS 2.3 / Linux 2.4.18. The universal installer selects the profile on the device; no OS choice is needed in the CF wizard. Other models are not qualified.
+
+The vendor firmware requirements below apply to **Plus**.
 
 Before installing 4VRS Gateway on **Moxa UC-7420-LX Plus**, upgrade the vendor
 firmware to **1.6** (`FWR_UC7400P_V1.6_Build_09110414`). This is the required
@@ -51,7 +55,7 @@ Upgrading the Firmware, pages 3-4–3-5.
 
 ## Installation
 
-The full package and CF wizard are available in the [release](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.01). Follow the [current commissioning procedure](release-final-commissioning.md), including explicit initial RNG activation. Earlier manual-install procedures do not apply to this release.
+The full package and CF wizard are available in the [release](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.03). Follow the [current commissioning procedure](release-final-commissioning.md), including explicit initial RNG activation. Earlier manual-install procedures do not apply to this release.
 
 ## Menu tree
 
@@ -92,7 +96,9 @@ Home screen
     │       ├── Recover access → F3 Set → F3 Yes / F1 No
     │       ├── HTTP cleartext / HTTPS not rec. → F3 Set
     │       └── F5 URLs → [HTTPS only] F5 Cert → SHA-256
-    ├── Shutdown → confirm stopping Gateway
+    ├── Shutdown → F3 Yes / F1 Cancel
+    │   ├── Stopping Gateway → Gateway stopped
+    │   └── Shutdown failed → F1 Back → Main Menu
     └── About — product and version
 ```
 
@@ -438,6 +444,8 @@ and private infrastructure details from shared logs.
 **Shutdown stops the Gateway application. It does not power off or reboot the
 Moxa operating system.** Coordinate OS restart or physical power removal
 separately. Do not start a second Gateway instance against the same UARTs.
+
+Confirmation shows stopping progress and the final screen. `Gateway stopped` means the application has exited; the OS is still running. `Shutdown failed` shows the reason; F1 returns to the menu without restarting stopped ports. [Screen and details](releases/v2026.02.03-lcd.md).
 
 ## Quick troubleshooting
 

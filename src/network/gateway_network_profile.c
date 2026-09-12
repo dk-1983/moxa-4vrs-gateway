@@ -1,3 +1,4 @@
+#include "core/platform.h"
 #include <stdio.h>
 #include <string.h>
 #include "network/gateway_network_profile.h"
@@ -153,7 +154,7 @@ int gateway_network_profile_broadcast(const gateway_network_profile_t *p,unsigne
         if(n>=sizeof(line))return -1;
         memcpy(line,s,n);line[n]=0;s+=n;if(*s)++s;
         if(sscanf(line," %63s",key)!=1||key[0]=='#')continue;
-        if(!strcmp(key,"iface")){if(sscanf(line," iface %63s",name)!=1)return -1;owned=!strcmp(name,lan?"eth1":"eth0");continue;}
+        if(!strcmp(key,"iface")){if(sscanf(line," iface %63s",name)!=1)return -1;owned=!strcmp(name,lan?"" FOURVRS_LAN_PREFIX "1":"" FOURVRS_LAN_PREFIX "0");continue;}
         if(!strcmp(key,"auto")||!strcmp(key,"allow-hotplug")){owned=0;continue;}
         if(owned&&!strcmp(key,"broadcast")){
             if(seen++||sscanf(line," broadcast %15s %c",out,&extra)!=1||gateway_ipv4_parse(out,&broadcast)||

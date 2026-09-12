@@ -46,6 +46,9 @@ typedef enum gateway_panel_view {
     GATEWAY_PANEL_NTP_CONFIRM,
     GATEWAY_PANEL_NTP_RESULT,
     GATEWAY_PANEL_SHUTDOWN_CONFIRM,
+    GATEWAY_PANEL_STOPPING,
+    GATEWAY_PANEL_STOP_FAILED,
+    GATEWAY_PANEL_STOPPED,
     GATEWAY_PANEL_ABOUT,
     GATEWAY_PANEL_NETWORK,
     GATEWAY_PANEL_NETWORK_EDIT,
@@ -103,6 +106,7 @@ typedef struct gateway_panel {
     gateway_panel_health_t health;
     gateway_panel_view_t view;
     unsigned int selected;
+    unsigned int shutdown_error;
     unsigned int scroll;
     unsigned int port_index;
     unsigned int detail_page;
@@ -131,6 +135,7 @@ typedef struct gateway_panel {
 int gateway_panel_init(gateway_panel_t *panel, const gateway_panel_ops_t *ops,
                        void *ops_context);
 void gateway_panel_step(gateway_panel_t *panel, gateway_application_t *application);
+void gateway_panel_stop_result(gateway_panel_t *, unsigned int error);
 void gateway_panel_shutdown(gateway_panel_t *panel);
 void gateway_panel_health(const gateway_panel_t *panel,
                           gateway_panel_health_t *health);

@@ -13,6 +13,11 @@ if [ "$mode" = target ]; then
  ar=/usr/local/xscale_be/bin/xscale_be-ar
  flags="$flags -mcpu=xscale -mbig-endian -msoft-float"
 fi
+if [ "$mode" = linux24 ]; then
+ cc=/usr/local/mxscaleb/bin/mxscaleb-gcc
+ ar=/usr/local/mxscaleb/bin/mxscaleb-ar
+ flags='-std=c99 -Os -Wall -W -mcpu=xscale -mbig-endian -msoft-float -DFOURVRS_LINUX24'
+fi
 if [ "$mode" = ubsan ]; then flags="$flags -fsanitize=undefined -fno-sanitize-recover=all -g"; fi
 for source in "$tls"/library/*.c; do
  name=$(basename "$source" .c)

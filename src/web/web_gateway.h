@@ -19,7 +19,7 @@ typedef struct web_gateway {
 } web_gateway_t;
 int web_gateway_init(web_gateway_t *,gateway_application_t *,const char *,const char *,unsigned int,unsigned int);
 void web_gateway_step(web_gateway_t *);
-void web_gateway_close(web_gateway_t *);
+int web_gateway_close(web_gateway_t *);
 int web_gateway_local(void *,unsigned int);
 /* Same fail-closed network gate used before starting/rebinding Web. */
 unsigned int web_gateway_network_error(const gateway_network_runtime_t *,unsigned int,char [2][16]);

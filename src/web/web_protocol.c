@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include "web/rng_client.h"
 #include "web/web_protocol.h"
 #include <errno.h>
@@ -9,7 +10,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 extern int fsync(int);
-uint32_t web_now(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (uint32_t)t.tv_sec*1000U+(uint32_t)t.tv_nsec/1000000U;}
+uint32_t web_now(void){struct timespec t;if(gateway_monotonic_time(&t))return 0;return (uint32_t)t.tv_sec*1000U+(uint32_t)t.tv_nsec/1000000U;}
 int web_nonblock(int fd){return fcntl(fd,F_SETFL,O_NONBLOCK)||fcntl(fd,F_SETFD,FD_CLOEXEC)?-1:0;}
 void web_clear(void *p,size_t n){volatile unsigned char *b=p;while(n--)*b++=0;}
 int web_equal(const void *a,const void *b,size_t n){const unsigned char *x=a,*y=b;unsigned int v=0;while(n--)v|=*x++^*y++;return v==0;}

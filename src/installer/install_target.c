@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include "installer/install_target.h"
 #include "installer/install_readiness.h"
 #include "installer/install_apache.h"
@@ -20,10 +21,15 @@
 #include <errno.h>
 #define APP "/var/hda/4vrs/bin/4vrs-gateway"
 #define HELPER "/etc/4vrs-network/gateway-network-recovery"
-static unsigned long long tick(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
+static unsigned long long tick(void){struct timespec t;if(gateway_monotonic_time(&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
 static int cf_available(void*v){struct stat a,b;struct statvfs fs;(void)v;if(stat("/var",&a)||stat("/var/hda",&b))return errno==ENOENT?0:-1;if(a.st_dev==b.st_dev)return 0;if(!S_ISDIR(b.st_mode)||statvfs("/var/hda",&fs))return -1;return(fs.f_flag&ST_RDONLY)?-1:1;}
 static int detect(void*v){struct utsname u;struct stat s;unsigned int i;char path[64];struct statvfs fs;(void)v;
- if(geteuid()!=0||uname(&u)||strncmp(u.machine,"arm",3)||strncmp(u.release,"2.6.10",6)||!strstr(u.release,"xscale_be"))return -1;
+ if(geteuid()!=0||uname(&u)||strcmp(u.machine,"armv5teb"))return -1;
+#ifdef FOURVRS_LINUX24
+ if(strcmp(u.release,"2.4.18_mvl30-ixdp425"))return -1;
+#else
+ if(strncmp(u.release,"2.6.10",6)||!strstr(u.release,"xscale_be"))return -1;
+#endif
  for(i=0;i<8;i++){snprintf(path,sizeof(path),"/dev/ttyM%u",i);if(stat(path,&s)||!S_ISCHR(s.st_mode))return -1;}
  if(stat("/usr/lib/libmoxalib.so",&s)||!S_ISREG(s.st_mode)||statvfs("/etc",&fs)||(fs.f_flag&ST_RDONLY))return -1;
  return 0;
@@ -90,14 +96,22 @@ static int stop(void*v){
  install_target_t*t=v;unsigned int running;install_file_t absent={0,0,0,0};int status;pid_t g;
  install_process_t children[128];unsigned int count,i;
  /* Refresh identities at every stop, including rollback after new activation. */
+ t->installer->stage="stop-apache";
  if(t->installer->transaction_services&&install_apache_stop())return -1;
+ t->installer->stage="stop-scan";
  if(scan(v,&running,0))return -1;
+ t->installer->stage="stop-descendants";
  if(descendants(t,children,&count))return -1;
+ t->installer->stage="stop-application";
  if(t->have_application){if(install_process_stop(&t->application,55000))return -1;(void)waitpid(t->application.pid,&status,WNOHANG);t->have_application=0;}
+ t->installer->stage="stop-guardian";
  {int held=guardian_pid(&g);if(held<0)return -1;if(held){install_process_t guardian;if(identity(g,&guardian)||install_process_stop(&guardian,35000))return -1;(void)waitpid(guardian.pid,&status,WNOHANG);}}
  t->have_guardian=0;
+ t->installer->stage="stop-guardian-lock";
  if(guardian_pid(&g)!=0)return -1;
+ t->installer->stage="stop-descendants-exit";
  for(i=0;i<count;i++)if(install_process_matches(&children[i])!=0)return -1;
+ t->installer->stage="stop-final-scan";
  if(scan(v,&running,0)||running||t->have_guardian)return -1;
  if(cf_available(v)!=1)return 0;
  return install_file_publish("/","var/hda/4vrs/run/4vrs-gateway.pid",&absent);
@@ -171,7 +185,18 @@ static int entry(void*v,unsigned int application,const char*action,unsigned int 
  install_target_t*t=v;char path[128];
  if(!strcmp(action,"start")&&fallback)return network_start(t,0);
  if(application){
-  if(!strcmp(action,"start")){unsigned int running;if(!access("/var/hda/4vrs/disable-autostart",F_OK))return 0;if(inspect(v,&running))return -1;if(running)return 0;return start_application(v);}
+  if(!strcmp(action,"start")){
+   unsigned int running;gateway_network_service_status_t status;
+   if(!access("/var/hda/4vrs/disable-autostart",F_OK))return 0;
+   if(inspect(v,&running))return -1;
+   /* stop() also stops the guardian. A direct application restart must
+    * restore its managed network service, just as the boot sequence does. */
+   if(!access("/etc/4vrs-network/enabled",F_OK)&&
+      (service(&status)||!status.ready||!status.settled||status.error)){
+    if(network_start(t,0))return -1;
+   }
+   return running?0:start_application(v);
+  }
   if(!strcmp(action,"stop"))return stop(v);
   if(!strcmp(action,"status")){unsigned int running;return inspect(v,&running)?1:running?0:3;}
   return -1;

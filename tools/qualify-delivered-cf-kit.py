@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory(prefix='delivered-kit-',dir='/opt') as tmp:
         if name in inner:assert item==inner[name]
     subprocess.run(['sha256sum','-c','SHA256SUMS'],cwd=kit,stdout=subprocess.DEVNULL,check=True)
     w.validate_installation(kit)
-    payload=w.package.load(kit/'gateway.tar.gz');assert len(payload)==11
+    payload=w.package.load(kit/'gateway.tar.gz');assert set(payload)==w.package.BUNDLE_NAMES
     assert os.access(kit/'4vrs-cf-rng-worker',os.X_OK)
     worker=subprocess.run([kit/'4vrs-cf-rng-worker'],capture_output=True)
     assert worker.returncode!=0 and worker.returncode>=0  # Executed, refused missing device arguments.

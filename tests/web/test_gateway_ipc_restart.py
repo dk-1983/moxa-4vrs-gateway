@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess,os,sys,time,json,tempfile,signal,http.client
 build=Path(sys.argv[1]);out=Path(sys.argv[2]);endpoint_id=os.getpid()+900000
-endpoint=Path('/tmp/4vrs-web-ipc')/(str(endpoint_id)+'.sock')
+endpoint=Path('/var/4vrs-web-ipc')/(str(endpoint_id)+'.sock')
 def wait(fn):
     end=time.monotonic()+20
     while time.monotonic()<end:

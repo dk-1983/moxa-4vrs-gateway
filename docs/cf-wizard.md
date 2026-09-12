@@ -1,10 +1,14 @@
-# CompactFlash wizard — v2026.02.01 / Ubuntu 24.04
+# CompactFlash wizard — v2026.02.03 / Ubuntu 24.04
 
 [Installation](installation.md) · [Initial activation](release-final-commissioning.md) · [Limits](release-final.md)
 
 The wizard runs offline on Ubuntu 24.04 x86-64. It prepares CF and stages the complete installer; it does not connect to the device or change vendor firmware. New CF requires separate explicit RNG activation. Consistent active schema 3 restarts autonomously.
 
 ## Vendor firmware requirement
+
+The universal package supports two verified platforms: **UC-7420-LX Plus, OS 1.6 / Linux 2.6.10**, and **UC-7420-LX without Plus, OS 2.3 / Linux 2.4.18**. No OS choice is needed on the PC: `install.sh` selects the profile from the device kernel, architecture and loader. An unknown platform is rejected before installation. Versions 1.6 and 2.3 belong to different families and are not interchangeable.
+
+The following vendor firmware upgrade procedure applies only to Plus:
 
 Before installing 4VRS Gateway on **Moxa UC-7420-LX Plus**, upgrade the vendor
 firmware to **1.6** (`FWR_UC7400P_V1.6_Build_09110414`). This is the required
@@ -42,7 +46,7 @@ directory, then verify the kit:
 
 ```sh
 sudo install -d -m 0755 /opt/4vrs-cf-install-update
-sudo unzip 4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip -d /opt/4vrs-cf-install-update
+sudo unzip 4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip -d /opt/4vrs-cf-install-update
 cd /opt/4vrs-cf-install-update
 sha256sum -c SHA256SUMS
 sudo python3 cf-wizard.py --list
@@ -77,7 +81,7 @@ The scan shows partition metadata; it does not inspect dirty filesystem contents
 The wizard creates a DOS/MBR table with one Linux partition starting at sector
 2048 and ext3 with 4096-byte blocks, 128-byte inodes and explicitly bounded legacy
 features. It checks the new filesystem, mounts it, creates fresh RNG using the
-existing worker and PC `getrandom`, and writes all 11 Gateway package files.
+existing worker and PC `getrandom`, and writes all 25 universal package files for both platforms.
 It unmounts, verifies RNG and package after read-only mounting, then unmounts normally.
 RNG is never silently regenerated on a retry: a new erase requires a new explicit
 confirmation. An interrupted first installation is incomplete.
@@ -94,7 +98,7 @@ the update. The wizard never provisions RNG in this scenario.
 The first mount is `ro,noload,nodev,nosuid,noexec`; used bytes and escaped top-level
 names are displayed without traversing private state. Confirm the exact **UPDATE**
 phrase. The complete package is staged separately under
-`4vrs-packages/gateway-624f807edb127977`. Active `4vrs/bin`, configurations,
+`4vrs-packages/gateway-<first 16 characters of package SHA256>`. Active `4vrs/bin`, configurations,
 administrator/password state, TLS certificate/private key and current RNG are
 unchanged. Existing files are never copied into the portable kit or report.
 
@@ -114,11 +118,12 @@ Keep the previous full package and protected recovery baseline. On that Moxa:
 Run these commands from the package directory reported by the wizard:
 
 ```sh
-./4vrs-install
-./4vrs-install --status
+sh install.sh --detect
+sh install.sh
+/etc/4vrs-installer/recovery --status
 ```
 
-The unchanged native installer performs full configuration decoding, platform,
+The selected native installer performs full configuration decoding, platform,
 package ABI and startup-layout checks, and transactional activation with recovery
 journals. It may disconnect SSH; reconnect and inspect
 `/etc/4vrs-installer/recovery --status`. An accepted launch is not success.

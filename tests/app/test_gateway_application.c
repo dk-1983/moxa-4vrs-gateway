@@ -1,3 +1,4 @@
+#include "version.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -52,7 +53,7 @@ static void step_to_runtime(fixture_t*f){unsigned int i;for(i=0;i<3000U&&f->appl
 static void step_to_stop(fixture_t*f){unsigned int i;for(i=0;i<3000U&&!gateway_application_finished(&f->application);++i){gateway_application_step(&f->application);++f->now;}}
 
 static void ready_and_shutdown(void)
-{fixture_t f;gateway_application_health_t h;unsigned int i;prepare(&f,GATEWAY_CONFIG_OK,GATEWAY_CONFIG_SOURCE_ACTIVE);step_to_runtime(&f);CHECK(f.application.coordinator.state==GATEWAY_APP_READY&&f.application.process_state==GATEWAY_PROCESS_RUNNING);CHECK(f.load_calls==1&&f.provide_calls==1&&f.attach_calls==1&&f.platform_calls==1);gateway_application_health(&f.application,&h);CHECK(strcmp(h.product.name,"4VRS Gateway")==0&&strcmp(h.product.version,"v2026.02.01")==0);CHECK(strcmp(h.configuration_directory,"test-config")==0&&h.coordinator.ready_ports==8);gateway_application_request_stop(&f.application);gateway_application_request_stop(&f.application);step_to_stop(&f);CHECK(f.application.exit_status==GATEWAY_EXIT_CLEAN&&f.application.cleanup_attempts==1&&f.application.shutdown_requests==2);for(i=0;i<8U;++i)CHECK(f.backend[i].stops==1&&f.transport[i].stops==1);}
+{fixture_t f;gateway_application_health_t h;unsigned int i;prepare(&f,GATEWAY_CONFIG_OK,GATEWAY_CONFIG_SOURCE_ACTIVE);step_to_runtime(&f);CHECK(f.application.coordinator.state==GATEWAY_APP_READY&&f.application.process_state==GATEWAY_PROCESS_RUNNING);CHECK(f.load_calls==1&&f.provide_calls==1&&f.attach_calls==1&&f.platform_calls==1);gateway_application_health(&f.application,&h);CHECK(strcmp(h.product.name,"4VRS Gateway")==0&&strcmp(h.product.version,FOURVRS_VERSION)==0);CHECK(strcmp(h.configuration_directory,"test-config")==0&&h.coordinator.ready_ports==8);gateway_application_request_stop(&f.application);gateway_application_request_stop(&f.application);step_to_stop(&f);CHECK(f.application.exit_status==GATEWAY_EXIT_CLEAN&&f.application.cleanup_attempts==1&&f.application.shutdown_requests==2);for(i=0;i<8U;++i)CHECK(f.backend[i].stops==1&&f.transport[i].stops==1);}
 static void degraded(void)
 {fixture_t f;prepare(&f,GATEWAY_CONFIG_OK,GATEWAY_CONFIG_SOURCE_ACTIVE);f.backend[2].open_failures_remaining=10000;f.backend[2].recovery_failures_remaining=10000;step_to_runtime(&f);CHECK(f.application.coordinator.state==GATEWAY_APP_DEGRADED&&f.application.process_state==GATEWAY_PROCESS_RUNNING);gateway_application_request_stop(&f.application);step_to_stop(&f);CHECK(f.application.exit_status==GATEWAY_EXIT_CLEAN);}
 static void safe_mode(void)

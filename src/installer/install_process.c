@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include "installer/install_process.h"
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -27,7 +28,7 @@ static int read_identity(pid_t pid,install_process_t*out){
 }
 int install_process_capture(pid_t pid,const char*executable,install_process_t*out){struct stat s;int r;if(!executable||stat(executable,&s)||!S_ISREG(s.st_mode)||s.st_uid!=geteuid())return -1;r=read_identity(pid,out);return r==1&&out->device==s.st_dev&&out->inode==s.st_ino?0:-1;}
 int install_process_matches(const install_process_t*expected){install_process_t actual;int r=read_identity(expected->pid,&actual);if(r<=0)return r;return actual.device==expected->device&&actual.inode==expected->inode&&actual.starttime==expected->starttime?1:-1;}
-static unsigned long long now(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
+static unsigned long long now(void){struct timespec t;if(gateway_monotonic_time(&t))return 0;return(unsigned long long)t.tv_sec*1000U+(unsigned long long)t.tv_nsec/1000000U;}
 static void pause_ms(void){struct timespec t;t.tv_sec=0;t.tv_nsec=10000000L;(void)nanosleep(&t,0);}
 int install_process_stop(const install_process_t*p,unsigned int timeout){
  unsigned long long start=now();int r;if(!start||timeout>60000||!timeout)return -1;

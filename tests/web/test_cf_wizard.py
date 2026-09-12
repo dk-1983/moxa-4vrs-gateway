@@ -98,13 +98,13 @@ class WizardTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.files=w.package.load(ROOT/'build/web-close-candidate-20260910/4vrs-gateway-v2026.02.01-web-close-candidate.tar.gz')
+        cls.files=w.package.load(Path(os.environ.get('CF_TEST_GATEWAY_ARCHIVE', ROOT/'build/universal-installer/gateway.tar.gz')))
 
     def installed(self, b):
         media=b.preflight(b.doc);root=b.mount(b.doc,media,True)
         b.worker('prepare',b.doc,media,root,CHOSEN);b.close();b.events=[]
         (b.tree/'4vrs/bin').mkdir(parents=True)
-        (b.tree/'4vrs/bin/4vrs-gateway').write_bytes(self.files['4vrs-gateway'][0])
+        (b.tree/'4vrs/bin/4vrs-gateway').write_bytes(self.files['platforms/linux26/4vrs-gateway'][0])
         for name in ['config','admin','tls']:
             (b.tree/'4vrs'/name).mkdir()
             (b.tree/'4vrs'/name/'public-test-sentinel').write_bytes(b'public fixture preserved')
@@ -147,7 +147,7 @@ class WizardTests(unittest.TestCase):
             r=self.run_flow(b,'wipe')
             self.assertEqual(b.events[0],'format');self.assertFalse(r['commissioned'])
             self.assertFalse((b.tree/'old-data').exists());self.assertFalse(b.mounted)
-            self.assertEqual(set((b.tree/r['package_path']).iterdir()),{b.tree/r['package_path']/n for n in self.files})
+            self.assertEqual({p for p in (b.tree/r['package_path']).rglob('*') if p.is_file()},{b.tree/r['package_path']/n for n in self.files})
             self.assertTrue((b.tree/'4vrs-rng/state').exists())
 
     def test_update_preserves_all_existing_bytes_and_no_rng_generation(self):
@@ -221,13 +221,14 @@ class WizardTests(unittest.TestCase):
 
     def test_staged_tamper_refused(self):
         b=Images(self.path);self.installed(b);r=self.run_flow(b)
-        (b.tree/r['package_path']/'4vrs-web').write_bytes(b'bad')
+        (b.tree/r['package_path']/'platforms/linux26/4vrs-web').write_bytes(b'bad')
         with self.assertRaises(ValueError):self.run_flow(b)
 
     def test_full_package_roundtrip_through_ext3_image(self):
         b=Images(self.path);r=self.run_flow(b,'wipe')
-        commands=['mkdir /4vrs-packages','mkdir /'+r['package_path'],'mkdir /4vrs-rng']
         paths=[r['package_path']+'/'+n for n in self.files]+['4vrs-rng/state']
+        directories={str(parent) for name in paths for parent in Path(name).parents if str(parent)!='.'}
+        commands=['mkdir /'+name for name in sorted(directories,key=lambda n:(n.count('/'),n))]
         for name in paths:commands.append('write '+str(b.tree/name)+' /'+name)
         script=self.path/'public-debugfs.commands';script.write_text('\n'.join(commands)+'\n')
         w.command(['debugfs','-w','-f',script,b.part])
@@ -236,6 +237,22 @@ class WizardTests(unittest.TestCase):
             w.command(['debugfs','-R','dump /'+name+' '+str(restored),b.part])
             self.assertEqual(restored.read_bytes(),(b.tree/name).read_bytes())
         w.command(['e2fsck','-f','-n',b.part])
+
+    def test_both_platforms_checked_and_mixed_abi_refused(self):
+        for platform,other in [('linux24','linux26'),('linux26','linux24')]:
+            data=self.files['platforms/'+platform+'/4vrs-gateway'][0]
+            w.package.check_target(data,w.package.VERSION,platform)
+            with self.assertRaises(ValueError):w.package.check_target(data,w.package.VERSION,other)
+
+    def test_nested_staging_symlink_refused(self):
+        b=Images(self.path);self.installed(b);r=self.run_flow(b)
+        nested=b.tree/r['package_path']/'platforms/linux24'
+        saved=self.path/'saved-linux24';nested.rename(saved);nested.symlink_to(saved)
+        with self.assertRaises(OSError):self.run_flow(b)
+
+    def test_untrusted_relative_paths_rejected(self):
+        for name in ['../escape','/absolute','platforms/../escape','platforms//bad']:
+            with self.assertRaises(ValueError):w.package.hierarchy({name:(b'bad',0o644)})
 
     def test_named_card_geometry_dirty_sparse_image(self):
         b=Images(self.path,blank=True)

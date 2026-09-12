@@ -1,6 +1,7 @@
 /* Local feasibility executable. No Gateway IPC, credentials, or mutations.
  * --serve binds ONLY 127.0.0.1:18443. Never deployed by the installer. */
 #define _POSIX_C_SOURCE 200112L
+#include "core/monotonic.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -43,7 +44,7 @@ static int entropy(void *context, unsigned char *out, size_t n, size_t *used)
 static unsigned long now_ms(void)
 {
     struct timespec t;
-    if (clock_gettime(CLOCK_MONOTONIC, &t)) exit(2);
+    if (gateway_monotonic_time( &t)) exit(2);
     return (unsigned long)t.tv_sec * 1000UL + (unsigned long)t.tv_nsec / 1000000UL;
 }
 static int send_bytes(void *p, const unsigned char *b, size_t n)

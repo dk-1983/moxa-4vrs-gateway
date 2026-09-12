@@ -2,6 +2,7 @@
  * No fork, threads or runtime state outside the exec owner.
  * State and any crash leftovers are confidential. Never print their contents. */
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
@@ -15,6 +16,9 @@
 #include <signal.h>
 #include <errno.h>
 #include <limits.h>
+#ifdef FOURVRS_LINUX24
+#include <linux/limits.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,7 +122,7 @@ static int cf_binding(const char *identity)
     if (fstat(raw, &block) || !S_ISBLK(block.st_mode) || block.st_rdev != here.st_dev ||
         pread(raw, super, sizeof(super), 1024) != sizeof(super)) { close(raw); return -1; }
     if (close(raw)) return -1;
-    memset(&ifr, 0, sizeof(ifr)); strcpy(ifr.ifr_name, "eth0");
+    memset(&ifr, 0, sizeof(ifr)); strcpy(ifr.ifr_name, "" FOURVRS_LAN_PREFIX "0");
     sock = socket(AF_INET, SOCK_DGRAM, 0); if (sock < 0) return -1;
     if (ioctl(sock, SIOCGIFHWADDR, &ifr)) { close(sock); return -1; }
     close(sock);

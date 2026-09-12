@@ -1,5 +1,6 @@
 #define _BSD_SOURCE 1
 
+#include "core/platform.h"
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <string.h>
@@ -38,7 +39,7 @@ void home_status_read(home_status_t *status)
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0)
         return;
-    read_ipv4(fd, "eth0", status->eth0_ipv4, sizeof(status->eth0_ipv4));
-    read_ipv4(fd, "eth1", status->eth1_ipv4, sizeof(status->eth1_ipv4));
+    read_ipv4(fd, "" FOURVRS_LAN_PREFIX "0", status->eth0_ipv4, sizeof(status->eth0_ipv4));
+    read_ipv4(fd, "" FOURVRS_LAN_PREFIX "1", status->eth1_ipv4, sizeof(status->eth1_ipv4));
     close(fd);
 }

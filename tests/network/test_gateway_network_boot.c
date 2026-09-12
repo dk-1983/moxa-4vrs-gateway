@@ -13,12 +13,13 @@
 #include <sys/stat.h>
 #include <string.h>
 #include "network/gateway_network_boot.h"
+#include "core/platform.h"
 static unsigned int checks,failed,calls,fail_at;static char names[32][16];
 #define CHECK(x) do{++checks;if(!(x)){++failed;fprintf(stderr,"line %u: %s\n",(unsigned int)__LINE__,#x);}}while(0)
 static int action(void *context,const char *name,unsigned int up)
 {CHECK(context==names);CHECK(up<=1U);strcpy(names[calls++],name);return calls==fail_at?-1:0;}
 static int eth2_present,inventory_error,missing_lo,eth2_state,lo_up,hook_error,diag_count,saw_addressless_up,saw_observation_error,saw_wrong_state;
-static int present(void *c,const char *n){(void)c;if(inventory_error)return -1;if(missing_lo&&!strcmp(n,"lo"))return 0;return strcmp(n,"eth2")?1:eth2_present;}
+static int present(void *c,const char *n){(void)c;if(inventory_error)return -1;if(missing_lo&&!strcmp(n,"lo"))return 0;return strcmp(n,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")?1:eth2_present;}
 static int vendor(void *c,const char *n,unsigned int up)
 {(void)c;(void)up;++calls;if(!strcmp(n,"lo")){lo_up=1;return 0;}eth2_state=1;return hook_error;}
 static void diagnostic(void *c,const char *n,const char *stage,int result)
@@ -65,9 +66,13 @@ static void loop_tests(void)
  CHECK(gateway_network_loopback(text,n,0,&ops,0)<0);CHECK(!receipt_state);no_change=0;
  loop_state=3;loop_error=7;CHECK(gateway_network_loopback(text,n,1,&ops,0)==7);CHECK(!receipt_state);
  loop_error=0;CHECK(!gateway_network_loopback(text,n,1,&ops,0));CHECK(loop_state==1&&receipt_state);
+ /* Old Linux retains 127.0.0.1/8 after ifdown. It is stopped, not ready. */
+ loop_state=4;receipt_state=0;CHECK(!gateway_network_loopback(text,n,1,&ops,0));CHECK(loop_state==1&&receipt_state);
+ loop_state=4;no_change=1;CHECK(!gateway_network_loopback(text,n,0,&ops,0));CHECK(!receipt_state);
+ CHECK(gateway_network_loopback(text,n,1,&ops,0)<0);CHECK(!receipt_state);no_change=0;
  CHECK(saw_addressless_up&&saw_observation_error&&saw_wrong_state);
  socket_error=ioctl_error=0;CHECK(gateway_network_loopback_observe(0)==1);
- lo_flags=IFF_LOOPBACK;CHECK(gateway_network_loopback_observe(0)==2);
+ lo_flags=IFF_LOOPBACK;CHECK(gateway_network_loopback_observe(0)==4);
  lo_address=0;CHECK(gateway_network_loopback_observe(0)==0);
  lo_flags|=IFF_UP;CHECK(gateway_network_loopback_observe(0)==3);
  address_error=EADDRNOTAVAIL;CHECK(gateway_network_loopback_observe(0)==3);
@@ -82,7 +87,7 @@ static void loop_tests(void)
 }
 static void checked_boot(void)
 {
- const char *text="auto eth0 eth1 eth2 lo\niface eth2 inet static\n address 192.168.5.127\n netmask 255.255.255.0\n up /vendor/hook\niface lo inet loopback\n";
+ const char *text="auto " FOURVRS_LAN_PREFIX "0 " FOURVRS_LAN_PREFIX "1 " FOURVRS_OPTIONAL_VENDOR_INTERFACE " lo\niface " FOURVRS_OPTIONAL_VENDOR_INTERFACE " inet static\n address 192.168.5.127\n netmask 255.255.255.0\n up /vendor/hook\niface lo inet loopback\n";
  const gateway_network_boot_ops_t ops={present,vendor,diagnostic,0};
  calls=0;CHECK(!gateway_network_unowned_checked(text,strlen(text),1,&ops,0));CHECK(lo_up&&calls==1&&!eth2_state);
  lo_up=0;calls=0;CHECK(!gateway_network_unowned_checked(text,strlen(text),1,&ops,0));CHECK(lo_up&&calls==1&&!eth2_state);
@@ -91,16 +96,16 @@ static void checked_boot(void)
  inventory_error=1;calls=0;CHECK(gateway_network_unowned_checked(text,strlen(text),1,&ops,0)<0);CHECK(!calls);
  inventory_error=0;calls=0;CHECK(gateway_network_unowned_checked("auto lo\nsource /unknown\n",strlen("auto lo\nsource /unknown\n"),1,&ops,0)<0);CHECK(!calls);
  eth2_present=0;hook_error=0;lo_up=0;calls=0;
- {const char *manual="auto eth0 eth1 eth2 lo\niface eth2 inet manual\niface lo inet loopback\n";
+ {const char *manual="auto " FOURVRS_LAN_PREFIX "0 " FOURVRS_LAN_PREFIX "1 " FOURVRS_OPTIONAL_VENDOR_INTERFACE " lo\niface " FOURVRS_OPTIONAL_VENDOR_INTERFACE " inet manual\niface lo inet loopback\n";
  CHECK(gateway_network_unowned_checked(manual,strlen(manual),1,&ops,0)<0);CHECK(lo_up&&calls==1);}
  missing_lo=1;calls=0;CHECK(gateway_network_unowned_checked(text,strlen(text),1,&ops,0)<0);CHECK(!calls);missing_lo=0;
  CHECK(diag_count>0);
- CHECK(gateway_network_vendor_present(0,"eth2")==1);
- ioctl_error=ENODEV;CHECK(gateway_network_vendor_present(0,"eth2")==0);
- ioctl_error=ENXIO;CHECK(gateway_network_vendor_present(0,"eth2")==0);
- ioctl_error=EPERM;CHECK(gateway_network_vendor_present(0,"eth2")<0);
- ioctl_error=EIO;CHECK(gateway_network_vendor_present(0,"eth2")<0);
- socket_error=1;CHECK(gateway_network_vendor_present(0,"eth2")<0);
+ CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")==1);
+ ioctl_error=ENODEV;CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")==0);
+ ioctl_error=ENXIO;CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")==0);
+ ioctl_error=EPERM;CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")<0);
+ ioctl_error=EIO;CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")<0);
+ socket_error=1;CHECK(gateway_network_vendor_present(0,"" FOURVRS_OPTIONAL_VENDOR_INTERFACE "")<0);
 }
 static void process_tests(void)
 {
@@ -112,7 +117,7 @@ static void process_tests(void)
  CHECK(gateway_network_loopback_receipt(&fd,0,"changed",7)==0);
  CHECK(gateway_network_loopback_receipt(&fd,1,"profile",7)==0);
  CHECK(gateway_network_loopback_receipt(&fd,0,"profile",7)==0);
- snprintf(script,sizeof(script),"#!/bin/sh\nif test -e /proc/self/fd/%d; then exit 9; fi\ncase \"$1\" in -f) test \"$2\" = lo; exit $?;; fail) exit 7;; hang) sleep 20;; *) exit 0;; esac\n",sentinel);
+ snprintf(script,sizeof(script),"#!/bin/sh\nif test -e /proc/self/fd/%d; then exit 9; fi\ncase \"$1\" in " FOURVRS_IFDOWN_FORCE ") test \"$2\" = lo; exit $?;; fail) exit 7;; hang) sleep 20;; lo) exit 0;; *) exit 8;; esac\n",sentinel);
  CHECK(fputs(script,f)>=0&&fclose(f)==0);CHECK(chmod(path,0700)==0);
  CHECK(gateway_network_vendor_execute(path,"lo",2000)==0);
  CHECK(gateway_network_vendor_execute_forced(path,"lo",2000)==0);
@@ -123,10 +128,10 @@ static void process_tests(void)
 }
 int main(void)
 {
- const char text[]="# preserved\nauto lo eth0 eth1 eth2\nauto eth2\niface lo inet loopback\niface eth0 inet dhcp\niface eth1 inet static\n address 192.0.2.127\niface eth2 inet static\n up /vendor/hook\niface spare inet manual\n";
- const char bad[]="auto lo eth2\nauto bad;command\n";
+ const char text[]="# preserved\nauto lo " FOURVRS_LAN_PREFIX "0 " FOURVRS_LAN_PREFIX "1 " FOURVRS_OPTIONAL_VENDOR_INTERFACE "\nauto " FOURVRS_OPTIONAL_VENDOR_INTERFACE "\niface lo inet loopback\niface " FOURVRS_LAN_PREFIX "0 inet dhcp\niface " FOURVRS_LAN_PREFIX "1 inet static\n address 192.0.2.127\niface " FOURVRS_OPTIONAL_VENDOR_INTERFACE " inet static\n up /vendor/hook\niface spare inet manual\n";
+ const char bad[]="auto lo " FOURVRS_OPTIONAL_VENDOR_INTERFACE "\nauto bad;command\n";
  CHECK(!gateway_network_unowned(text,strlen(text),1,action,names));
- CHECK(calls==2&&!strcmp(names[0],"lo")&&!strcmp(names[1],"eth2"));
+ CHECK(calls==2&&!strcmp(names[0],"lo")&&!strcmp(names[1],"" FOURVRS_OPTIONAL_VENDOR_INTERFACE ""));
  calls=0;CHECK(!gateway_network_unowned(text,strlen(text),0,action,names));
  CHECK(calls==3&&!strcmp(names[2],"spare"));
  calls=0;CHECK(gateway_network_unowned(bad,strlen(bad),1,action,names)<0);CHECK(!calls);

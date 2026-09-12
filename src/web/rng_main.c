@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include "web/exec_fds.h"
 #include "web/rng_nv.h"
 #include "web/rng_wire.h"
@@ -26,7 +27,7 @@ static int prepare_stop(void){struct sigaction sa;sigset_t set;
   * handlers exist; a handler records intent and never interrupts a commit. */
  return sigprocmask(SIG_UNBLOCK,&set,NULL);
 }
-static unsigned long now(void){struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))return 0;return (unsigned long)t.tv_sec;}
+static unsigned long now(void){struct timespec t;if(gateway_monotonic_time(&t))return 0;return (unsigned long)t.tv_sec;}
 static int broker(void){
  struct channel {unsigned char rx[16],tx[1040];size_t used,sent,total;unsigned int seq;int attached;unsigned long at;} c[2];
  unsigned int epoch=(unsigned int)rng_nv_generation(),requests=0,rotations=0,i;unsigned long rotated=now(),interval=60;

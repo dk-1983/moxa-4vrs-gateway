@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include "web/rng_client.h"
 #include "web/web_certificate.h"
 #include "web/web_http.h"
@@ -24,7 +25,7 @@ static int recv_tls(void *p,unsigned char *b,size_t n){ssize_t r=recv(*(int*)p,b
 static int ipc(int fd,const char *request,char *reply){web_frame_t tx,rx;ssize_t n;int r;uint32_t start=web_now();unsigned char b[WEB_FRAME_MAX];memset(&rx,0,sizeof(rx));if(web_frame_make(&tx,request))return -1;while(tx.sent<tx.total){n=send(fd,tx.bytes+tx.sent,tx.total-tx.sent,MSG_NOSIGNAL);if(n>0)tx.sent+=(size_t)n;else if(!n||(errno!=EAGAIN&&errno!=EINTR))return -1;if(wait_fd(fd,1,start,60000))return -1;}web_clear(&tx,sizeof(tx));for(;;){n=recv(fd,b,sizeof(b),0);if(n>0){r=web_frame_feed(&rx,b,(size_t)n);if(r<0)return -1;if(r==1){memcpy(reply,rx.bytes+8,rx.total-8);reply[rx.total-8]=0;web_clear(&rx,sizeof(rx));web_clear(b,sizeof(b));return 0;}}else if(!n||(errno!=EAGAIN&&errno!=EINTR))return -1;if(wait_fd(fd,0,start,60000))return -1;}}
 static const char *field_line(char *reply,const char *name){static char empty[]="";char *p=reply;size_t n=strlen(name);while(*p){if(!strncmp(p,name,n)&&p[n]=='=')return p+n+1;p=strchr(p,'\n');if(!p)return empty;++p;}return empty;}
 #include "web/web_clients.h"
-static int listener(const char *ip,unsigned int port,unsigned int lan){struct sockaddr_in a;const char *device=lan?"eth1":"eth0";int fd,on=1;if(!strcmp(ip,"-"))return -2;if(!strcmp(ip,"0.0.0.0")||inet_pton(AF_INET,ip,&a.sin_addr)!=1)return -1;
+static int listener(const char *ip,unsigned int port,unsigned int lan){struct sockaddr_in a;const char *device=lan?"" FOURVRS_LAN_PREFIX "1":"" FOURVRS_LAN_PREFIX "0";int fd,on=1;if(!strcmp(ip,"-"))return -2;if(!strcmp(ip,"0.0.0.0")||inet_pton(AF_INET,ip,&a.sin_addr)!=1)return -1;
 #ifdef WEB_HOST_TEST
  if(!strncmp(ip,"127.",4))device="lo";
 #endif

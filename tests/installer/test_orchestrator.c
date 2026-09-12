@@ -228,6 +228,11 @@ int INSTALL_ORCHESTRATOR_MAIN(int argc,char**argv){
   if(i==4){CHECK(r==INSTALL_ROLLED_BACK);equal_set(&c,1);CHECK(!fail_sync);}
   install_context_release(&c);
  }
+ /* Vendor boot resets CF root to 0777; an authenticated application start
+  * repairs only that root while preserving descendant modes. */
+ fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);
+ {char cfpath[1024];struct stat st;CHECK(snprintf(cfpath,sizeof(cfpath),"%s/var/hda",root)>0);CHECK(!chmod(cfpath,0777));CHECK(!install_recover_entry(&c,1,"start"));CHECK(!stat(cfpath,&st));CHECK((st.st_mode&0777)==0755);}
+ install_context_release(&c);
  /* Corruption is fail-closed even when a completed marker exists. */
  fixture(argv[1],root,&p);memset(&f,0,sizeof(f));f.cf=1;context_init(&c,&f,root);CHECK(install_orchestrate(&c,&p)==INSTALL_COMPLETED);
  {install_file_t j;CHECK(!install_file_read(c.journal_directory,"journal",&j));j.data[20]^=1;CHECK(!install_file_publish(c.journal_directory,"journal",&j));install_file_free(&j);}

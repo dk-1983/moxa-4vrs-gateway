@@ -1,3 +1,4 @@
+#include "core/platform.h"
 #include "installer/install_network.h"
 #include "config/gateway_persistence.h"
 #include <stdio.h>
@@ -12,7 +13,7 @@ static int normalize(install_file_t*f,const install_file_t*r){
   * ordered resolver agreement after the single key substitution. */
  line=(char*)f->data;
  while(*line){end=strchr(line,'\n');if(!end)return -1;start=line;while(start<end&&(*start==' '||*start=='\t'))start++;
-  if(!strncmp(start,"iface ",6)||!strncmp(start,"iface\t",6)){char row[256],iface[32],inet[32],mode[32],extra[32];int fields;if(end-start>=256)return -1;memcpy(row,start,(size_t)(end-start));row[end-start]=0;fields=sscanf(row,"iface %31s %31s %31s %31s",iface,inet,mode,extra);owner=fields==3&&!strcmp(iface,"eth0")&&!strcmp(inet,"inet")&&!strcmp(mode,"static");}
+  if(!strncmp(start,"iface ",6)||!strncmp(start,"iface\t",6)){char row[256],iface[32],inet[32],mode[32],extra[32];int fields;if(end-start>=256)return -1;memcpy(row,start,(size_t)(end-start));row[end-start]=0;fields=sscanf(row,"iface %31s %31s %31s %31s",iface,inet,mode,extra);owner=fields==3&&!strcmp(iface,"" FOURVRS_LAN_PREFIX "0")&&!strcmp(inet,"inet")&&!strcmp(mode,"static");}
   if(!strncmp(start,"auto ",5)||!strncmp(start,"allow-hotplug ",14))owner=0;
   if(!strncmp(start,"dns-",4)){if(!owner||end-start<12||strncmp(start,"dns-servers",11)||(start[11]!=' '&&start[11]!='\t'))return -1;key=start;count++;}
   line=end+1;

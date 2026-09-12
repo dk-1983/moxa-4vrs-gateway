@@ -1,7 +1,9 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <linux/types.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <linux/filter.h>
@@ -31,7 +33,7 @@ int gateway_dhcp_io_open(gateway_dhcp_io_t *io,unsigned int lan)
     struct sock_fprog program;int receive_bytes=16384;
     if(!io||lan>=2U)return -1;
     io->packet=io->udp=-1;io->index=0;
-    snprintf(device,sizeof(device),"eth%u",lan);
+    snprintf(device,sizeof(device),"" FOURVRS_LAN_PREFIX "%u",lan);
     io->udp=socket(AF_INET,SOCK_DGRAM,0);if(io->udp<0)return -1;
     memset(&request,0,sizeof(request));strcpy(request.ifr_name,device);
     if(ioctl(io->udp,SIOCGIFINDEX,&request)||request.ifr_ifindex<=0)goto fail;

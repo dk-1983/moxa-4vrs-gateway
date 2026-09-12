@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include <ctype.h>
 #include <errno.h>
 #include <signal.h>
@@ -18,7 +19,7 @@
 #include "network/gateway_network_store.h"
 int gateway_network_unowned_checked(const char *text,size_t length,unsigned int up,const gateway_network_boot_ops_t *ops,void *context)
 {
-    size_t offset=0;char names[32][16];int present[32],result=0;unsigned int count=0,i,eth2_stanzas=0,optional_eth2=0;
+    size_t offset=0;char names[32][16];int present[32],result=0;unsigned int count=0,i,optional_stanzas=0,optional_static=0;
     if(!text||!ops||!ops->action||up>1U||length>GATEWAY_NETWORK_FILE_MAX||memchr(text,0,length))return -1;
     while(offset<length){char line[513],*word,*save;size_t n=0;unsigned int auto_line,iface_line;
         while(offset+n<length&&text[offset+n]!='\n')++n;
@@ -30,8 +31,8 @@ int gateway_network_unowned_checked(const char *text,size_t length,unsigned int 
         if(iface_line){char name[32],family[32],method[32],extra[2];
             int fields=sscanf(save,"%31s %31s %31s %1s",name,family,method,extra);
             if(fields<1)return -1;
-            if(!strcmp(name,"eth2")){
-                ++eth2_stanzas;optional_eth2=fields==3&&!strcmp(family,"inet")&&!strcmp(method,"static");
+            if(!strcmp(name,FOURVRS_OPTIONAL_VENDOR_INTERFACE)){
+                ++optional_stanzas;optional_static=fields==3&&!strcmp(family,"inet")&&!strcmp(method,"static");
             }
         }
         if(up?!auto_line:!iface_line)continue;
@@ -39,7 +40,7 @@ int gateway_network_unowned_checked(const char *text,size_t length,unsigned int 
             if(word[0]=='#')break;
             if(strlen(word)>=16U||!isalnum((unsigned char)word[0]))return -1;
             for(j=0;word[j];++j)if(!isalnum((unsigned char)word[j])&&word[j]!='_'&&word[j]!='.'&&word[j]!=':'&&word[j]!='-')return -1;
-            if(strcmp(word,"eth0")&&strcmp(word,"eth1")){
+            if(strcmp(word,"" FOURVRS_LAN_PREFIX "0")&&strcmp(word,"" FOURVRS_LAN_PREFIX "1")){
                 for(i=0;i<count&&strcmp(names[i],word);++i){}
                 if(i==count){if(count==32U)return -1;strcpy(names[count++],word);}
             }
@@ -53,9 +54,9 @@ int gateway_network_unowned_checked(const char *text,size_t length,unsigned int 
     }
     for(i=0;i<count;++i){int r;
         if(!present[i]){
-            /* Only the retained vendor eth2 is known optional on this product.
+            /* Only the platform-specific vendor Wi-Fi interface is known optional.
              * Do not skip virtual interface creators or a missing loopback. */
-            r=!strcmp(names[i],"eth2")&&eth2_stanzas==1U&&optional_eth2?0:-1;
+            r=!strcmp(names[i],FOURVRS_OPTIONAL_VENDOR_INTERFACE)&&optional_stanzas==1U&&optional_static?0:-1;
             if(ops->diagnostic)ops->diagnostic(context,names[i],r?"missing-required":"deferred-absent",r);
         }else{
             r=ops->loopback&&!strcmp(names[i],"lo")?ops->loopback(context,text,length,up):ops->action(context,names[i],up);
@@ -83,7 +84,7 @@ static int vendor_execute(const char *program,const char *name,unsigned int wait
     if(!program||!name||!waits||waits>2000U)return -1;
     child=fork();if(child<0)return -1;
     if(!child){char *args[4];if(gateway_network_process_isolate(-1))_exit(125);
-        args[0]=(char *)program;args[1]=force?"-f":(char *)name;
+        args[0]=(char *)program;args[1]=force?FOURVRS_IFDOWN_FORCE:(char *)name;
         args[2]=force?(char *)name:0;args[3]=0;execv(program,args);_exit(126);}
     for(i=0;i<waits;++i){got=waitpid(child,&status,WNOHANG);
         if(got==child)return WIFEXITED(status)?WEXITSTATUS(status):WIFSIGNALED(status)?128+WTERMSIG(status):-1;
@@ -108,7 +109,7 @@ static void vendor_diagnostic(void *unused,const char *name,const char *stage,in
 static void lo_observed(const gateway_network_loopback_ops_t *ops,void *c,int state)
 {
     const char *stage=state<0?"lo-observation-error":state==0?"lo-no-address-down":
-        state==1?"lo-ready":state==3?"lo-no-address-up":"lo-address-mask-state";
+        state==1?"lo-ready":state==3?"lo-no-address-up":state==4?"lo-address-retained-down":"lo-address-mask-state";
     if(ops->diagnostic)ops->diagnostic(c,"lo",stage,state);
 }
 int gateway_network_loopback(const char *text,size_t length,unsigned int up,const gateway_network_loopback_ops_t *ops,void *c)
@@ -123,14 +124,14 @@ int gateway_network_loopback(const char *text,size_t length,unsigned int up,cons
     }
     /* Vendor down may remove IPv4 while retaining IFF_UP. Both addressless
      * states permit normal vendor up; neither is READY or earns a receipt. */
-    if(up&&state!=0&&state!=3){stage="lo-restart-required";r=-1;goto done;}
+    if(up&&state!=0&&state!=3&&state!=4){stage="lo-restart-required";r=-1;goto done;}
     stage="lo-receipt-clear";r=ops->receipt(c,1,text,length);if(r)goto done;
     stage=up?"lo-vendor-up":"lo-vendor-forced-down";r=ops->action(c,up);
     if(ops->diagnostic)ops->diagnostic(c,"lo",stage,r);
     if(r)goto done;
     stage="lo-post-observe";state=ops->observe(c);
     lo_observed(ops,c,state);
-    if(up?state!=1:(state!=0&&state!=3)){r=-1;goto done;}
+    if(up?state!=1:(state!=0&&state!=3&&state!=4)){r=-1;goto done;}
     if(up){stage="lo-receipt-save";r=ops->receipt(c,2,text,length);}
 done:
     if(ops->diagnostic)ops->diagnostic(c,"lo",stage,r);
@@ -153,7 +154,7 @@ int gateway_network_loopback_observe(void *unused)
     if(!address){r=(flags&IFF_UP)?3:0;goto done;}
     if(ioctl(fd,SIOCGIFNETMASK,&q)||q.ifr_netmask.sa_family!=AF_INET)goto done;
     mask=ntohl(((struct sockaddr_in *)&q.ifr_netmask)->sin_addr.s_addr);
-    r=(flags&IFF_UP)&&address==0x7f000001UL&&mask==0xff000000UL?1:2;
+    r=address==0x7f000001UL&&mask==0xff000000UL?((flags&IFF_UP)?1:4):2;
 done:
     close(fd);return r;
 }

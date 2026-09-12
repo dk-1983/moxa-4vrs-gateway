@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/monotonic.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -31,7 +32,8 @@ typedef struct service_context {
 static volatile sig_atomic_t stopping;
 static void stop_signal(int signal_number){(void)signal_number;stopping=1;}
 static core_tick_t now_ms(void)
-{struct timespec t;if(clock_gettime(CLOCK_MONOTONIC,&t))_exit(125);return (core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
+{struct timespec t;if(gateway_monotonic_time(&t))_exit(125);return (core_tick_t)((unsigned long)t.tv_sec*1000UL+(unsigned long)t.tv_nsec/1000000UL);}
+#include "network/gateway_network_frames.h"
 static int path(char *out,size_t cap,const char *directory,const char *name)
 {int n=snprintf(out,cap,"%s/%s",directory,name);return n<0||(size_t)n>=cap?-1:0;}
 static int nonblock(int fd)
@@ -95,7 +97,7 @@ static int listener(const char *directory)
     if(path(address.sun_path,sizeof(address.sun_path),directory,"owner.sock"))return -1;
     if(!lstat(address.sun_path,&st)){if(!S_ISSOCK(st.st_mode)||st.st_uid!=geteuid()||unlink(address.sun_path))return -1;}
     else if(errno!=ENOENT)return -1;
-    fd=socket(AF_UNIX,SOCK_SEQPACKET,0);if(fd<0)return -1;
+    fd=socket(AF_UNIX,SERVICE_SOCKET_TYPE,0);if(fd<0)return -1;
     if(nonblock(fd)||bind(fd,(struct sockaddr *)&address,sizeof(address))||chmod(address.sun_path,0600)||listen(fd,4)){close(fd);return -1;}
     return fd;
 }
@@ -123,9 +125,9 @@ static void run_owner(const gateway_network_service_environment_t *environment,i
         fds[0].fd=server;fds[0].events=POLLIN;fds[0].revents=0;
         fds[1].fd=client;fds[1].events=POLLIN;fds[1].revents=0;
         if(poll(fds,2,10)<0&&errno!=EINTR)_exit(5);
-        if(client>=0){command_t command;ssize_t n=-1;
+        if(client>=0){command_t command;ssize_t n=-2;
             if(fds[1].revents&(POLLHUP|POLLERR|POLLNVAL))n=0;
-            else if(fds[1].revents&POLLIN)n=recv(client,&command,sizeof(command),MSG_DONTWAIT|MSG_TRUNC);
+            else if(fds[1].revents&POLLIN)n=service_receive(client,&command,sizeof(command));
             if(n==0){
                 close(client);client=-1;
                 if(profile(environment->directory,0,&p)||gateway_network_owner_policy(&owner,&p,now))_exit(6);
@@ -135,16 +137,16 @@ static void run_owner(const gateway_network_service_environment_t *environment,i
                     request_error=profile(environment->directory,command.code=='A'?"candidate":0,&p)||gateway_network_owner_policy(&owner,&p,now)?10U:0U;
                 }else if(command.code!='B'){close(client);client=-1;if(profile(environment->directory,0,&p)||gateway_network_owner_policy(&owner,&p,now))_exit(6);}
                 next_send=wall;
-            }else if(n>0){close(client);client=-1;if(profile(environment->directory,0,&p)||gateway_network_owner_policy(&owner,&p,now))_exit(6);}
+            }else if(n>0||(n==-1&&errno!=EAGAIN&&errno!=EWOULDBLOCK&&errno!=EINTR)){close(client);client=-1;if(profile(environment->directory,0,&p)||gateway_network_owner_policy(&owner,&p,now))_exit(6);}
         }
         if(fds[0].revents&POLLIN){
             peer=accept(server,0,0);
             if(peer>=0){struct ucred credentials;socklen_t size=sizeof(credentials);command_t command;ssize_t n;struct pollfd first;
                 first.fd=peer;first.events=POLLIN;first.revents=0;
                 if(nonblock(peer)||getsockopt(peer,SOL_SOCKET,SO_PEERCRED,&credentials,&size)||credentials.uid!=geteuid()||poll(&first,1,20)!=1){close(peer);continue;}
-                n=recv(peer,&command,sizeof(command),MSG_DONTWAIT|MSG_TRUNC);
+                n=service_receive_wait(peer,&command,sizeof(command),20);
                 if(n==(ssize_t)sizeof(command)&&command.protocol==SERVICE_PROTOCOL&&command.code=='Q'){
-                    snapshot(&owner,command.request,&status);if(request_error){status.error=request_error;status.ready=status.settled=0;}(void)send(peer,&status,sizeof(status),MSG_NOSIGNAL);close(peer);
+                    snapshot(&owner,command.request,&status);if(request_error){status.error=request_error;status.ready=status.settled=0;}(void)service_send(peer,&status,sizeof(status));close(peer);
                 }else if(n==(ssize_t)sizeof(command)&&command.protocol==SERVICE_PROTOCOL&&command.code=='B'&&client<0){client=peer;request=command.request;next_send=wall;memset(&last,255,sizeof(last));}
                 else close(peer);
             }
@@ -152,7 +154,7 @@ static void run_owner(const gateway_network_service_environment_t *environment,i
         if(client>=0){
             snapshot(&owner,request,&status);if(request_error){status.error=request_error;status.ready=status.settled=0;}
             if(memcmp(&status,&last,sizeof(status))||(int32_t)(wall-next_send)>=0){
-                ssize_t n=send(client,&status,sizeof(status),MSG_NOSIGNAL);
+                ssize_t n=service_send(client,&status,sizeof(status));
                 if(n==(ssize_t)sizeof(status)){last=status;next_send=wall+250U;}
             }
         }
@@ -195,7 +197,7 @@ static void guardian(const gateway_network_service_environment_t *e)
     sigaction(SIGTERM,&action,0);sigaction(SIGINT,&action,0);stopping=0;
     for(;;){core_tick_t now=now_ms();struct pollfd p;ssize_t n;
         if(!owner&&!job&&!recovering&&!stopping){
-            if(socketpair(AF_UNIX,SOCK_SEQPACKET,0,pair)||nonblock(pair[0])||nonblock(pair[1]))_exit(12);
+            if(socketpair(AF_UNIX,GUARDIAN_SOCKET_TYPE,0,pair)||nonblock(pair[0])||nonblock(pair[1]))_exit(12);
             {int bytes=65536;unsigned int i;for(i=0;i<2U;++i)
                 if(setsockopt(pair[i],SOL_SOCKET,SO_SNDBUF,&bytes,sizeof(bytes))||setsockopt(pair[i],SOL_SOCKET,SO_RCVBUF,&bytes,sizeof(bytes)))_exit(12);}
             owner=fork();if(owner<0)_exit(13);
@@ -241,15 +243,15 @@ static int connect_socket(const char *directory)
     struct sockaddr_un address;int fd;struct ucred credentials;socklen_t size=sizeof(credentials);
     memset(&address,0,sizeof(address));address.sun_family=AF_UNIX;
     if(path(address.sun_path,sizeof(address.sun_path),directory,"owner.sock"))return -1;
-    fd=socket(AF_UNIX,SOCK_SEQPACKET,0);if(fd<0)return -1;
+    fd=socket(AF_UNIX,SERVICE_SOCKET_TYPE,0);if(fd<0)return -1;
     if(nonblock(fd)||connect(fd,(struct sockaddr *)&address,sizeof(address))){close(fd);return -1;}
     if(getsockopt(fd,SOL_SOCKET,SO_PEERCRED,&credentials,&size)||credentials.uid!=geteuid()){close(fd);return -1;}
     return fd;
 }
 int gateway_network_service_command(int fd,char code,unsigned int request)
-{command_t command;memset(&command,0,sizeof(command));command.protocol=SERVICE_PROTOCOL;command.code=code;command.request=request;return send(fd,&command,sizeof(command),MSG_NOSIGNAL)==(ssize_t)sizeof(command)?0:-1;}
+{command_t command;memset(&command,0,sizeof(command));command.protocol=SERVICE_PROTOCOL;command.code=code;command.request=request;return service_send(fd,&command,sizeof(command))==(ssize_t)sizeof(command)?0:-1;}
 int gateway_network_service_read(int fd,gateway_network_service_status_t *status)
-{ssize_t n=recv(fd,status,sizeof(*status),MSG_DONTWAIT|MSG_TRUNC);if(n<0&&(errno==EAGAIN||errno==EWOULDBLOCK||errno==EINTR))return 0;return n==(ssize_t)sizeof(*status)&&status->protocol==SERVICE_PROTOCOL?1:-1;}
+{ssize_t n=service_receive(fd,status,sizeof(*status));if(n<0&&(errno==EAGAIN||errno==EWOULDBLOCK||errno==EINTR))return 0;return n==(ssize_t)sizeof(*status)&&status->protocol==SERVICE_PROTOCOL?1:-1;}
 int gateway_network_service_connect(const gateway_network_service_environment_t *e,unsigned int start)
 {
     int fd;unsigned int attempt;pid_t pid;
@@ -269,5 +271,5 @@ int gateway_network_service_query(const gateway_network_service_environment_t *e
     if(fd<0)return -1;
     if(gateway_network_service_command(fd,'Q',1)){close(fd);return -1;}
     p.fd=fd;p.events=POLLIN;p.revents=0;result=poll(&p,1,100);
-    result=result==1?gateway_network_service_read(fd,out):-1;close(fd);return result==1?0:-1;
+    result=result==1&&service_receive_wait(fd,out,sizeof(*out),100)==(ssize_t)sizeof(*out)&&out->protocol==SERVICE_PROTOCOL?0:-1;close(fd);return result;
 }
