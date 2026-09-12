@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
+# Detection is deliberately separate from installation; --detect writes nothing.
+select_platform() {
+    case "$1:$2" in
+        armv5teb:2.4.18_mvl30-ixdp425) printf '%s\n' linux24 ;;
+        armv5teb:2.6.10_dev-ixdp42x-arm_xscale_be) printf '%s\n' linux26 ;;
+        *) return 1 ;;
+    esac
+}
+platform=$(select_platform "$(uname -m)" "$(uname -r)") || {
+    echo 'Unsupported Moxa platform: no files changed.' >&2
+    exit 2
+}
+case "$platform" in
+    linux24) loader=/lib/ld-linux.so.2 ;;
+    linux26) loader=/lib/ld-linux.so.3 ;;
+esac
+test -f "$loader" || { echo 'Required platform loader is missing.' >&2; exit 2; }
+if test "$#" -eq 1 && test "$1" = --detect; then
+    printf 'platform=%s\n' "$platform"
+    exit 0
+fi
+test "$#" -eq 0 || { echo 'Usage: sh install.sh [--detect]' >&2; exit 2; }
+test "$(id -u)" = 0 || { echo 'Installation requires root.' >&2; exit 2; }
+case "$0" in
+    /*) location=${0%/*}; test -n "$location" || location=/ ;;
+    */*) location=./${0%/*} ;;
+    *) location=. ;;
+esac
+base=$(CDPATH= cd "$location" && pwd -P)
+cd "$base/platforms/$platform"
+test -f ./4vrs-install && test ! -L ./4vrs-install && test -x ./4vrs-install || {
+    echo 'Selected installer is missing or not executable.' >&2
+    exit 2
+}
+printf 'Selected %s; starting the transactional installer.\n' "$platform"
+exec ./4vrs-install

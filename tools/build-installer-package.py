@@ -52,7 +52,10 @@ def read_regular(path, limit):
     return data
 
 
-def check_target(data, version):
+def check_target(data, version, platform="linux26"):
+    profiles = {"linux26": (0x04000002, b"/lib/ld-linux.so.3\0"), "linux24": (0x202, b"/lib/ld-linux.so.2\0")}
+    if platform not in profiles: raise ValueError("unknown platform")
+    target_flags, target_loader = profiles[platform]
     """Basic ELF envelope check, not a substitute for the full target ABI audit."""
     if len(data) < 52 or data[:7] != b"\x7fELF\x01\x02\x01":
         raise ValueError("expected ELF32 big-endian executable")
@@ -61,7 +64,7 @@ def check_target(data, version):
     flags = struct.unpack_from(">I", data, 36)[0]
     ehsize, phsize, phnum = struct.unpack_from(">HHH", data, 40)
     if (kind != 2 or machine != 40 or elf_version != 1 or ehsize != 52
-            or flags != 0x04000002 or phsize != 32 or not 1 <= phnum <= 128
+            or flags != target_flags or phsize != 32 or not 1 <= phnum <= 128
             or phoff < 52 or phoff + phnum * phsize > len(data)):
         raise ValueError("unsupported target ELF envelope")
     interpreters = []
@@ -75,7 +78,7 @@ def check_target(data, version):
             loadable = True
         if ptype == 3:
             interpreters.append(data[offset:offset + filesz])
-    if not loadable or interpreters != [b"/lib/ld-linux.so.3\0"]:
+    if not loadable or interpreters != [target_loader]:
         raise ValueError("unsupported target loader")
     versions = set(re.findall(rb"v[0-9]{4}\.[0-9]{2,}\.[0-9]{2,}\x00", data))
     if versions != {version.encode("ascii") + b"\0"}:
@@ -89,7 +92,7 @@ def check_script(data):
     data.decode("ascii")
 
 
-def package(version, installer, gateway, init_script, wrapper, output, *, web=None, license_file=None, rng=None, kdf=None):
+def package(version, installer, gateway, init_script, wrapper, output, *, web=None, license_file=None, rng=None, kdf=None, platform="linux26"):
     if not re.fullmatch(r"v[0-9]{4}\.[0-9]{2,}\.[0-9]{2,}", version):
         raise ValueError("invalid package version")
     if version in ('v2026.02.01', 'v2026.02.03') and web is None:
@@ -107,7 +110,7 @@ def package(version, installer, gateway, init_script, wrapper, output, *, web=No
         binary = index < 2 or index >= 4
         data = read_regular(source, MAX_BINARY if binary else MAX_SCRIPT)
         if binary:
-            check_target(data, version)
+            check_target(data, version, platform)
         else:
             check_script(data)
         contents[name] = data
@@ -166,6 +169,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("version", "installer", "gateway", "init-script", "wrapper", "output"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument('--platform', choices=('linux26','linux24'), default='linux26')
     parser.add_argument('--web')
     parser.add_argument('--rng')
     parser.add_argument('--kdf')
@@ -174,7 +178,7 @@ def main():
     try:
         result = package(args.version, args.installer, args.gateway,
                          args.init_script, args.wrapper, args.output,
-                         web=args.web, license_file=args.license_file, rng=args.rng, kdf=args.kdf)
+                         web=args.web, license_file=args.license_file, rng=args.rng, kdf=args.kdf, platform=args.platform)
     except (ValueError, OSError) as error:
         parser.exit(1, "package refused: " + str(error) + "\n")
     print(json.dumps(result, sort_keys=True))

@@ -11,7 +11,8 @@ typedef struct gateway_network_boot_ops {
 } gateway_network_boot_ops_t;
 typedef struct gateway_network_loopback_ops {
     int (*observe)(void *); /* 0 no address/down, 1 exact ready, 2 other,
-                            * 3 no address/UP, -1 observation error */
+                            * 3 no address/UP, 4 exact address/down,
+                            * -1 observation error */
     int (*receipt)(void *,unsigned int,const char *,size_t); /* 0 match, 1 clear, 2 save; match returns 0/1 */
     int (*action)(void *,unsigned int); /* vendor up, or forced vendor down */
     void (*diagnostic)(void *,const char *,const char *,int);

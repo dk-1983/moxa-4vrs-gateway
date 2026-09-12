@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include "installer/install_orchestrator.h"
 #include "installer/install_scripts.h"
 #include "installer/install_apache.h"
@@ -65,7 +66,7 @@ static const char*const common_paths[]={
  "etc/4vrs-installer/networking","etc/4vrs-installer/application",
  "etc/rc.d/rcS.d/S40networking","etc/rc.d/rc3.d/S90fourvrs-gateway",
  "etc/rc.d/rc0.d/K10fourvrs-gateway","etc/rc.d/rc6.d/K10fourvrs-gateway",
- "var/hda/4vrs/bin/4vrs-web","etc/rc.d/rcS.d/S21apache",
+ "var/hda/4vrs/bin/4vrs-web",FOURVRS_APACHE_GATE,
  "var/hda/4vrs/bin/4vrs-rng","var/hda/4vrs/bin/4vrs-kdf"
 };
 int install_allow_path(void*v,const char*path,unsigned int flags){

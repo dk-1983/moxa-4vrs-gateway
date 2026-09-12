@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include "installer/install_package.h"
+#include "core/platform.h"
 #include "installer/install_digest.h"
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -13,9 +14,9 @@ static unsigned int u32(const unsigned char*p){return((unsigned int)p[0]<<24)|((
 static unsigned int u16(const unsigned char*p){return((unsigned int)p[0]<<8)|p[1];}
 static int elf(const install_file_t*f){
  const unsigned char*p=f->data;unsigned int ph,n,i,load=0,interp=0,version=0;size_t z;
- if(f->size<52||memcmp(p,"\177ELF\1\2\1",7)||u16(p+16)!=2||u16(p+18)!=40||u32(p+20)!=1||u32(p+36)!=0x04000002U||u16(p+40)!=52||u16(p+42)!=32)return -1;
+ if(f->size<52||memcmp(p,"\177ELF\1\2\1",7)||u16(p+16)!=2||u16(p+18)!=40||u32(p+20)!=1||u32(p+36)!=FOURVRS_ELF_FLAGS||u16(p+40)!=52||u16(p+42)!=32)return -1;
  ph=u32(p+28);n=u16(p+44);if(ph<52||ph>f->size||!n||n>128||n*32>f->size-ph)return -1;
- for(i=0;i<n;i++){const unsigned char*h=p+ph+i*32;unsigned int off=u32(h+4),size=u32(h+16);if(off>f->size||size>f->size-off)return -1;if(u32(h)==1){load++;if(size>u32(h+20))return -1;}if(u32(h)==3){interp++;if(size!=sizeof("/lib/ld-linux.so.3")||memcmp(p+off,"/lib/ld-linux.so.3",size))return -1;}}
+ for(i=0;i<n;i++){const unsigned char*h=p+ph+i*32;unsigned int off=u32(h+4),size=u32(h+16);if(off>f->size||size>f->size-off)return -1;if(u32(h)==1){load++;if(size>u32(h+20))return -1;}if(u32(h)==3){interp++;if(size!=sizeof(FOURVRS_ELF_LOADER)||memcmp(p+off,FOURVRS_ELF_LOADER,size))return -1;}}
  for(z=0;z+sizeof(INSTALL_RELEASE)<=f->size;z++){
   size_t j,count;
   if(p[z]!='v')continue;

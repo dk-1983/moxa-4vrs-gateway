@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include "core/platform.h"
 #include "installer/install_apache.h"
 #include "installer/install_process.h"
 #include <dirent.h>
@@ -12,17 +13,17 @@
 
 int install_apache_plan(const char *root,const char *init,install_plan_t *plan){
  install_file_t gate={0,0,0,0},entry={0,0,0,0},absent={0,0,0,0};char path[256];int r=-1;
- if(install_file_read(root,"etc/rc.d/rcS.d/S21apache",&gate))return -1;
+ if(install_file_read(root,FOURVRS_APACHE_GATE,&gate))return -1;
  if(!gate.kind)return 0;
  /* Captured vendor symlink. Unknown replacements are not disabled by name. */
  if(gate.kind!=2||gate.size!=16||memcmp(gate.data,"../init.d/apache",16))goto done;
  snprintf(path,sizeof(path),"%s/apache",init);
- if(install_file_read(root,path,&entry)||entry.kind!=2||entry.size!=24||memcmp(entry.data,"../../usr/sbin/apachectl",24))goto done;
- r=install_plan_add(plan,root,"etc/rc.d/rcS.d/S21apache",0,&absent);
+ if(install_file_read(root,path,&entry)||entry.kind!=2||entry.size!=(sizeof(FOURVRS_APACHE_ENTRY)-1)||memcmp(entry.data,FOURVRS_APACHE_ENTRY,(sizeof(FOURVRS_APACHE_ENTRY)-1)))goto done;
+ r=install_plan_add(plan,root,FOURVRS_APACHE_GATE,0,&absent);
 done:install_file_free(&gate);install_file_free(&entry);return r;
 }
 static int scan(unsigned int *running){
- DIR *dir;struct dirent *e;struct stat binary;unsigned int seen=0,count=0;int present=!stat("/bin/httpd",&binary);
+ DIR *dir;struct dirent *e;struct stat binary;unsigned int seen=0,count=0;int present=!stat(FOURVRS_APACHE_BINARY,&binary);
  *running=0;dir=opendir("/proc");if(!dir)return -1;
  while((e=readdir(dir))!=NULL){char *end,path[128],args[256];long pid=strtol(e->d_name,&end,10);struct stat exe;int fd;ssize_t n;install_process_t identity;
   if(*end||pid<=1)continue;
@@ -30,8 +31,13 @@ static int scan(unsigned int *running){
   snprintf(path,sizeof(path),"/proc/%ld/exe",pid);if(stat(path,&exe))continue;
   if(!present||exe.st_ino!=binary.st_ino||exe.st_dev!=binary.st_dev)continue;
   snprintf(path,sizeof(path),"/proc/%ld/cmdline",pid);fd=open(path,O_RDONLY);if(fd<0){closedir(dir);return -1;}n=read(fd,args,sizeof(args));close(fd);
-  {static const char expected[]="/bin/httpd\0-f\0/etc/apache/httpd.conf\0-k\0start\0";
-   if(n!=(ssize_t)sizeof(expected)-1||memcmp(args,expected,sizeof(expected)-1)||install_process_capture((pid_t)pid,"/bin/httpd",&identity)){closedir(dir);return -1;}}
+  {static const char expected[]=
+#ifdef FOURVRS_LINUX24
+ FOURVRS_APACHE_BINARY "\0-k\0start\0-f\0/etc/apache/httpd.conf\0";
+#else
+ FOURVRS_APACHE_BINARY "\0-f\0/etc/apache/httpd.conf\0-k\0start\0";
+#endif
+   if(n!=(ssize_t)sizeof(expected)-1||memcmp(args,expected,sizeof(expected)-1)||install_process_capture((pid_t)pid,FOURVRS_APACHE_BINARY,&identity)){closedir(dir);return -1;}}
   if(++count>64){closedir(dir);return -1;}
  }
  closedir(dir);*running=count?1U:0U;return 0;
@@ -43,7 +49,7 @@ static int owned_socket(unsigned long inode){
  while((e=readdir(procs))!=NULL){char *end,path[128],link[128],expected[64];long pid=strtol(e->d_name,&end,10);DIR *fds;struct dirent *f;install_process_t owner;unsigned int count=0;int trusted;
   if(*end||pid<=1)continue;
   if(++seen>4096){result=-1;break;}
-  trusted=!install_process_capture((pid_t)pid,"/bin/httpd",&owner);
+  trusted=!install_process_capture((pid_t)pid,FOURVRS_APACHE_BINARY,&owner);
   if(!trusted&&!install_process_capture((pid_t)pid,"/var/hda/4vrs/bin/4vrs-web",&owner)){
    char statbuf[2048],*closing;long parent;int fd;ssize_t n;install_process_t gateway;
    snprintf(path,sizeof(path),"/proc/%ld/stat",pid);fd=open(path,O_RDONLY);if(fd<0)continue;n=read(fd,statbuf,sizeof(statbuf)-1);close(fd);if(n<=0)continue;statbuf[n]=0;closing=strrchr(statbuf,')');
@@ -77,6 +83,12 @@ int install_apache_ports(void){
  }
  return 0;
 }
-static int command(const char *action){char *argv[]={"/bin/httpd","-f","/etc/apache/httpd.conf","-k",0,0};argv[4]=(char*)action;return install_process_run(argv[0],argv,10000);}
+static int command(const char *action){char *argv[]={FOURVRS_APACHE_BINARY,
+#ifdef FOURVRS_LINUX24
+ "-k",0,"-f","/etc/apache/httpd.conf",0};argv[2]=(char*)action;
+#else
+ "-f","/etc/apache/httpd.conf","-k",0,0};argv[4]=(char*)action;
+#endif
+return install_process_run(argv[0],argv,10000);}
 int install_apache_stop(void){unsigned int running,i;if(scan(&running))return -1;if(!running)return 0;if(command("stop"))return -1;for(i=0;i<100;i++){if(scan(&running))return -1;if(!running)return 0;usleep(100000);}return -1;}
 int install_apache_restore(unsigned int previous){unsigned int running,i;if(scan(&running))return -1;if(!previous)return running?install_apache_stop():0;if(running)return 0;if(command("start"))return -1;for(i=0;i<100;i++){if(scan(&running))return -1;if(running)return 0;usleep(100000);}return -1;}
