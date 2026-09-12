@@ -1,23 +1,25 @@
 # Первичный ввод: CF → установка → явная активация → Web
 
+Поддерживаются UC-7420-LX Plus с ОС 1.6 / Linux 2.6.10 и UC-7420-LX без Plus с ОС 2.3 / Linux 2.4.18. Универсальный установщик выбирает профиль на приборе; выбирать ОС в мастере CF не нужно. Другие модели не квалифицированы.
+
 [English](release-final-commissioning.md) · [Матрица](release-final.ru.md)
 
 Выполняйте ввод в эксплуатацию в согласованное окно обслуживания. До записи проверьте модель, MAC выбранного прибора и UUID его карты. IP и UUID на иллюстрациях — примеры, не целевые значения. Мастер подготавливает CF; установка и первичная активация на приборе выполняются отдельно.
 
 ## Что подготовить
 
-Нужны Moxa UC-7420-LX Plus с заводской прошивкой 1.6, CF и USB-картридер, Ubuntu 24.04 x86-64 с доступом root/sudo и консольный доступ к Moxa. В Windows можно использовать Ubuntu 24.04 в WSL2, но сначала USB-картридер должен быть передан в WSL и виден в `lsblk`; буква диска Windows не является устройством Linux. Мастер откажет, если не может безопасно определить системный диск или целевую карту. В таком случае используйте обычную Ubuntu 24.04. Не используйте CF с единственной копией нужных данных для полной очистки.
+Нужны прибор одной из указанных платформ, CF и USB-картридер, Ubuntu 24.04 x86-64 с доступом root/sudo и консольный доступ к Moxa. В Windows можно использовать Ubuntu 24.04 в WSL2, но сначала USB-картридер должен быть передан в WSL и виден в `lsblk`; буква диска Windows не является устройством Linux. Мастер откажет, если не может безопасно определить системный диск или целевую карту. В таком случае используйте обычную Ubuntu 24.04. Не используйте CF с единственной копией нужных данных для полной очистки.
 
 Выполняйте команды по одной; при ошибке остановитесь. Каталоги должны быть новыми. Скачанный мастер уже содержит полный `gateway.tar.gz`: отдельная загрузка установщика для этой ветки не требуется.
 
 ```sh
 sudo apt-get update
 sudo apt-get install python3 util-linux fdisk e2fsprogs udev unzip curl
-mkdir 4vrs-v2026.02.01-download
-cd 4vrs-v2026.02.01-download
-curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.01/4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip
-curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.01/SHA256SUMS
-grep '  4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip$' SHA256SUMS > wizard.SHA256SUMS
+mkdir 4vrs-v2026.02.03-download
+cd 4vrs-v2026.02.03-download
+curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.03/4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip
+curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.03/SHA256SUMS
+grep '  4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip$' SHA256SUMS > wizard.SHA256SUMS
 test -s wizard.SHA256SUMS
 sha256sum -c wizard.SHA256SUMS
 ```
@@ -27,12 +29,12 @@ sha256sum -c wizard.SHA256SUMS
 1. На Ubuntu 24.04 x86-64 сверить SHA256 выдаваемого ZIP. Распаковать штатным unzip в новый root-owned каталог на PC (не на CF):
 
    ```sh
-   sudo install -d -m 0755 /opt/4vrs-v2026.02.01-final
-   sudo unzip 4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip -d /opt/4vrs-v2026.02.01-final
-   cd /opt/4vrs-v2026.02.01-final
+   sudo install -d -m 0755 /opt/4vrs-v2026.02.03-final
+   sudo unzip 4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip -d /opt/4vrs-v2026.02.03-final
+   cd /opt/4vrs-v2026.02.03-final
    sha256sum -c SHA256SUMS
    sudo python3 cf-wizard.py --list
-   sudo python3 cf-wizard.py --report /root/cf-v2026.02.01-new.json
+   sudo python3 cf-wizard.py --report /root/cf-v2026.02.03-new.json
    ```
 
    Выбрать и проверить физическую карту, режим полной очистки только для новой/разрешённой запасной CF и MAC целевой Moxa; подтвердить очистку в мастере. UUID после ext3 прочитать на PC напрямую и сверить с отчётом. Не переносить RNG со старой карты; старую рабочую CF сохранить отдельно. Исторический Bash UUID не применять как единственное подтверждение. Worker проверяет подготовленные файлы; итог — commissioned=false, первичная активация ожидается.
@@ -84,23 +86,23 @@ findmnt /mnt/4vrs-cf
 
 Последняя команда должна не показать монтирование (код выхода 1 для отсутствующего mount). Только после успешного umount извлеките карту. Вставляйте её в выключенный прибор.
 
-3. На приборе выбрать каталог `4vrs-packages/gateway-<первые 16 символов SHA256 gateway.tar.gz>` по новому SHA256SUMS. Проверить MAC/UUID и конфигурацию. Выполнить один `./4vrs-install`. Операция асинхронна: опрашивать `./4vrs-install --status` до конечного результата; **result100 — ещё работа**. Result0 verify-installed означает завершённую установку, result3 already-installed — no-op. Другие результаты разбирать, не повторять установку по тайм-ауту три секунды. До активации Web может быть закрыт из-за отсутствующей RNG policy.
+3. На приборе выбрать каталог `4vrs-packages/gateway-<первые 16 символов SHA256 gateway.tar.gz>` по новому SHA256SUMS. Проверить MAC/UUID и конфигурацию. Выполнить один `sh install.sh`. Операция асинхронна: опрашивать `/etc/4vrs-installer/recovery --status` до конечного результата; **result100 — ещё работа**. Result0 verify-installed означает завершённую установку, result3 already-installed — no-op. Другие результаты разбирать, не повторять установку по тайм-ауту три секунды. До активации Web может быть закрыт из-за отсутствующей RNG policy.
 
-На Moxa войдите как root через консоль либо уже настроенный SSH. Не используйте пароль другого прибора. Убедитесь по `mount`, что `/var/hda` — смонтированная CF, а не пустой каталог во внутренней памяти; MAC `eth0` должен совпадать с выбранным в мастере. Для опубликованного установочного архива путь пакета следующий:
+На Moxa войдите как root через консоль либо уже настроенный SSH. Не используйте пароль другого прибора. Убедитесь по `mount`, что `/var/hda` — смонтированная CF, а не пустой каталог во внутренней памяти; MAC LAN1 (`eth0` на Plus, `ixp0` на Linux 2.4) должен совпадать с выбранным в мастере. Для опубликованного установочного архива путь пакета следующий:
 
 ```sh
 id
 kversion
-ifconfig eth0
+ifconfig
 mount
 df -k /var/hda /etc
-ls -ld /var/hda/4vrs-packages/gateway-624f807edb127977
-cd /var/hda/4vrs-packages/gateway-624f807edb127977
-./4vrs-install
-./4vrs-install --status
+ls -ld /var/hda/4vrs-packages/gateway-3e911f67b2f847b8
+cd /var/hda/4vrs-packages/gateway-3e911f67b2f847b8
+sh install.sh
+/etc/4vrs-installer/recovery --status
 ```
 
-Повторяйте только `./4vrs-install --status`, пока `result=100`; не запускайте установку повторно. Если связь прервалась, после входа используйте `/etc/4vrs-installer/recovery --status`. `result=0` или `result=3` — успешный конечный результат; другой результат требует разбора.
+Повторяйте только `/etc/4vrs-installer/recovery --status`, пока `result=100`; не запускайте установку повторно. Если связь прервалась, после входа используйте `/etc/4vrs-installer/recovery --status`. `result=0` или `result=3` — успешный конечный результат; другой результат требует разбора.
 
 4. После terminal result согласованно остановить приложение штатной командой `/etc/init.d/4vrs-gateway stop`, убедиться в завершении владельца RNG. Для новой согласованной schema1 выполнить **однократно**:
 

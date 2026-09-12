@@ -1,6 +1,6 @@
 # 4VRS Gateway
 
-**Modbus and transparent serial gateway for Moxa UC-7420-LX Plus.**
+**Modbus and transparent serial gateway for Moxa UC-7420-LX Plus and UC-7420-LX.**
 
 English · [Русский](README.ru.md) · [User guide](docs/user-guide.md)
 
@@ -10,8 +10,8 @@ Eight independently configurable RS-232 / RS-485 / RS-422 ports, managed from
 the device's own display and keys. Runs on the existing Moxa Linux system;
 the kernel and drivers remain in place.
 
-**Status:** [v2026.02.01 is released](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.01). See the [qualified operating scope](docs/release-final.md).
-[Evidence and limitations](docs/validation.md) · [Release notes](docs/releases/v2026.02.01.md) · [LCD and Web screens with menu paths](docs/screens.md).
+**Status:** [v2026.02.03](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.03). See the [qualified operating scope](docs/release-final.md).
+[Evidence and limitations](docs/validation.md) · [Release notes](docs/releases/v2026.02.03.md) · [LCD and Web screens with menu paths](docs/screens.md).
 
 ## Features
 
@@ -144,14 +144,12 @@ event, not the application's current readiness.
 
 ## Compatibility and installation
 
-Hardware-tested: **Moxa UC-7420-LX Plus**, legacy XScale big-endian Linux.
-**UC-7410-LX Plus** and other UC-74xx variants are related models, but have not
-been hardware-qualified. The family name is not a tested-device list.
+Supported platforms are UC-7420-LX Plus with OS 1.6 / Linux 2.6.10 and UC-7420-LX without Plus with OS 2.3 / Linux 2.4.18. The universal installer selects the profile on the device; no OS choice is needed in the CF wizard. Other models are not qualified.
 
 Product files and configuration use CompactFlash under `/var/hda/4vrs/`.
 Minimal startup integration remains on internal storage.
 
-The full installer and CF wizard are available in [v2026.02.01](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.01). Follow the [commissioning procedure](docs/release-final-commissioning.md).
+The full installer and CF wizard are available in [v2026.02.03](https://github.com/dk-1983/moxa-4vrs-gateway/releases/tag/v2026.02.03). Follow the [commissioning procedure](docs/release-final-commissioning.md).
 
 Read the [user guide](docs/user-guide.md) for operating an installed system.
 Initial migration retains supported existing device settings and network addresses.
@@ -182,7 +180,7 @@ and device experiments. See the [validation status](docs/validation.md)
 for passed cases and remaining qualification. Component tests, TCP connections
 and instrument transactions prove different scopes.
 
-Versions use [`vYEAR.RELEASE.PATCH`](docs/versioning.md). Release and patch counters start at `00`, except for the first public release, `v2026.00.01`. The current published release is **v2026.02.01**.
+Versions use [`vYEAR.RELEASE.PATCH`](docs/versioning.md). Release and patch counters start at `00`, except for the first public release, `v2026.00.01`. The current release is **v2026.02.03**.
 
 ## Contributing and license
 

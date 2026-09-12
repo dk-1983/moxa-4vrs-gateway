@@ -1,23 +1,25 @@
 # Initial commissioning: CF → install → explicit activation → Web
 
+Supported platforms are UC-7420-LX Plus with OS 1.6 / Linux 2.6.10 and UC-7420-LX without Plus with OS 2.3 / Linux 2.4.18. The universal installer selects the profile on the device; no OS choice is needed in the CF wizard. Other models are not qualified.
+
 [Русский](release-final-commissioning.ru.md) · [Release matrix](release-final.md)
 
 Commission during a maintenance window. Before writing, verify the selected device model/MAC and its CF UUID. Addresses and UUIDs in illustrations are examples, not target values. The wizard prepares CF; device installation and initial activation are separate steps.
 
 ## Prerequisites
 
-You need a Moxa UC-7420-LX Plus with vendor firmware 1.6, CF and a USB reader, Ubuntu 24.04 x86-64 with root/sudo access, and console access to the Moxa. Ubuntu 24.04 in WSL2 is an option on Windows only after the USB reader is attached to WSL and visible in `lsblk`; a Windows drive letter is not a Linux device. The wizard refuses if it cannot safely identify the system disk or target card. Use native Ubuntu 24.04 in that case. Do not fully erase CF containing the only copy of required data.
+You need one of the supported devices, CF and a USB reader, Ubuntu 24.04 x86-64 with root/sudo access, and console access to the Moxa. Ubuntu 24.04 in WSL2 is an option on Windows only after the USB reader is attached to WSL and visible in `lsblk`; a Windows drive letter is not a Linux device. The wizard refuses if it cannot safely identify the system disk or target card. Use native Ubuntu 24.04 in that case. Do not fully erase CF containing the only copy of required data.
 
 Run commands individually and stop on any error. Use new directories. The wizard already contains the complete `gateway.tar.gz`; no separate installer download is required for this path.
 
 ```sh
 sudo apt-get update
 sudo apt-get install python3 util-linux fdisk e2fsprogs udev unzip curl
-mkdir 4vrs-v2026.02.01-download
-cd 4vrs-v2026.02.01-download
-curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.01/4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip
-curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.01/SHA256SUMS
-grep '  4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip$' SHA256SUMS > wizard.SHA256SUMS
+mkdir 4vrs-v2026.02.03-download
+cd 4vrs-v2026.02.03-download
+curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.03/4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip
+curl -fLO https://github.com/dk-1983/moxa-4vrs-gateway/releases/download/v2026.02.03/SHA256SUMS
+grep '  4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip$' SHA256SUMS > wizard.SHA256SUMS
 test -s wizard.SHA256SUMS
 sha256sum -c wizard.SHA256SUMS
 ```
@@ -27,12 +29,12 @@ sha256sum -c wizard.SHA256SUMS
 1. On Ubuntu 24.04 x86-64, verify the distributed ZIP SHA256. Extract using unzip into a new root-owned PC directory outside CF:
 
    ```sh
-   sudo install -d -m 0755 /opt/4vrs-v2026.02.01-final
-   sudo unzip 4vrs-cf-wizard-v2026.02.01-ubuntu24-docs-r2.zip -d /opt/4vrs-v2026.02.01-final
-   cd /opt/4vrs-v2026.02.01-final
+   sudo install -d -m 0755 /opt/4vrs-v2026.02.03-final
+   sudo unzip 4vrs-cf-wizard-v2026.02.03-universal-ubuntu24.zip -d /opt/4vrs-v2026.02.03-final
+   cd /opt/4vrs-v2026.02.03-final
    sha256sum -c SHA256SUMS
    sudo python3 cf-wizard.py --list
-   sudo python3 cf-wizard.py --report /root/cf-v2026.02.01-new.json
+   sudo python3 cf-wizard.py --report /root/cf-v2026.02.03-new.json
    ```
 
    Confirm physical card, target MAC and destructive formatting only for the authorized new/spare CF. Verify the new ext3 UUID directly on PC against the report. Preserve the working card separately; never copy its RNG. Historical Bash UUID output is not authoritative. Worker file verification ends commissioned=false, activation pending.
@@ -86,21 +88,21 @@ The final command should show no mount (exit 1 for an absent mount). Remove the 
 
 3. On the device select `4vrs-packages/gateway-<first 16 SHA256 characters of gateway.tar.gz>` from the new SHA256SUMS. Verify MAC/UUID/configuration. Use the command sequence below once and poll status until terminal result. **Result100 is still running**; result0 verify-installed means installation completed, result3 already-installed means no-op. Investigate other results; a three-second timeout does not authorize relaunch. Before policy activation Web may remain closed.
 
-Log into the Moxa as root through console or configured SSH. Do not copy another unit’s credentials. Confirm using `mount` that `/var/hda` is mounted CF, not an empty internal-memory directory; eth0 MAC must match the wizard target. The published installer uses this package path:
+Log into the Moxa as root through console or configured SSH. Do not copy another unit’s credentials. Confirm using `mount` that `/var/hda` is mounted CF, not an empty internal-memory directory; LAN1 MAC (`eth0` on Plus, `ixp0` on Linux 2.4) must match the wizard target. The published installer uses this package path:
 
 ```sh
 id
 kversion
-ifconfig eth0
+ifconfig
 mount
 df -k /var/hda /etc
-ls -ld /var/hda/4vrs-packages/gateway-624f807edb127977
-cd /var/hda/4vrs-packages/gateway-624f807edb127977
-./4vrs-install
-./4vrs-install --status
+ls -ld /var/hda/4vrs-packages/gateway-3e911f67b2f847b8
+cd /var/hda/4vrs-packages/gateway-3e911f67b2f847b8
+sh install.sh
+/etc/4vrs-installer/recovery --status
 ```
 
-Repeat only `./4vrs-install --status` while `result=100`; do not relaunch installation. After a disconnection use `/etc/4vrs-installer/recovery --status`. `result=0` or `result=3` is a successful terminal result; investigate other results.
+Repeat only `/etc/4vrs-installer/recovery --status` while `result=100`; do not relaunch installation. After a disconnection use `/etc/4vrs-installer/recovery --status`. `result=0` or `result=3` is a successful terminal result; investigate other results.
 
 4. After terminal result, coordinate `/etc/init.d/4vrs-gateway stop` and confirm the RNG owner exited. For new consistent schema1 run **once**:
 
