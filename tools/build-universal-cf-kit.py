@@ -29,7 +29,8 @@ def build(source, archive, worker, output):
             raise ValueError('unsupported documentation reference: '+relative)
         data=path.read_bytes();files[relative]=data
         if path.suffix=='.md':
-            for link in re.findall(r'\]\(([^)]+)\)',data.decode('utf-8')):
+            text=re.sub(r'```.*?```','',data.decode('utf-8'),flags=re.S)
+            for link in re.findall(r'\]\(([^)]+)\)',text)+re.findall(r'(?:src|href)="([^"]+)"',text):
                 link=link.split('#',1)[0]
                 if not link or re.match(r'^[a-zA-Z]+:',link):continue
                 target=(path.parent/link).resolve()
